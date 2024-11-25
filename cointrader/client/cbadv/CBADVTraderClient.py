@@ -31,6 +31,9 @@ class CBADVTraderClient(TraderClientBase):
         result = []
         products = self.client.get_products().products
         for product in products:
+            # ignore EUR and GBP pairs
+            if product.product_id.endswith('-EUR') or product.product_id.endswith('-GBP'):
+                continue
             result.append(product.product_id)
         return result
    
