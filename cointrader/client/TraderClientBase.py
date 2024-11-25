@@ -68,7 +68,7 @@ class TraderClientBase(object):
         """Set balance of currency (used for testing)"""
         raise NotImplementedError
 
-    def balance_get_all(self) -> dict[str, float]:
+    def balance_all_get(self) -> dict[str, tuple[float, float]]:
         """Get all balances with non-zero values"""
         raise NotImplementedError
 
@@ -88,13 +88,17 @@ class TraderClientBase(object):
     def market_get_trades(self, ticker: str, limit: int) -> dict:
         """Get trades for ticker for a given limit"""
         raise NotImplementedError
-    
-    def market_get_klines(self, ticker: str, interval: str, limit: int) -> dict:
-        """Get klines for ticker for a given interval and limit"""
+
+    def market_get_kline_granularities(self) -> list[int]:
+        """Get kline granularities"""
         raise NotImplementedError
-    
-    def market_get_klines_range(self, ticker: str, interval: str, start_ts: int, end_ts: int) -> dict:
-        """Get klines for ticker for a given interval and time range"""
+
+    def market_get_max_kline_count(self, granularity: int) -> int:
+        """Get max kline count for a given interval"""
+        raise NotImplementedError
+
+    def market_get_klines_range(self, ticker: str, start_ts: int, end_ts: int, granularity: int) -> dict:
+        """Get klines for a given range"""
         raise NotImplementedError
 
 
