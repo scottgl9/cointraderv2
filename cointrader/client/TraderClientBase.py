@@ -1,4 +1,5 @@
 # TraderClientBase is the base class for all exchange specific implementations
+from cointrader.common.AssetInfo import AssetInfo
 
 class TraderClientBase(object):
     def __init__(self) -> None:
@@ -38,8 +39,12 @@ class TraderClientBase(object):
         """Get quote currency name from ticker"""
         return self.info_ticker_split(ticker)[1]
 
-    def info_ticker_query(self, ticker: str) -> dict:
+    def info_ticker_query(self, ticker: str) -> AssetInfo:
         """Query ticker information"""
+        raise NotImplementedError
+
+    def info_ticker_query_all(self) -> dict[str, AssetInfo]:
+        """Query all tickers"""
         raise NotImplementedError
 
     def info_currency_query(self, currency: str) -> dict:

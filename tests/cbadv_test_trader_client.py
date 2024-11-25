@@ -16,7 +16,7 @@ if __name__ == '__main__':
     print("info_ticker_names_list")
     print(client.info_ticker_names_list())
     print("info_ticker_create")
-    print(client.info_ticker_create("BTC", "USD"))
+    print(client.info_ticker_join("BTC", "USD"))
     print("info_ticker_split")
     print(client.info_ticker_split("BTC-USD"))
     print("info_ticker_get_base")

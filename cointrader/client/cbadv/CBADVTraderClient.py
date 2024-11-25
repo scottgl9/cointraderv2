@@ -1,5 +1,6 @@
 from cointrader.client.TraderClientBase import TraderClientBase
 from coinbase.rest import RESTClient
+from cointrader.common.AssetInfo import AssetInfo
 
 class CBADVTraderClient(TraderClientBase):
     MAX_CANDLES = 350
@@ -54,22 +55,30 @@ class CBADVTraderClient(TraderClientBase):
         """Split ticker into base and quote currency names"""
         return tuple(ticker.split('-'))
 
-    def info_ticker_query(self, ticker: str) -> dict:
+    def info_ticker_query(self, ticker: str) -> AssetInfo:
         """Query ticker information"""
         response = self.client.get_product(product_id=ticker)
-        result = {
-            'ticker': response.product_id,
-            'price': float(response.price),
-            'base_currency': response.base_currency_id,
-            'quote_currency': response.quote_currency_id,
-            'base_min_size': float(response.base_min_size),
-            'base_max_size': float(response.base_max_size),
-            'quote_increment': float(response.quote_increment),
-            'base_increment': float(response.base_increment),
-            'display_name': response.display_name,
-            'status': response.status,
-            'disabled': response.is_disabled
-        }
+        result = AssetInfo()
+        result.base_name = response.base_currency_id
+        result.quote_name = response.quote_currency_id
+        result.price = float(response.price)
+        result.base_min_size = float(response.base_min_size)
+        result.base_step_size = float(response.base_increment)
+        result.quote_min_size = float(response.quote_min_size)
+        result.quote_step_size = float(response.quote_increment)
+        result.base_precision = len(str(result.base_step_size).split('.')[1])
+        result.quote_precision = len(str(result.quote_step_size).split('.')[1])
+
+        return result
+
+    def info_ticker_query_all(self) -> dict[str, AssetInfo]:
+        """Query all tickers"""
+        result = {}
+        products = self.client.get_products(limit=250).products
+        for product in products:
+            if product.product_id.endswith('-EUR') or product.product_id.endswith('-GBP'):
+                continue
+            result[product.product_id] = self.info_ticker_query(product.product_id)
         return result
 
     def info_currency_query(self, currency: str) -> dict:
@@ -118,7 +127,7 @@ class CBADVTraderClient(TraderClientBase):
         response = self.client.get_product(product_id=ticker)
         return float(response.price)
 
-    def market_ticker_prices_get(self) -> dict:
+    def market_ticker_prices_all_get(self) -> dict:
         """Get all ticker prices"""
         result = {}
         products = self.client.get_products(limit=250).products
