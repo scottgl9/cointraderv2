@@ -1,9 +1,9 @@
 import os
 import json
-from trader.account.CryptoAccountBaseInfo import CryptoAccountBaseInfo
-from trader.lib.struct.Order import Order
-from trader.lib.struct.AssetInfo import AssetInfo
-from trader.lib.struct.Exchange import Exchange
+from cointrader.account.CryptoAccountBaseInfo import CryptoAccountBaseInfo
+#from cointrader.lib.struct.Order import Order
+#from cointrader.lib.struct.AssetInfo import AssetInfo
+#from cointrader.lib.struct.Exchange import Exchange
 from coinbase.rest import RESTClient
 
 
@@ -12,8 +12,8 @@ class AccountCoinbaseInfo(CryptoAccountBaseInfo):
         self.client = client
         self.simulate = simulate
         self.logger = logger
-        self.exchange_type = Exchange.EXCHANGE_CBADV
-        self.exchange_name = Exchange.name(self.exchange_type)
+        #self.exchange_type = Exchange.EXCHANGE_CBADV
+        self.exchange_name = "CBADV"#Exchange.name(self.exchange_type)
         self.exchange_info_file = "{}_info.json".format(self.exchange_name)
         self.info_all_pairs = {}
         self.info_all_assets = {}
@@ -23,8 +23,8 @@ class AccountCoinbaseInfo(CryptoAccountBaseInfo):
         self.currencies = ['BTC', 'ETH', 'USDC', 'USD']
         self.currency_trade_pairs = ['ETH-BTC', 'BTC-USDC', 'ETH-USDC', 'BTC-USD', 'ETH-USD']
         self.trade_fee = 0.5 / 100.0
-        self._trader_mode = Exchange.TRADER_MODE_NONE
-        self._account_mode = Exchange.ACCOUNT_MODE_CRYPTO
+        #self._trader_mode = Exchange.TRADER_MODE_NONE
+        #self._account_mode = Exchange.ACCOUNT_MODE_CRYPTO
 
     def make_ticker_id(self, base, currency):
         return '%s-%s' % (base, currency)
@@ -193,7 +193,7 @@ class AccountCoinbaseInfo(CryptoAccountBaseInfo):
         raise NotImplementedError
 
     # return asset info in AssetInfo class object
-    def get_asset_info(self, symbol=None, base=None, currency=None) -> AssetInfo:
+    def get_asset_info(self, symbol=None, base=None, currency=None):
         info = self.get_asset_info_dict(symbol=symbol, base=base, currency=currency)
         if not info:
             return None

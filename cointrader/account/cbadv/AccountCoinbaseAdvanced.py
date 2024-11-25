@@ -1,15 +1,15 @@
-from trader.account.CryptoAccountBase import CryptoAccountBase
-from trader.lib.struct.TraderMessage import TraderMessage
-from trader.lib.struct.Order import Order
-from trader.lib.struct.OrderUpdate import OrderUpdate
-from trader.lib.struct.AssetInfo import AssetInfo
-from trader.lib.struct.Exchange import Exchange
+from cointrader.account.CryptoAccountBase import CryptoAccountBase
+#from cointrader.lib.struct.TraderMessage import TraderMessage
+#from cointrader.lib.struct.Order import Order
+#from cointrader.lib.struct.OrderUpdate import OrderUpdate
+#from cointrader.lib.struct.AssetInfo import AssetInfo
+#from cointrader.lib.struct.Exchange import Exchange
 from .AccountCoinbaseInfo import AccountCoinbaseInfo
 from .AccountCoinbaseBalance import AccountCoinbaseBalance
 from .AccountCoinbaseTrade import AccountCoinbaseTrade
 from .AccountCoinbaseMarket import AccountCoinbaseMarket
 from coinbase.rest import RESTBase, RESTClient
-from trader.config import *
+from cointrader.config import *
 import json
 import os
 import time

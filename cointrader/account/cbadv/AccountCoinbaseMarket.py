@@ -1,4 +1,4 @@
-from trader.account.CryptoAccountBaseMarket import CryptoAccountBaseMarket
+from cointrader.account.CryptoAccountBaseMarket import CryptoAccountBaseMarket
 from coinbase.rest import RESTClient
 from datetime import datetime, timedelta
 import time

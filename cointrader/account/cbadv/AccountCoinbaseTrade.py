@@ -1,7 +1,7 @@
-from trader.account.CryptoAccountBaseTrade import CryptoAccountBaseTrade
-from trader.lib.struct.TraderMessage import TraderMessage
-from trader.lib.struct.Order import Order
-from trader.lib.struct.OrderUpdate import OrderUpdate
+from cointrader.account.CryptoAccountBaseTrade import CryptoAccountBaseTrade
+#from trader.lib.struct.TraderMessage import TraderMessage
+#from trader.lib.struct.Order import Order
+#from trader.lib.struct.OrderUpdate import OrderUpdate
 from coinbase.rest import RESTClient
 
 

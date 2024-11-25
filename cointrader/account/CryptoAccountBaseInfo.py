@@ -1,5 +1,5 @@
 # base account class for handling account information
-from trader.lib.struct.Exchange import Exchange
+#from trader.lib.struct.Exchange import Exchange
 
 
 class CryptoAccountBaseInfo(object):

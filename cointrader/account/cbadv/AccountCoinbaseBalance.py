@@ -1,4 +1,4 @@
-from trader.account.CryptoAccountBaseBalance import CryptoAccountBaseBalance
+from cointrader.account.CryptoAccountBaseBalance import CryptoAccountBaseBalance
 from coinbase.rest import RESTBase, RESTClient
 
 class AccountCoinbaseBalance(CryptoAccountBaseBalance):

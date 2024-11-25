@@ -1,6 +1,6 @@
-from trader.lib.struct.Order import Order
-from trader.lib.struct.Exchange import Exchange
-from trader.lib.struct.AssetInfo import AssetInfo
+#from cointrader.lib.struct.Order import Order
+#from cointrader.lib.struct.Exchange import Exchange
+#from cointrader.lib.struct.AssetInfo import AssetInfo
 import math
 
 
@@ -11,7 +11,7 @@ class CryptoAccountBase(object):
         self.client = client
         self.simulate = simulate
         self.live = live
-        self.exchange_type = Exchange.EXCHANGE_UNKNOWN
+        #self.exchange_type = Exchange.EXCHANGE_UNKNOWN
 
         # account specific components
         self.info = None
@@ -215,7 +215,7 @@ class CryptoAccountBase(object):
     def get_asset_status(self, name=None):
         return self.info.get_asset_status(name)
 
-    def get_asset_info(self, symbol=None, base=None, currency=None) -> AssetInfo:
+    def get_asset_info(self, symbol=None, base=None, currency=None):
         return self.info.get_asset_info(symbol, base, currency)
 
     def get_asset_info_dict(self, symbol=None, base=None, currency=None, field=None) -> dict:

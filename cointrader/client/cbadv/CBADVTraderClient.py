@@ -37,21 +37,13 @@ class CBADVTraderClient(TraderClientBase):
             result.append(product.product_id)
         return result
    
-    def info_ticker_create(self, base: str, quote: str) -> str:
+    def info_ticker_join(self, base: str, quote: str) -> str:
         """Create a ticker from base and quote currency names"""
         return f"{base}-{quote}"
 
     def info_ticker_split(self, ticker: str) -> tuple[str, str]:
         """Split ticker into base and quote currency names"""
         return tuple(ticker.split('-'))
-
-    def info_ticker_get_base(self, ticker: str) -> str:
-        """Get base currency name from ticker"""
-        return ticker.split('-')[0]
-
-    def info_ticker_get_quote(self, ticker: str) -> str:
-        """Get quote currency name from ticker"""
-        return ticker.split('-')[1]
 
     def info_ticker_query(self, ticker: str) -> dict:
         """Query ticker information"""

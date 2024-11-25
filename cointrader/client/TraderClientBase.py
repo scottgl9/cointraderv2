@@ -22,26 +22,26 @@ class TraderClientBase(object):
         """
         raise NotImplementedError
    
-    def info_ticker_create(self, base: str, quote: str) -> str:
+    def info_ticker_join(self, base: str, quote: str) -> str:
         """Create a ticker from base and quote currency names"""
         raise NotImplementedError
-    
+
     def info_ticker_split(self, ticker: str) -> tuple[str, str]:
         """Split ticker into base and quote currency names"""
         raise NotImplementedError
 
     def info_ticker_get_base(self, ticker: str) -> str:
         """Get base currency name from ticker"""
-        raise NotImplementedError
+        return self.info_ticker_split(ticker)[0]
     
     def info_ticker_get_quote(self, ticker: str) -> str:
         """Get quote currency name from ticker"""
-        raise NotImplementedError
+        return self.info_ticker_split(ticker)[1]
 
     def info_ticker_query(self, ticker: str) -> dict:
         """Query ticker information"""
         raise NotImplementedError
-    
+
     def info_currency_query(self, currency: str) -> dict:
         """Query currency information"""
         raise NotImplementedError
@@ -106,19 +106,19 @@ class TraderClientBase(object):
         """Sell at market price"""
         raise NotImplementedError
     
-    def trade_buy_limit(self, ticker: str, amount: float, price: float) -> dict:
+    def trade_buy_limit(self, ticker: str, amount: float, price: float, type: str) -> dict:
         """Buy at a specific price"""
         raise NotImplementedError
     
-    def trade_sell_limit(self, ticker: str, amount: float, price: float) -> dict:
+    def trade_sell_limit(self, ticker: str, amount: float, price: float, type: str) -> dict:
         """Sell at a specific price"""
         raise NotImplementedError
     
-    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float) -> dict:
+    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str) -> dict:
         """Buy at a specific price when stop price is reached"""
         raise NotImplementedError
     
-    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float) -> dict:
+    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str) -> dict:
         """Sell at a specific price when stop price is reached"""
         raise NotImplementedError
 
