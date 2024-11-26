@@ -6,6 +6,7 @@ import pandas as pd
 sys.path.append('.')
 from cointrader.client.TraderSelectClient import TraderSelectClient
 from cointrader.indicators.EMA import EMA
+from cointrader.indicators.ADX import ADX
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 #import matplotlib.pyplot as plt
@@ -16,9 +17,10 @@ GRANULARITY = 3600
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plot ADX indicator')
-    parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
+    parser.add_argument('--ticker', type=str, help='Ticker symbol (ex. BTC-USD)', default='BTC-USD')
     #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
+
     client = TraderSelectClient(CLIENT_NAME).get_client()
     #ticker = client.info_ticker_join("BTC", "USD")
     ticker = args.ticker
@@ -58,10 +60,8 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    ema12 = EMA(period=12)
-    ema12_values = []
-    ema24 = EMA(period=24)
-    ema24_values = []
+    adx = ADX(period=14)
+    adx_values = []
 
     opens = []
     closes = []
@@ -72,10 +72,11 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = ema12.update(kline)
-        ema12_values.append(result)
-        result = ema24.update(kline)
-        ema24_values.append(result)
+        result = adx.update(kline)
+        #if not adx.ready():
+        #    result = np.nan
+        print(result)
+        adx_values.append(result)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -96,14 +97,14 @@ data = {
 df = pd.DataFrame(data)
 df.set_index('Date', inplace=True)
 
-ema12_plot = mpf.make_addplot(ema12_values, panel=0, color='blue', width=1.5)
-ema24_plot = mpf.make_addplot(ema24_values, panel=0, color='red', width=1.5)
+adx_plot = mpf.make_addplot(adx_values, panel=1, color='blue', width=1.5)
 
 mpf.plot(
     df,
     type='candle',
     style='charles',
-    title=f'{ticker} {granularity_name} chart with EMA12 and EMA24',
+    title=f'{ticker} {granularity_name} chart with ADX',
     ylabel='Price',
-    addplot=[ema12_plot, ema24_plot],
+    addplot=[adx_plot],
+    panel_ratios=(3, 1),
 )

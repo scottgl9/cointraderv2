@@ -2,14 +2,13 @@ from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
 class ATR(Indicator):
-    def __init__(self, name, period):
+    def __init__(self, name='atr', period=14):
         super().__init__(name)
         self.period = period
         self.reset()
 
     def update(self, kline: Kline):
         self.klines.append(kline)
-        self.timestamps.append(kline.ts)
         
         if len(self.klines) > 1:
             prev_kline = self.klines[-2]
@@ -27,25 +26,22 @@ class ATR(Indicator):
         
         if len(self.tr_values) > self.period:
             self.tr_values.pop(0)
-            self.timestamps.pop(0)
             self.klines.pop(0)
 
         self._last_value = self.atr_values[-1] if self.atr_values else None
+        self._last_kline = kline
+
         return self._last_value
 
     def get_last_value(self):
         return self._last_value
-    
-    def get_last_timestamp(self):
-        return self.timestamps[-1] if self.timestamps else None
 
     def get_last_kline(self):
-        return self.klines[-1] if self.klines else None
+        return self._last_kline
 
     def reset(self):
         self.tr_values = []
         self.atr_values = []
-        self.timestamps = []
         self.klines = []
 
     def ready(self):

@@ -10,6 +10,8 @@ class SMA(Indicator):
     def update(self, kline : Kline):
         self.values.append(kline.close)
 
+        sma_value = kline.close
+
         if len(self.values) == self.period:
             sma_value = sum(self.values) / self.period
             self.values.append(sma_value)

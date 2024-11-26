@@ -5,7 +5,7 @@ import pandas as pd
 #sys.path.append('./tests')
 sys.path.append('.')
 from cointrader.client.TraderSelectClient import TraderSelectClient
-from cointrader.indicators.EMA import EMA
+from cointrader.indicators.BB import BollingerBands
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 #import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ CLIENT_NAME = "cbadv"
 GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot ADX indicator')
+    parser = argparse.ArgumentParser(description='Plot Bollinger Bands indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
@@ -58,10 +58,10 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    ema12 = EMA(period=12)
-    ema12_values = []
-    ema24 = EMA(period=24)
-    ema24_values = []
+    bb = BollingerBands(period=20, std_dev=2)
+    bb_upper_values = []
+    bb_middle_values = []
+    bb_lower_values = []
 
     opens = []
     closes = []
@@ -72,10 +72,17 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = ema12.update(kline)
-        ema12_values.append(result)
-        result = ema24.update(kline)
-        ema24_values.append(result)
+        result = bb.update(kline)
+        if not bb.ready():
+            result['upper'] = np.nan
+            result['middle'] = np.nan
+            result['lower'] = np.nan
+        upper = result['upper']
+        middle = result['middle']
+        lower = result['lower']
+        bb_upper_values.append(upper)
+        bb_middle_values.append(middle)
+        bb_lower_values.append(lower)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -96,14 +103,15 @@ data = {
 df = pd.DataFrame(data)
 df.set_index('Date', inplace=True)
 
-ema12_plot = mpf.make_addplot(ema12_values, panel=0, color='blue', width=1.5)
-ema24_plot = mpf.make_addplot(ema24_values, panel=0, color='red', width=1.5)
+bb_upper_plot = mpf.make_addplot(bb_upper_values, panel=0, color='blue', width=1.5)
+bb_middle_plot = mpf.make_addplot(bb_middle_values, panel=0, color='red', width=1.5)
+bb_lower_plot = mpf.make_addplot(bb_lower_values, panel=0, color='blue', width=1.5)
 
 mpf.plot(
     df,
     type='candle',
     style='charles',
-    title=f'{ticker} {granularity_name} chart with EMA12 and EMA24',
+    title=f'{ticker} {granularity_name} chart with Bollinger Bands',
     ylabel='Price',
-    addplot=[ema12_plot, ema24_plot],
+    addplot=[bb_upper_plot, bb_middle_plot, bb_lower_plot],
 )

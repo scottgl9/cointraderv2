@@ -39,9 +39,6 @@ class KAMA(Indicator):
     def get_last_value(self):
         return self._last_value
 
-    def get_last_timestamp(self):
-        return self.timestamps[-1]
-    
     def get_last_kline(self):
         return self._last_kline
     
