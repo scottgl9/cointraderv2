@@ -35,19 +35,14 @@ class RSI(Indicator):
             avg_loss = sum(self.losses) / self.period
             rs = avg_gain / avg_loss if avg_loss != 0 else 0
             rsi = 100 - (100 / (1 + rs))
-            return rsi
+            self._last_value = rsi
         else:
-            return None
+            self._last_value = None
+
+        return self._last_value
 
     def get_last_value(self):
-        if len(self.gains) == self.period:
-            avg_gain = sum(self.gains) / self.period
-            avg_loss = sum(self.losses) / self.period
-            rs = avg_gain / avg_loss if avg_loss != 0 else 0
-            rsi = 100 - (100 / (1 + rs))
-            return rsi
-        else:
-            return None
+        return self._last_value
 
     def get_last_timestamp(self):
         return self.timestamps[-1] if self.timestamps else None
@@ -60,3 +55,6 @@ class RSI(Indicator):
         self.losses = []
         self.timestamps = []
         self.klines = []
+    
+    def ready(self):
+        return len(self.gains) == self.period

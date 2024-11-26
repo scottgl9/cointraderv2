@@ -29,10 +29,11 @@ class MACD(Indicator):
             self.signal_values.pop(0)
             self.histogram_values.pop(0)
 
-        return macd_value, signal_value, histogram_value
+        self._last_value = tuple(macd_value, signal_value, histogram_value)
+        return self._last_value
 
     def get_last_value(self):
-        return self.macd_values[-1], self.signal_values[-1], self.histogram_values[-1]
+        return self._last_value
 
     def reset(self):
         self.short_ema.reset()
@@ -41,3 +42,6 @@ class MACD(Indicator):
         self.macd_values = []
         self.signal_values = []
         self.histogram_values = []
+    
+    def ready(self):
+        return self.short_ema.ready() and self.long_ema.ready() and self.signal_ema.ready()

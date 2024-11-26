@@ -33,10 +33,11 @@ class ATR(Indicator):
             self.timestamps.pop(0)
             self.klines.pop(0)
         
-        return self.atr_values[-1] if self.atr_values else None
+        self._last_value = self.atr_values[-1] if self.atr_values else None
+        return self._last_value
 
     def get_last_value(self):
-        return self.atr_values[-1] if self.atr_values else None
+        return self._last_value
     
     def get_last_timestamp(self):
         return self.timestamps[-1] if self.timestamps else None
@@ -49,3 +50,6 @@ class ATR(Indicator):
         self.atr_values = []
         self.timestamps = []
         self.klines = []
+
+    def ready(self):
+        return len(self.atr_values) == self.period

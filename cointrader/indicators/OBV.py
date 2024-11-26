@@ -1,28 +1,26 @@
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
-class EMA(Indicator):
-    def __init__(self, name, period):
+class OBV(Indicator):
+    def __init__(self, name):
         super().__init__(name)
-        self.period = period
         self.values = []
         self.timestamps = []
         self.klines = []
-        self.multiplier = 2 / (period + 1)
 
-    def update(self, kline : Kline):
+    def update(self, kline: Kline):
         self.klines.append(kline)
         self.timestamps.append(kline.ts)
         if len(self.values) == 0:
-            self.values.append(kline.close)
+            self.values.append(0)
         else:
-            ema_value = (kline.close - self.values[-1]) * self.multiplier + self.values[-1]
-            self.values.append(ema_value)
-        
-        if len(self.values) > self.period:
-            self.values.pop(0)
-            self.timestamps.pop(0)
-            self.klines.pop(0)
+            if kline.close > self.klines[-2].close:
+                obv_value = self.values[-1] + kline.volume
+            elif kline.close < self.klines[-2].close:
+                obv_value = self.values[-1] - kline.volume
+            else:
+                obv_value = self.values[-1]
+            self.values.append(obv_value)
 
         self._last_value = self.values[-1]
         return self._last_value
@@ -42,4 +40,4 @@ class EMA(Indicator):
         self.klines = []
 
     def ready(self):
-        return len(self.values) == self.period
+        return len(self.klines) > 1

@@ -11,7 +11,7 @@ class SMA(Indicator):
     def update(self, kline):
         self.klines.append(kline)
         self.values.append(kline.close)
-        self.timestamps.append(kline.timestamp)
+        self.timestamps.append(kline.ts)
         if len(self.values) > self.period:
             self.values.pop(0)
             self.timestamps.pop(0)
@@ -20,11 +20,12 @@ class SMA(Indicator):
             sma_value = sum(self.values) / self.period
             self.values[-1] = sma_value
 
-        return sma_value
+        self._last_value = sma_value
+        return self._last_value
 
     def get_last_value(self):
-        return self.values[-1]
-    
+        return self._last_value
+
     def get_last_timestamp(self):
         return self.timestamps[-1]
     
@@ -35,3 +36,6 @@ class SMA(Indicator):
         self.values = []
         self.timestamps = []
         self.klines = []
+    
+    def ready(self):
+        return len(self.values) == self.period

@@ -64,14 +64,15 @@ class ADX(Indicator):
                     self.adx.append((self.adx[-1] * (self.period - 1) + self.dx[-1]) / self.period)
         
         self.klines.append(kline)
-        return self.adx[-1] if len(self.adx) > 0 else None
+        self._last_value = self.adx[-1] if len(self.adx) > 0 else 0.0
+        return self._last_value
 
     def get_last_value(self):
-        return self.adx[-1] if len(self.adx) > 0 else None
+        return self._last_value
     
     def get_last_timestamp(self):
-        return self.klines[-1].timestamp if len(self.klines) > 0 else None
-    
+        return self.klines[-1].ts if len(self.klines) > 0 else 0
+
     def get_last_kline(self):
         return self.klines[-1] if len(self.klines) > 0 else None
     
@@ -85,3 +86,7 @@ class ADX(Indicator):
         self.dx = []
         self.adx = []
         self.klines = []
+        self._ready = False
+
+    def ready(self):
+        return len(self.adx) == self.period

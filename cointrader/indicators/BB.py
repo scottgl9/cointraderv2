@@ -26,20 +26,15 @@ class BollingerBands(Indicator):
             std_dev = np.std(self.values)
             upper_band = sma + (self.std_dev_multiplier * std_dev)
             lower_band = sma - (self.std_dev_multiplier * std_dev)
-            return sma, upper_band, lower_band
+            self._last_value = tuple(sma, upper_band, lower_band)
         else:
-            return None, None, None
+            self._last_value = tuple(None, None, None)
+        
+        return self._last_value
 
     def get_last_value(self):
-        if len(self.values) == self.period:
-            sma = np.mean(self.values)
-            std_dev = np.std(self.values)
-            upper_band = sma + (self.std_dev_multiplier * std_dev)
-            lower_band = sma - (self.std_dev_multiplier * std_dev)
-            return sma, upper_band, lower_band
-        else:
-            return None, None, None
-    
+        return self._last_value
+
     def get_last_timestamp(self):
         return self.timestamps[-1] if self.timestamps else None
     
@@ -50,3 +45,6 @@ class BollingerBands(Indicator):
         self.values = []
         self.timestamps = []
         self.klines = []
+
+    def ready(self):
+        return len(self.values) == self.period

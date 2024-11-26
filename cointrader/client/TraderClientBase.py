@@ -56,12 +56,12 @@ class TraderClientBase(object):
         """Get account ids if account is multi-account"""
         raise NotImplementedError
 
-    def account_get_market_fee(self) -> float:
-        """Get market trade fee"""
+    def account_get_maker_fee(self) -> float:
+        """Get maker trade fee"""
         raise NotImplementedError
 
-    def account_get_limit_fee(self) -> float:
-        """Get limit trade fee"""
+    def account_get_taker_fee(self) -> float:
+        """Get taker trade fee"""
         raise NotImplementedError
 
 

@@ -8,7 +8,8 @@ class CBADVTraderClient(TraderClientBase):
         self.client = RESTClient(api_key=api_key, api_secret=api_secret)
         self.logger = logger
         self._quote_currency_list = ['BTC', 'ETH', 'USDC', 'USD', 'USDT']
-        self.granularity_mapping = {
+        self._excluded_currency_list = ['EUR', 'GBP']
+        self._granularity_mapping = {
             60: 'ONE_MINUTE',
             300: 'FIVE_MINUTE',
             900: 'FIFTEEN_MINUTE',
@@ -41,8 +42,8 @@ class CBADVTraderClient(TraderClientBase):
         result = []
         products = self.client.get_products().products
         for product in products:
-            # ignore EUR and GBP pairs
-            if product.product_id.endswith('-EUR') or product.product_id.endswith('-GBP'):
+            #  ignored currencies
+            if self.info_ticker_get_quote(product.product_id) in self._excluded_currency_list:
                 continue
             result.append(product.product_id)
         return result
@@ -76,7 +77,7 @@ class CBADVTraderClient(TraderClientBase):
         result = {}
         products = self.client.get_products(limit=250).products
         for product in products:
-            if product.product_id.endswith('-EUR') or product.product_id.endswith('-GBP'):
+            if self.info_ticker_get_quote(product.product_id) in self._excluded_currency_list:
                 continue
             result[product.product_id] = self.info_ticker_query(product.product_id)
         return result
@@ -90,13 +91,13 @@ class CBADVTraderClient(TraderClientBase):
         """Get account ids if account is multi-account"""
         raise NotImplementedError
 
-    def account_get_market_fee(self) -> float:
-        """Get market trade fee"""
-        raise NotImplementedError
+    def account_get_maker_fee(self) -> float:
+        """Get maker trade fee"""
+        return self.client.get_transaction_summary().fee_tier['maker_fee_rate']
 
-    def account_get_limit_fee(self) -> float:
-        """Get limit trade fee"""
-        raise NotImplementedError
+    def account_get_taker_fee(self) -> float:
+        """Get taker trade fee"""
+        return self.client.get_transaction_summary().fee_tier['taker_fee_rate']
 
 
     def balance_get(self, currency: str) -> tuple[float, float]:
@@ -110,7 +111,7 @@ class CBADVTraderClient(TraderClientBase):
 
     def balance_set(self, currency: str, available: float, hold: float) -> None:
         """Set balance of currency (used for testing)"""
-        raise NotImplementedError
+        pass
 
     def balance_all_get(self) -> dict[str, tuple[float, float]]:
         """Get all balances"""
@@ -145,7 +146,7 @@ class CBADVTraderClient(TraderClientBase):
 
     def market_get_kline_granularities(self) -> list[int]:
         """Get kline granularities"""
-        return list(self.granularity_mapping.keys())
+        return list(self._granularity_mapping.keys())
 
     def market_get_max_kline_count(self, granularity: int) -> int:
         """Get max kline count for a given interval"""
@@ -153,7 +154,7 @@ class CBADVTraderClient(TraderClientBase):
 
     def market_get_klines_range(self, ticker: str, start_ts: int, end_ts: int, granularity: int) -> dict:
         """Get klines for ticker for a given interval and time range"""
-        candles = self.client.get_candles(ticker, start_ts, end_ts, granularity=self.granularity_mapping[granularity])
+        candles = self.client.get_candles(ticker, start_ts, end_ts, granularity=self._granularity_mapping[granularity])
         candles = candles['candles']
         #candles = [candle.__repr__() for candle in candles]
         candles = [candle.__dict__ for candle in candles]

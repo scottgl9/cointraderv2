@@ -2,28 +2,54 @@
 from .Kline import Kline
 
 class Indicator:
-    name = None
+    _name = None
+    _ready = False
+    _last_value = None
     def __init__(self, name, **kwargs):
-        self.name = name
+        self._name = name
 
-    def update(self, kline : Kline):
+    def update(self, kline : Kline) -> tuple:
         raise NotImplementedError
-    
-    def get_last_value(self):
+
+    def get_last_value(self) -> tuple:
         raise NotImplementedError
-    
+
     def get_last_timestamp(self):
         raise NotImplementedError
 
-    def get_last_kline(self):
+    def get_last_kline(self) -> Kline:
+        raise NotImplementedError
+
+    def ready(self) -> bool:
         raise NotImplementedError
 
     def reset(self):
         raise NotImplementedError
 
-    def __greater_than__(self, other):
-        raise NotImplementedError
-    
-    def __less_than__(self, other):
-        raise NotImplementedError
+    def __greater_than__(self, other) -> bool:
+        if isinstance(other, Indicator):
+            this_value = self.get_last_value()
+            other_value = other.get_last_value()
+            if isinstance(this_value, tuple) or isinstance(other_value, tuple):
+                raise ValueError("this_value tuple size is greater than 1")
 
+            return this_value > other_value
+        else:
+            return self.get_last_value() > other
+
+    def __less_than__(self, other) -> bool:
+        if isinstance(other, Indicator):
+            this_value = self.get_last_value()
+            other_value = other.get_last_value()
+            if isinstance(this_value, tuple) or isinstance(other_value, tuple):
+                raise ValueError("this_value tuple size is greater than 1")
+
+            return this_value < other_value
+        else:
+            return self.get_last_value() < other
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Indicator):
+            return self.get_last_value() == other.get_last_value()
+        else:
+            return self.get_last_value() == other
