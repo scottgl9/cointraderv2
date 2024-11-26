@@ -15,7 +15,7 @@ CLIENT_NAME = "cbadv"
 GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot ADX indicator')
+    parser = argparse.ArgumentParser(description='Plot SAMA indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
@@ -67,11 +67,18 @@ if __name__ == '__main__':
 
 sama = SlopeAdaptiveMovingAverage()
 sama_values = []
+sama_slope_values = []
+colors = []
 
 for candle in reversed(candles):
     kline.from_dict(candle)
     result = sama.update(kline)
     sama_values.append(result['ma'])
+    sama_slope_values.append(result['slope'])
+    if result['slope'] > 0:
+        colors.append('green')
+    else:
+        colors.append('red')
     opens.append(kline.open)
     closes.append(kline.close)
     highs.append(kline.high)
@@ -92,6 +99,7 @@ df = pd.DataFrame(data)
 df.set_index('Date', inplace=True)
 
 sama_plot = mpf.make_addplot(sama_values, panel=0, color='green', width=1.5)
+sama_slope_plot = mpf.make_addplot(sama_slope_values, panel=1, width=1.5)
 
 mpf.plot(
     df,
@@ -99,5 +107,5 @@ mpf.plot(
     style='charles',
     title=f'{ticker} {granularity_name} chart with SAMA',
     ylabel='Price',
-    addplot=[sama_plot],
+    addplot=[sama_plot, sama_slope_plot],
 )

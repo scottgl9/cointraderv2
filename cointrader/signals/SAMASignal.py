@@ -35,7 +35,7 @@ class SAMASignal(Signal):
 
     def update(self, kline: Kline):
         # Update the indicator with the closing price
-        src = kline.close
+        src = kline
         result = self.indicator.update(src)
         if not result:
             return

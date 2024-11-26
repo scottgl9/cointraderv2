@@ -118,7 +118,6 @@ class SlopeAdaptiveMovingAverage(Indicator):
             highestHigh = max(self.src_history, key=lambda k: k.high).high
             lowestLow = min(self.src_history, key=lambda k: k.low).low
 
-
         # Prevent division by zero
         if highestHigh - lowestLow != 0:
             slope_range = self.slopeInRange / (highestHigh - lowestLow) * lowestLow
