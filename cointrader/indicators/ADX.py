@@ -5,14 +5,7 @@ class ADX(Indicator):
     def __init__(self, name, period):
         super().__init__(name)
         self.period = period
-        self.true_range = []
-        self.plus_dm = []
-        self.minus_dm = []
-        self.smooth_tr = []
-        self.smooth_plus_dm = []
-        self.smooth_minus_dm = []
-        self.dx = []
-        self.adx = []
+        self.reset()
 
     def update(self, kline: Kline):
         if len(self.true_range) == 0:
@@ -63,7 +56,7 @@ class ADX(Indicator):
                 else:
                     self.adx.append((self.adx[-1] * (self.period - 1) + self.dx[-1]) / self.period)
         
-        self.klines.append(kline)
+        self._last_kline = kline
         self._last_value = self.adx[-1] if len(self.adx) > 0 else 0.0
         return self._last_value
 

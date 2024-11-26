@@ -5,25 +5,23 @@ class Indicator:
     _name = None
     _ready = False
     _last_value = None
+    _last_kline = None
     def __init__(self, name, **kwargs):
         self._name = name
+
+    def ready(self) -> bool:
+        raise NotImplementedError
+
+    def reset(self):
+        raise NotImplementedError
 
     def update(self, kline : Kline) -> tuple:
         raise NotImplementedError
 
     def get_last_value(self) -> tuple:
         raise NotImplementedError
-
-    def get_last_timestamp(self):
-        raise NotImplementedError
-
+   
     def get_last_kline(self) -> Kline:
-        raise NotImplementedError
-
-    def ready(self) -> bool:
-        raise NotImplementedError
-
-    def reset(self):
         raise NotImplementedError
 
     def __greater_than__(self, other) -> bool:

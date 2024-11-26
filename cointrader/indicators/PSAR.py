@@ -44,16 +44,18 @@ class PSAR(Indicator):
                     self.ep = kline.low
                     self.af = min(self.af + self.af_increment, self.max_af)
 
+        self._last_kline = kline
+
         return self.psar
 
     def get_last_value(self):
         return self.psar
 
     def get_last_timestamp(self):
-        return self.klines[-1].ts if self.klines else None
+        return self._last_kline.ts
 
     def get_last_kline(self):
-        return self.klines[-1] if self.klines else None
+        return self._last_kline
 
     def reset(self):
         self.af = self.af_increment

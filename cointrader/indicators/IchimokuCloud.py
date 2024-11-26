@@ -46,6 +46,7 @@ class IchimokuCloud(Indicator):
             self.senkou_span_b.append(None)
 
         self.chikou_span.append(kline.close)
+        self._last_kline = kline
 
         self._last_value = {
             'tenkan_sen': self.tenkan_sen[-1],
@@ -54,6 +55,7 @@ class IchimokuCloud(Indicator):
             'senkou_span_b': self.senkou_span_b[-1],
             'chikou_span': self.chikou_span[-1]
         }
+
         return self._last_value
 
     def get_last_value(self):

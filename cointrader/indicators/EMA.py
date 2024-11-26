@@ -5,10 +5,8 @@ class EMA(Indicator):
     def __init__(self, name, period):
         super().__init__(name)
         self.period = period
-        self.values = []
-        self.timestamps = []
-        self.klines = []
         self.multiplier = 2 / (period + 1)
+        self.reset()
 
     def update(self, kline : Kline):
         self.klines.append(kline)
@@ -24,6 +22,7 @@ class EMA(Indicator):
             self.timestamps.pop(0)
             self.klines.pop(0)
 
+        self._last_kline = kline
         self._last_value = self.values[-1]
         return self._last_value
 
@@ -32,10 +31,10 @@ class EMA(Indicator):
 
     def get_last_timestamp(self):
         return self.timestamps[-1]
-    
+
     def get_last_kline(self):
-        return self.klines[-1]
-    
+        return self._last_kline
+
     def reset(self):
         self.values = []
         self.timestamps = []

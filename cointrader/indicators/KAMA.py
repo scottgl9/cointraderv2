@@ -32,6 +32,8 @@ class KAMA(Indicator):
             kama_value = self._last_value + sc * (self.values[-1] - self._last_value)
             self._last_value = kama_value
 
+        self._last_kline = kline
+
         return self._last_value
 
     def get_last_value(self):
@@ -41,7 +43,7 @@ class KAMA(Indicator):
         return self.timestamps[-1]
     
     def get_last_kline(self):
-        return self.klines[-1]
+        return self._last_kline
     
     def reset(self):
         self.values = []

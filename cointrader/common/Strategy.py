@@ -1,3 +1,4 @@
+# This file contains the Strategy class which is the base class for all strategies
 from .Kline import Kline
 
 class Strategy:

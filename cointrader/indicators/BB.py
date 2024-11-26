@@ -1,5 +1,6 @@
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
+from .SMA import SMA
 import numpy as np
 
 class BollingerBands(Indicator):
@@ -7,12 +8,10 @@ class BollingerBands(Indicator):
         super().__init__(name)
         self.period = period
         self.std_dev_multiplier = std_dev_multiplier
-        self.values = []
-        self.timestamps = []
-        self.klines = []
+        self.sma = SMA(name + "_sma", period)
+        self.reset()
 
     def update(self, kline : Kline):
-        self.klines.append(kline)
         self.timestamps.append(kline.ts)
         self.values.append(kline.close)
 
@@ -21,15 +20,23 @@ class BollingerBands(Indicator):
             self.timestamps.pop(0)
             self.klines.pop(0)
 
+        sma_value = self.sma.update(kline)
+        upper_band = 0.0
+        lower_band = 0.0
+
         if len(self.values) == self.period:
-            sma = np.mean(self.values)
             std_dev = np.std(self.values)
-            upper_band = sma + (self.std_dev_multiplier * std_dev)
-            lower_band = sma - (self.std_dev_multiplier * std_dev)
-            self._last_value = tuple(sma, upper_band, lower_band)
-        else:
-            self._last_value = tuple(None, None, None)
-        
+            upper_band = sma_value + (self.std_dev_multiplier * std_dev)
+            lower_band = sma_value - (self.std_dev_multiplier * std_dev)
+
+        self._last_value = {
+            'sma': sma_value,
+            'upper_band': upper_band,
+            'lower_band': lower_band
+        }
+
+        self._last_kline = kline
+
         return self._last_value
 
     def get_last_value(self):
@@ -37,14 +44,14 @@ class BollingerBands(Indicator):
 
     def get_last_timestamp(self):
         return self.timestamps[-1] if self.timestamps else None
-    
+
     def get_last_kline(self):
-        return self.klines[-1] if self.klines else None
+        return self._last_kline
     
     def reset(self):
+        self.sma.reset()
         self.values = []
         self.timestamps = []
-        self.klines = []
 
     def ready(self):
         return len(self.values) == self.period
