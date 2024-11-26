@@ -51,9 +51,6 @@ class PSAR(Indicator):
     def get_last_value(self):
         return self.psar
 
-    def get_last_timestamp(self):
-        return self._last_kline.ts
-
     def get_last_kline(self):
         return self._last_kline
 

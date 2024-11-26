@@ -1,4 +1,5 @@
 coinbase-advanced-py
 numpy
 matplotlib
+mplfinance
 pandas

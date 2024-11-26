@@ -2,7 +2,7 @@ from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
 class EMA(Indicator):
-    def __init__(self, name, period):
+    def __init__(self, name='ema', period=12):
         super().__init__(name)
         self.period = period
         self.multiplier = 2 / (period + 1)
@@ -28,9 +28,6 @@ class EMA(Indicator):
 
     def get_last_value(self):
         return self._last_value
-
-    def get_last_timestamp(self):
-        return self.timestamps[-1]
 
     def get_last_kline(self):
         return self._last_kline

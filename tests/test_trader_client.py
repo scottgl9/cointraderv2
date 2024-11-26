@@ -1,14 +1,12 @@
 import sys
-try:
-    import cointrader
-except ImportError:
-    sys.path.append('.')
+#sys.path.append('./tests')
+sys.path.append('.')
+from cointrader.client.TraderSelectClient import TraderSelectClient
 
-from cointrader.client.cbadv.CBADVTraderClient import CBADVTraderClient
-from cointrader.config import CBADV_KEY, CBADV_SECRET
+CLIENT_NAME = "cbadv"
 
 if __name__ == '__main__':
-    client = CBADVTraderClient(CBADV_KEY, CBADV_SECRET)
+    client = TraderSelectClient(CLIENT_NAME).get_client()
     print("info_base_currencies_list")
     print(client.info_base_currencies_list())
     print("info_quote_currencies_list")
