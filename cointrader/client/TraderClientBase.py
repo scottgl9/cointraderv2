@@ -73,6 +73,14 @@ class TraderClientBase(object):
         """Set balance of currency (used for testing)"""
         raise NotImplementedError
 
+    def balance_get(self, currency: str) -> tuple[float, float]:
+        """Get balance of currency"""
+        raise NotImplementedError
+
+    def balance_set(self, currency: str, available: float, hold: float) -> None:
+        """Set balance of currency (used for testing)"""
+        raise NotImplementedError
+
     def balance_all_get(self) -> dict[str, tuple[float, float]]:
         """Get all balances with non-zero values"""
         raise NotImplementedError

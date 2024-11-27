@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import argparse
 
 CLIENT_NAME = "cbadv"
-GRANULARITY = 3600
+GRANULARITY = 900
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plot SAMA indicator')
