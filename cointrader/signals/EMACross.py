@@ -15,15 +15,17 @@ class EMACross(Signal):
     def update(self, kline: Kline):
         short_ema_value = self.short_ema.update(kline)
         long_ema_value = self.long_ema.update(kline)
-        result = {
-            "short_ema": short_ema_value,
-            "long_ema": long_ema_value
-        }
 
-        self._values.append(result)
+        if len(self._short_ema_values) > self.window:
+            self._short_ema_values.pop(0)
 
-        if len(self._values) > self.window:
-            self._values.pop(0)
+        if len(self._long_ema_values) > self.window:
+            self._long_ema_values.pop(0)
+        
+        if short_ema_value > max(self._long_ema_values) and min(self._short_ema_values) < self._long_ema_values[-1]:
+            self._cross_up = True
+        elif short_ema_value < min(self._long_ema_values) and max(self._short_ema_values) > self._long_ema_values[-1]:
+            self._cross_down = True
 
         return
 
@@ -58,3 +60,5 @@ class EMACross(Signal):
         self.long_ema.reset()
         self._cross_up = False
         self._cross_down = False
+        self._short_ema_values = []
+        self._long_ema_values = []

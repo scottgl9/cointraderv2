@@ -11,7 +11,6 @@ class Signal:
     def __init__(self, name, symbol, **kwargs):
         self._name = name
         self._symbol = symbol
-        self._values = []
 
     def ready(self):
         raise NotImplementedError

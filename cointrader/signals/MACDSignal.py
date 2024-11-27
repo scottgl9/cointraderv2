@@ -15,27 +15,41 @@ class MACDSignal(Signal):
         self.reset()
 
     def update(self, kline: Kline):
-        self._values.append(self.macd.update(kline))
-        if len(self._values) > self.window:
-            self._values.pop(0)
+        result = self.macd.update(kline)
+        self._macd_values.append(result["macd"])
+        self._signal_values.append(result["signal"])
+        if len(self._macd_values) > self.window:
+            self._macd_values.pop(0)
+        if len(self._signal_values) > self.window:
+            self._signal_values.pop(0)
+        
+        if self._macd_values[-1] > max(self._signal_values) and min(self._macd_values) < self._signal_values[-1]:
+            self._cross_up = True
+        elif self._macd_values[-1] < min(self._signal_values) and max(self._macd_values) > self._signal_values[-1]:
+            self._cross_down = True
 
     def ready(self):
         return self.macd.ready()
 
-    def cross_up(self):
+    def above(self):
         return self.macd.get_last_value()["macd"] > self.macd.get_last_value()["signal"]
     
-    def cross_down(self):
+    def below(self):
         return self.macd.get_last_value()["macd"] < self.macd.get_last_value()["signal"]
 
-    def get_last_value(self):
-        return {
-            "macd": self.macd,
-            "signal": self.signal,
-            "histogram": self.histogram
-        }
+    def cross_up(self):
+        result = self._cross_up
+        self._cross_up = False
+        return result
+    
+    def cross_down(self):
+        result = self._cross_down
+        self._cross_down = False
+        return result
 
     def reset(self):
         self.macd.reset()
         self._cross_up = False
         self._cross_down = False
+        self._macd_values = []
+        self._signal_values = []
