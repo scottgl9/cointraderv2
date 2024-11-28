@@ -1,6 +1,6 @@
 from cointrader.client.TraderClientBase import TraderClientBase
 from coinbase.rest import RESTClient
-from cointrader.common.AssetInfo import AssetInfo
+from cointrader.common.SymbolInfo import SymbolInfo
 
 class CBADVTraderClient(TraderClientBase):
     MAX_CANDLES = 350
@@ -57,30 +57,36 @@ class CBADVTraderClient(TraderClientBase):
         """Split ticker into base and quote currency names"""
         return tuple(ticker.split('-'))
 
-    def info_ticker_query(self, ticker: str) -> AssetInfo:
+    def info_ticker_query(self, ticker: str) -> SymbolInfo:
         """Query ticker information"""
         response = self.client.get_product(product_id=ticker)
-        result = AssetInfo()
-        result.base_name = response.base_currency_id
-        result.quote_name = response.quote_currency_id
-        result.price = float(response.price)
-        result.base_min_size = float(response.base_min_size)
-        result.base_step_size = float(response.base_increment)
-        result.quote_min_size = float(response.quote_min_size)
-        result.quote_step_size = float(response.quote_increment)
+        result = self.info_ticker_parse(ticker, response)
+
+        return result
+    
+    def info_ticker_parse(self, ticker: str, response) -> SymbolInfo:
+        """Parse ticker information"""
+        result = SymbolInfo()
+        result.base_name = response['base_currency_id']
+        result.quote_name = response['quote_currency_id']
+        result.price = float(response['price'])
+        result.base_min_size = float(response['base_min_size'])
+        result.base_step_size = float(response['base_increment'])
+        result.quote_min_size = float(response['quote_min_size'])
+        result.quote_step_size = float(response['quote_increment'])
         result.base_precision = len(str(result.base_step_size).split('.')[1])
         result.quote_precision = len(str(result.quote_step_size).split('.')[1])
 
         return result
 
-    def info_ticker_query_all(self) -> dict[str, AssetInfo]:
+    def info_ticker_query_all(self) -> dict[str, SymbolInfo]:
         """Query all tickers"""
         result = {}
         products = self.client.get_products(limit=250).products
         for product in products:
             if self.info_ticker_get_quote(product.product_id) in self._excluded_currency_list:
                 continue
-            result[product.product_id] = self.info_ticker_query(product.product_id)
+            result[product.product_id] = self.info_ticker_parse(product.product_id, product)
         return result
 
     def info_currency_query(self, currency: str) -> dict:

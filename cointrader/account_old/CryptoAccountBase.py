@@ -1,6 +1,6 @@
 #from cointrader.lib.struct.Order import Order
 #from cointrader.lib.struct.Exchange import Exchange
-#from cointrader.lib.struct.AssetInfo import AssetInfo
+#from cointrader.lib.struct.SymbolInfo import SymbolInfo
 import math
 
 
@@ -88,19 +88,19 @@ class CryptoAccountBase(object):
         return size
 
     def round_base_symbol(self, symbol, price):
-        base_increment = self.get_asset_info_dict(symbol=symbol, field='base_step_size')
+        base_increment = self.get_symbol_info_dict(symbol=symbol, field='base_step_size')
         return self.round_base(price, base_increment)
 
     def round_quantity_symbol(self, symbol, size):
-        min_qty = self.get_asset_info_dict(symbol=symbol, field='min_qty')
+        min_qty = self.get_symbol_info_dict(symbol=symbol, field='min_qty')
         return self.round_quantity(size, min_qty)
 
     def round_quote_symbol(self, symbol, price):
-        quote_increment = self.get_asset_info_dict(symbol=symbol, field='currency_step_size')
+        quote_increment = self.get_symbol_info_dict(symbol=symbol, field='currency_step_size')
         return self.round_quote(price, quote_increment)
 
     def round_quote_pair(self, base, currency, price):
-        quote_increment = self.get_asset_info_dict(base=base, currency=currency, field='currency_step_size')
+        quote_increment = self.get_symbol_info_dict(base=base, currency=currency, field='currency_step_size')
         return self.round_quote(price, quote_increment)
 
     def my_float(self, value):
@@ -110,13 +110,13 @@ class CryptoAccountBase(object):
             return "{:.8f}".format(float(value))
 
     def get_base_step_size(self, symbol=None, base=None, currency=None):
-        info = self.get_asset_info_dict(symbol=symbol, base=base, currency=currency)
+        info = self.get_symbol_info_dict(symbol=symbol, base=base, currency=currency)
         if not info:
             return 0
         return info['base_step_size']
 
     def get_currency_step_size(self, symbol=None, base=None, currency=None):
-        info = self.get_asset_info_dict(symbol=symbol, base=base, currency=currency)
+        info = self.get_symbol_info_dict(symbol=symbol, base=base, currency=currency)
         if not info:
             return 0
         return info['currency_step_size']
@@ -203,8 +203,8 @@ class CryptoAccountBase(object):
     def get_exchange_info(self):
         return self.info.get_exchange_info()
 
-    def parse_exchange_info(self, pair_info, asset_info):
-        return self.info.parse_exchange_info(pair_info, asset_info)
+    def parse_exchange_info(self, pair_info, symbol_info):
+        return self.info.parse_exchange_info(pair_info, symbol_info)
 
     def get_exchange_pairs(self):
         return self.info.get_exchange_pairs()
@@ -215,11 +215,11 @@ class CryptoAccountBase(object):
     def get_asset_status(self, name=None):
         return self.info.get_asset_status(name)
 
-    def get_asset_info(self, symbol=None, base=None, currency=None):
-        return self.info.get_asset_info(symbol, base, currency)
+    def get_symbol_info(self, symbol=None, base=None, currency=None):
+        return self.info.get_symbol_info(symbol, base, currency)
 
-    def get_asset_info_dict(self, symbol=None, base=None, currency=None, field=None) -> dict:
-        return self.info.get_asset_info_dict(symbol, base, currency, field)
+    def get_symbol_info_dict(self, symbol=None, base=None, currency=None, field=None) -> dict:
+        return self.info.get_symbol_info_dict(symbol, base, currency, field)
 
     def is_asset_available(self, name):
         return self.info.is_asset_available(name)

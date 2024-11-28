@@ -2,7 +2,7 @@ import os
 import json
 from cointrader.account.CryptoAccountBaseInfo import CryptoAccountBaseInfo
 #from cointrader.lib.struct.Order import Order
-#from cointrader.lib.struct.AssetInfo import AssetInfo
+#from cointrader.lib.struct.SymbolInfo import SymbolInfo
 #from cointrader.lib.struct.Exchange import Exchange
 from coinbase.rest import RESTClient
 
@@ -121,10 +121,10 @@ class AccountCoinbaseInfo(CryptoAccountBaseInfo):
     # get exchange info from exchange via API
     def get_exchange_info(self):
         pair_info = self.client.get_products(limit=250).products
-        asset_info = None
-        return self.parse_exchange_info(pair_info, asset_info)
+        symbol_info = None
+        return self.parse_exchange_info(pair_info, symbol_info)
 
-    def parse_exchange_info(self, pair_info, asset_info):
+    def parse_exchange_info(self, pair_info, symbol_info):
         """
         :type pair_info: list[Product]
         """
@@ -192,9 +192,9 @@ class AccountCoinbaseInfo(CryptoAccountBaseInfo):
     def is_asset_available(self, name):
         raise NotImplementedError
 
-    # return asset info in AssetInfo class object
-    def get_asset_info(self, symbol=None, base=None, currency=None):
-        info = self.get_asset_info_dict(symbol=symbol, base=base, currency=currency)
+    # return asset info in SymbolInfo class object
+    def get_symbol_info(self, symbol=None, base=None, currency=None):
+        info = self.get_symbol_info_dict(symbol=symbol, base=base, currency=currency)
         if not info:
             return None
 
@@ -208,7 +208,7 @@ class AccountCoinbaseInfo(CryptoAccountBaseInfo):
 
         orderTypes = []
 
-        result = AssetInfo(base=base,
+        result = SymbolInfo(base=base,
                            currency=currency,
                            min_qty=min_qty,
                            min_price=min_price,
@@ -221,7 +221,7 @@ class AccountCoinbaseInfo(CryptoAccountBaseInfo):
                            )
         return result
 
-    def get_asset_info_dict(self, symbol=None, base=None, currency=None, field=None):
+    def get_symbol_info_dict(self, symbol=None, base=None, currency=None, field=None):
         if not self.info_all_pairs:
             self.load_exchange_info()
 

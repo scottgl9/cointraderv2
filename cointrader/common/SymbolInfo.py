@@ -1,6 +1,6 @@
-# This file contains the AssetInfo class which is used to store information about a trading pair
+# This file contains the SymbolInfo class which is used to store information about a trading pair
 
-class AssetInfo(object):
+class SymbolInfo(object):
     initialized = False
     base_name = None
     quote_name = None

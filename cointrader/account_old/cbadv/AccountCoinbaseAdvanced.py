@@ -2,7 +2,7 @@ from cointrader.account.CryptoAccountBase import CryptoAccountBase
 #from cointrader.lib.struct.TraderMessage import TraderMessage
 #from cointrader.lib.struct.Order import Order
 #from cointrader.lib.struct.OrderUpdate import OrderUpdate
-#from cointrader.lib.struct.AssetInfo import AssetInfo
+#from cointrader.lib.struct.SymbolInfo import SymbolInfo
 #from cointrader.lib.struct.Exchange import Exchange
 from .AccountCoinbaseInfo import AccountCoinbaseInfo
 from .AccountCoinbaseBalance import AccountCoinbaseBalance

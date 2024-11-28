@@ -67,7 +67,7 @@ class CryptoAccountBaseInfo(object):
     def get_exchange_info(self):
         raise NotImplementedError
 
-    def parse_exchange_info(self, pair_info, asset_info):
+    def parse_exchange_info(self, pair_info, symbol_info):
         raise NotImplementedError
 
     def get_exchange_pairs(self):
@@ -87,8 +87,8 @@ class CryptoAccountBaseInfo(object):
             return False
         return True
 
-    # return asset info in AssetInfo class object
-    def get_asset_info(self, symbol=None, base=None, currency=None):
+    # return asset info in SymbolInfo class object
+    def get_symbol_info(self, symbol=None, base=None, currency=None):
         raise NotImplementedError
 
     def get_asset_status(self, name=None):
@@ -97,5 +97,5 @@ class CryptoAccountBaseInfo(object):
     def is_asset_available(self, name):
         raise NotImplementedError
 
-    def get_asset_info_dict(self, symbol=None, base=None, currency=None, field=None):
+    def get_symbol_info_dict(self, symbol=None, base=None, currency=None, field=None):
         raise NotImplementedError

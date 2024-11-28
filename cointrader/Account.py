@@ -1,19 +1,23 @@
 from cointrader.base.AccountBase import AccountBase
 from cointrader.client.TraderClientBase import TraderClientBase
-from cointrader.common.AssetInfo import AssetInfo
-from cointrader.common.AssetInfoConfig import AssetInfoConfig
+from cointrader.common.SymbolInfo import SymbolInfo
+from cointrader.common.SymbolInfoConfig import SymbolInfoConfig
 
 class Account(AccountBase):
-    _asset_info = None
-    def __init__(self, client: TraderClientBase, asset_info=None, logger=None):
+    _symbol_info = None
+    _name = None
+    def __init__(self, client: TraderClientBase, symbol_info=None, logger=None):
         super().__init__(logger)
-        if not asset_info:
-            name = client.name()
-            asset_info = AssetInfoConfig(f'{name}_asset_info.json')
-        self._asset_info = asset_info
+        self._name = client.name()
+        if not symbol_info:
+            symbol_info = SymbolInfoConfig(f'{self._name}_symbol_info.json')
+        self._symbol_info = symbol_info
         self._balances = {}
         self._tickers_info = {}
         self._client = client
+
+    def name(self):
+        return self._name
 
     def get_account_balances(self) -> dict:
         return self._client.balance_all_get()
@@ -30,14 +34,16 @@ class Account(AccountBase):
         self._balances[asset] = {'available': available, 'hold': hold}
         return self._client.balance_set(asset, available, hold)
 
-    def load_asset_info(self):
-        if not self._asset_info.file_exists():
-            self._asset_info.fetch()
+    def load_symbol_info(self):
+        if not self._symbol_info.file_exists():
+            if not self._symbol_info.fetch():
+                return False
         else:
-            self._asset_info.load()
+            self._symbol_info.load()
+        return True
 
-    def save_asset_info(self):
-        self._asset_info.save()
+    def save_symbol_info(self):
+        self._symbol_info.save()
 
-    def get_asset_info(self, symbol) -> AssetInfo:
-        return self._asset_info.get_asset_info(symbol)
+    def get_symbol_info(self, symbol) -> SymbolInfo:
+        return self._symbol_info.get_symbol_info(symbol)

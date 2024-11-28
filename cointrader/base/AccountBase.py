@@ -1,4 +1,4 @@
-from cointrader.common.AssetInfo import AssetInfo
+from cointrader.common.SymbolInfo import SymbolInfo
 
 class AccountBase(object):
     _logger = None
@@ -19,11 +19,11 @@ class AccountBase(object):
     def update_asset_balance(self, asset, available: float, hold: float):
         raise NotImplementedError
     
-    def load_asset_info(self):
+    def load_symbol_info(self):
         raise NotImplementedError
     
-    def save_asset_info(self):
+    def save_symbol_info(self):
         raise NotImplementedError
     
-    def get_asset_info(self, symbol) -> AssetInfo:
+    def get_symbol_info(self, symbol) -> SymbolInfo:
         raise NotImplementedError
