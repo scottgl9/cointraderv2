@@ -5,6 +5,7 @@ from cointrader.common.AssetInfo import AssetInfo
 class CBADVTraderClient(TraderClientBase):
     MAX_CANDLES = 350
     def __init__(self, api_key, api_secret, logger=None):
+        self._name = "cbadv"
         self.client = RESTClient(api_key=api_key, api_secret=api_secret)
         self.logger = logger
         self._quote_currency_list = ['BTC', 'ETH', 'USDC', 'USD', 'USDT']

@@ -6,17 +6,22 @@ import json
 
 class AssetInfoConfig:
     filename = None
-    def __init__(self, path):
+    _client = None
+    def __init__(self, client, path):
         self._asset_info = {}
+        self._client = client
         self.path = path
 
 
-    def file_exists(self):
+    def file_exists(self) -> bool:
         """
         Check if the file exists for asset info
         """
         if os.path.exists(self.path):
             return True
+        return False
+
+    def fetch(self) -> bool:
         return False
 
     def load(self) -> bool:
@@ -40,8 +45,12 @@ class AssetInfoConfig:
             return False
         return True
 
-    def get_asset_info(self, symbol):
-        pass
+    def get_asset_info(self, symbol) -> AssetInfo:
+        if symbol not in self._asset_info.keys():
+            return None
+        info = AssetInfo()
+        info.load_dict(self._asset_info[symbol])
+        return info
 
     def set_asset_info(self, symbol, asset_info: AssetInfo):
-        pass
+        self._asset_info[symbol] = dict(asset_info)

@@ -8,7 +8,8 @@ class Account(AccountBase):
     def __init__(self, client: TraderClientBase, asset_info=None, logger=None):
         super().__init__(logger)
         if not asset_info:
-            asset_info = AssetInfoConfig('asset_info.json')
+            name = client.name()
+            asset_info = AssetInfoConfig(f'{name}_asset_info.json')
         self._asset_info = asset_info
         self._balances = {}
         self._tickers_info = {}
@@ -30,10 +31,13 @@ class Account(AccountBase):
         return self._client.balance_set(asset, available, hold)
 
     def load_asset_info(self):
-        raise NotImplementedError
-    
+        if not self._asset_info.file_exists():
+            self._asset_info.fetch()
+        else:
+            self._asset_info.load()
+
     def save_asset_info(self):
-        raise NotImplementedError
-    
+        self._asset_info.save()
+
     def get_asset_info(self, symbol) -> AssetInfo:
-        return self._client.info_ticker_query(symbol)
+        return self._asset_info.get_asset_info(symbol)

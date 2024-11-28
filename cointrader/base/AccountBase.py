@@ -2,9 +2,11 @@ from cointrader.common.AssetInfo import AssetInfo
 
 class AccountBase(object):
     _logger = None
+    _name = None
+
     def __init__(self, logger=None):
         self.logger = logger
-    
+
     def get_account_balances(self) -> dict:
         raise NotImplementedError
 

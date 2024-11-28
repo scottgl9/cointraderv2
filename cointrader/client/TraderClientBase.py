@@ -2,8 +2,14 @@
 from cointrader.common.AssetInfo import AssetInfo
 
 class TraderClientBase(object):
+    _name = None
     def __init__(self) -> None:
-        pass
+        self._name = "generic"
+
+
+    def name(self) -> str:
+        """Return name of client"""
+        return self._name
 
     # return list of all base currency names
     def info_base_currencies_list(self) -> list[str]:
