@@ -1,5 +1,7 @@
+import os
 import json
 
+# Example of a trade config
 DEFAULT_TRADE_CONFIG = {
     'max_positions': 1,
     'quote_currency': 'USD',
@@ -20,7 +22,7 @@ DEFAULT_TRADE_CONFIG = {
 class TraderConfig(object):
     def __init__(self, path : str):
         self._path = path
-        self._config = {}
+        self._config = DEFAULT_TRADE_CONFIG
 
     def path(self) -> str:
         return self._path
@@ -28,19 +30,25 @@ class TraderConfig(object):
     def get_config(self):
         return self._config
 
+    def config_file_exists(self) -> bool:
+        if os.path.exists(self._path):
+            return True
+        return False
+
     def load_config(self) -> bool:
         try:
-            with open(self.path, 'r') as f:
+            with open(self._path, 'r') as f:
                 self._config = json.load(f)
         except Exception as e:
-            print(f"Error loading config from {self.path}: {e}")
+            print(f"Error loading config from {self.path} {e}: using defaults")
             return False
         return True
 
     def save_config(self) -> bool:
         try:
-            with open(self.path, 'w') as f:
-                json.dump(self._config, f)
+            with open(self._path, 'w') as f:
+                print(self._config)
+                json.dump(self._config, f, indent=4)
         except Exception as e:
             print(f"Error saving config to {self.path}: {e}")
             return False

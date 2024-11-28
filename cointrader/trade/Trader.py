@@ -5,14 +5,16 @@ from cointrader.common.Strategy import Strategy
 from cointrader.Account import Account
 from .TraderConfig import TraderConfig
 
-def Trader(object):
+class Trader(object):
     _symbol = None
+    _account = None
     _positions = []
     _strategy_name = None
     _max_positions = 0
 
     def __init__(self, account: Account, symbol: str, config: TraderConfig):
         self._symbol = symbol
+        self._account = account
         self._config = config
         self._positions = []
         self._strategy_name = config.strategy()

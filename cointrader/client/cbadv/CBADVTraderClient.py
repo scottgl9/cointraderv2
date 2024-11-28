@@ -67,15 +67,25 @@ class CBADVTraderClient(TraderClientBase):
     def info_ticker_parse(self, ticker: str, response) -> SymbolInfo:
         """Parse ticker information"""
         result = SymbolInfo()
-        result.base_name = response['base_currency_id']
-        result.quote_name = response['quote_currency_id']
-        result.price = float(response['price'])
-        result.base_min_size = float(response['base_min_size'])
-        result.base_step_size = float(response['base_increment'])
-        result.quote_min_size = float(response['quote_min_size'])
-        result.quote_step_size = float(response['quote_increment'])
-        result.base_precision = len(str(result.base_step_size).split('.')[1])
-        result.quote_precision = len(str(result.quote_step_size).split('.')[1])
+        result.base_name = response.base_currency_id
+        result.quote_name = response.quote_currency_id
+        result.price = float(response.price)
+        result.base_min_size = float(response.base_min_size)
+        result.base_step_size = float(response.base_increment)
+        result.quote_min_size = float(response.quote_min_size)
+        result.quote_step_size = float(response.quote_increment)
+
+        def get_precision(step_size: float) -> int:
+            """Get precision based on step size"""
+            step_size_str = f"{step_size:.10f}".rstrip('0')
+            if '.' in step_size_str:
+                return len(step_size_str.split('.')[1])
+            return 0
+
+        result.base_precision = get_precision(result.base_step_size)
+        result.quote_precision = get_precision(result.quote_step_size)
+        #result.base_precision = len(str(result.base_step_size).split('.')[1])
+        #result.quote_precision = len(str(result.quote_step_size).split('.')[1])
 
         return result
 

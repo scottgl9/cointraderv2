@@ -8,7 +8,7 @@ import json
 class SymbolInfoConfig:
     filename = None
     _client = None
-    def __init__(self, client: TraderClientBase, path):
+    def __init__(self, client: TraderClientBase, path: str):
         self._symbol_info_all = {}
         self._client = client
         self.path = path
@@ -36,9 +36,9 @@ class SymbolInfoConfig:
         try:
             info_all = self._client.info_ticker_query_all()
             for symbol, info in info_all.items():
-                self._symbol_info_all[symbol] = dict(info)
+                self._symbol_info_all[symbol] = info.to_dict()
         except Exception as e:
-            print(f"Error fetching asset info: {e}")
+            print(f"Error fetching symbol info: {e}")
             return False
 
         return True
@@ -51,7 +51,7 @@ class SymbolInfoConfig:
             return False
         try:
             with open(self.path, 'r') as f:
-                self._symbol_info = json.load(f)
+                self._symbol_info_all = json.load(f)
         except Exception as e:
             print(f"Error loading asset info from {self.path}: {e}")
             return False
@@ -64,18 +64,19 @@ class SymbolInfoConfig:
         """
         try:
             with open(self.path, 'w') as f:
-                json.dump(self._symbol_info, f)
+                data = dict(sorted(self._symbol_info_all.items()))
+                json.dump(data, f, indent=2)
         except Exception as e:
             print(f"Error saving asset info to {self.path}: {e}")
             return False
         return True
 
     def get_symbol_info(self, symbol) -> SymbolInfo:
-        if symbol not in self._symbol_info.keys():
+        if symbol not in self._symbol_info_all.keys():
             return None
         info = SymbolInfo()
-        info.load_from_dict(self._symbol_info[symbol])
+        info.load_from_dict(self._symbol_info_all[symbol])
         return info
 
     def set_symbol_info(self, symbol, symbol_info: SymbolInfo):
-        self._symbol_info[symbol] = dict(symbol_info)
+        self._symbol_info_all[symbol]  = symbol_info.to_dict()

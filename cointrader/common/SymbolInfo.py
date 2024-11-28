@@ -18,8 +18,9 @@ class SymbolInfo(object):
         self.initialized = False
 
     def load_from_dict(self, data):
-        self.base = data['base']
-        self.currency = data['currency']
+        print(data)
+        self.base_name = data['base_name']
+        self.quote_name = data['quote_name']
         self.base_min_size = data['base_min_size']
         self.quote_min_size = data['quote_min_size']
         self.base_step_size = data['base_step_size']
@@ -30,10 +31,10 @@ class SymbolInfo(object):
         self.orderTypes = data['orderTypes']
         self.initialized = True
 
-    def __dict__(self):
+    def to_dict(self):
         return {
-            'base': self.base,
-            'currency': self.currency,
+            'base_name': self.base_name,
+            'quote_name': self.quote_name,
             'base_min_size': self.base_min_size,
             'quote_min_size': self.quote_min_size,
             'base_step_size': self.base_step_size,
@@ -43,6 +44,9 @@ class SymbolInfo(object):
             'quote_precision': self.quote_precision,
             'orderTypes': self.orderTypes
         }
+
+    def __dict__(self):
+        return self.to_dict()
 
     def __repr__(self):
         return self.__dict__()

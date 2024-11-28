@@ -10,7 +10,7 @@ class Account(AccountBase):
         super().__init__(logger)
         self._name = client.name()
         if not symbol_info:
-            symbol_info = SymbolInfoConfig(f'{self._name}_symbol_info.json')
+            symbol_info = SymbolInfoConfig(client=client, path=f'{self._name}_symbol_info.json')
         self._symbol_info = symbol_info
         self._balances = {}
         self._tickers_info = {}
@@ -18,6 +18,9 @@ class Account(AccountBase):
 
     def name(self):
         return self._name
+    
+    def get_client(self) -> TraderClientBase:
+        return self._client
 
     def get_account_balances(self) -> dict:
         return self._client.balance_all_get()
@@ -35,9 +38,12 @@ class Account(AccountBase):
         return self._client.balance_set(asset, available, hold)
 
     def load_symbol_info(self):
+        print(f'Loading symbol info from {self._name}')
         if not self._symbol_info.file_exists():
+            print(f'Loading symbol info from {self._name}')
             if not self._symbol_info.fetch():
                 return False
+            self._symbol_info.save()
         else:
             self._symbol_info.load()
         return True
