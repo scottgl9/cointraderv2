@@ -2,7 +2,7 @@ from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
 class KAMA(Indicator):
-    def __init__(self, name, period, fast_period=2, slow_period=30):
+    def __init__(self, name='kama', period=10, fast_period=2, slow_period=30):
         super().__init__(name)
         self.period = period
         self.fast_period = fast_period

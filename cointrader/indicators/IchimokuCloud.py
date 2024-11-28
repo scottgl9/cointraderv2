@@ -2,17 +2,12 @@ from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
 class IchimokuCloud(Indicator):
-    def __init__(self, name, short_period=9, medium_period=26, long_period=52):
+    def __init__(self, name='ichimokucloud', short_period=9, medium_period=26, long_period=52):
         super().__init__(name)
         self.short_period = short_period
         self.medium_period = medium_period
         self.long_period = long_period
-        self.tenkan_sen = []
-        self.kijun_sen = []
-        self.senkou_span_a = []
-        self.senkou_span_b = []
-        self.chikou_span = []
-        self.klines = []
+        self.reset()
 
     def update(self, kline: Kline):
         self.klines.append(kline)
@@ -33,7 +28,8 @@ class IchimokuCloud(Indicator):
         else:
             self.kijun_sen.append(None)
 
-        if len(self.tenkan_sen) > 1 and len(self.kijun_sen) > 1:
+        if (len(self.tenkan_sen) > 2 and len(self.kijun_sen) > 2 and
+            self.tenkan_sen[-2] is not None and self.kijun_sen[-2] is not None):
             self.senkou_span_a.append((self.tenkan_sen[-2] + self.kijun_sen[-2]) / 2)
         else:
             self.senkou_span_a.append(None)
