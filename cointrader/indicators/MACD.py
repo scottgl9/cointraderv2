@@ -3,7 +3,7 @@ from cointrader.common.Kline import Kline
 from .EMA import EMA
 
 class MACD(Indicator):
-    def __init__(self, name, short_period, long_period, signal_period):
+    def __init__(self, name=None, short_period=12, long_period=26, signal_period=9):
         super().__init__(name)
         self.short_ema = EMA(f"{name}_short", short_period)
         self.long_ema = EMA(f"{name}_long", long_period)

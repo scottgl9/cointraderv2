@@ -2,11 +2,11 @@
 
 import sys
 try:
-    import trader
+    import cointrader
 except ImportError:
     sys.path.append('.')
 
-from cointrader.account.cbadv.AccountCoinbaseAdvanced import AccountCoinbaseAdvanced
+from cointrader.account_old.cbadv.AccountCoinbaseAdvanced import AccountCoinbaseAdvanced
 from cointrader.config import *
 from coinbase.rest import RESTClient
 

@@ -63,6 +63,9 @@ class Kline(object):
 
     def __str__(self):
         return str(self.__repr__())
+    
+    def __eq__(self, other):
+        return self.__dict__() == other.__dict__()
 
     def reset(self):
         self.symbol = None

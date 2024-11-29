@@ -6,7 +6,7 @@ DEFAULT_TRADE_CONFIG = {
     'max_positions': 1,
     'quote_currency': 'USD',
     'max_position_quote_size': 25.0,
-    'strategy': 'default',
+    'strategy': 'Default',
     'trade_symbols': ['BTC-USD', 'ETH-USD', 'SOL-USD'],
     'stop_loss_percent': 5.0,
     'trailing_stop_loss': False,

@@ -2,13 +2,14 @@
 from .Kline import Kline
 
 class Strategy:
-    name = None
-    symbol = None
+    _name = None
+    _symbol = None
+    _kwargs = None
 
-    def __init__(self, name, symbol, **kwargs):
-        self.name = name
-        self.symbol = symbol
-        self.kwargs = kwargs
+    def __init__(self, symbol, name, **kwargs):
+        self._name = name
+        self._symbol = symbol
+        self._kwargs = kwargs
 
     def update(self, kline : Kline):
         raise NotImplementedError
