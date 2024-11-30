@@ -4,6 +4,8 @@ from cointrader.common.Kline import Kline
 from cointrader.common.Strategy import Strategy
 from cointrader.Account import Account
 from .TraderConfig import TraderConfig
+from cointrader.base.ExecuteBase import ExecuteBase
+from .TraderPosition import TraderPosition
 import importlib
 
 class Trader(object):
@@ -14,9 +16,10 @@ class Trader(object):
     _strategy = None
     _max_positions = 0
 
-    def __init__(self, account: Account, symbol: str, config: TraderConfig):
+    def __init__(self, account: Account, symbol: str, execute: ExecuteBase, config: TraderConfig):
         self._symbol = symbol
         self._account = account
+        self._execute = execute
         self._config = config
         self._positions = []
         self._strategy_name = config.strategy()
@@ -39,11 +42,24 @@ class Trader(object):
 
     def market_update(self, kline: Kline):
         self._strategy.update(kline)
+
         for position in self._positions:
             if position.closed():
                 self._positions.remove(position)
                 continue
             position.market_update(kline)
+        
+        if len(self._positions) > self._max_positions:
+            return
+
+        # Open a position on a buy signal
+        if self._strategy.buy():
+            position = TraderPosition(symbol=self._symbol, strategy=self._strategy, config=self._config)
+
+        # Close a position on a sell signal
+        if self._strategy.sell():
+            for position in self._positions:
+                position.close_position(price=kline.close, timestamp=kline.timestamp)
 
     def get_total_profit(self, currency: str) -> float:
         pass

@@ -22,8 +22,10 @@ from cointrader.common.Kline import Kline
 from cointrader.config import *
 
 class CBADVLive:
-    def __init__(self):
+    def __init__(self, mtrader: MultiTrader, tconfig: TraderConfig):
         self.prev_klines = {}
+        self.mtrader = mtrader
+        self.tconfig = tconfig
 
     def on_message(self, msg):
         kline = Kline()
@@ -59,8 +61,8 @@ def main(name):
     tconfig = TraderConfig(path=f'{name}_trader_config.json')
     tconfig.save_config()
 
-    rt = CBADVLive()
-    #mtrader = MultiTrader(account=account, config=tconfig)
+    mtrader = MultiTrader(account=account, config=tconfig)
+    rt = CBADVLive(mtrader=mtrader, tconfig=tconfig)
     ws_client = WSClient(api_key=CBADV_KEY, api_secret=CBADV_SECRET, on_message=rt.on_message)
     #accnt = AccountCoinbaseAdvanced(client=client, simulate=False, live=False, logger=logger)
 

@@ -7,6 +7,12 @@ class AccountBase(object):
     def __init__(self, logger=None):
         self.logger = logger
 
+    def name(self):
+        return self._name
+
+    def client(self):
+        raise NotImplementedError
+
     def get_account_balances(self) -> dict:
         raise NotImplementedError
 

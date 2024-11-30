@@ -5,7 +5,6 @@ from cointrader.common.SymbolInfoConfig import SymbolInfoConfig
 
 class Account(AccountBase):
     _symbol_info = None
-    _name = None
     def __init__(self, client: TraderClientBase, symbol_info=None, logger=None):
         super().__init__(logger)
         self._name = client.name()
@@ -15,11 +14,8 @@ class Account(AccountBase):
         self._balances = {}
         self._tickers_info = {}
         self._client = client
-
-    def name(self):
-        return self._name
     
-    def get_client(self) -> TraderClientBase:
+    def client(self) -> TraderClientBase:
         return self._client
 
     def get_account_balances(self) -> dict:
