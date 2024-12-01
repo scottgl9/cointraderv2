@@ -1,5 +1,6 @@
 # TraderClientBase is the base class for all exchange specific implementations
 from cointrader.common.SymbolInfo import SymbolInfo
+from cointrader.order.OrderResult import OrderResult
 
 class TraderClientBase(object):
     _name = None
@@ -132,7 +133,7 @@ class TraderClientBase(object):
     def trade_sell_market(self, ticker: str, amount: float) -> dict:
         """Sell at market price"""
         raise NotImplementedError
-    
+
     def trade_buy_limit(self, ticker: str, amount: float, price: float, type: str) -> dict:
         """Buy at a specific price"""
         raise NotImplementedError
@@ -165,7 +166,6 @@ class TraderClientBase(object):
         """Get closed orders"""
         raise NotImplementedError
     
-    def trade_parse_order_result(self, result: str, ticker: str, sigid: int) -> dict:
+    def trade_parse_order_result(self, result, ticker: str) -> OrderResult:
         """Parse trade order result"""
         raise NotImplementedError
-    

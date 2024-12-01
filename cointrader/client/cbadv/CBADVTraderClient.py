@@ -1,6 +1,7 @@
 from cointrader.client.TraderClientBase import TraderClientBase
 from coinbase.rest import RESTClient
 from cointrader.common.SymbolInfo import SymbolInfo
+from cointrader.order.OrderResult import OrderResult
 
 class CBADVTraderClient(TraderClientBase):
     MAX_CANDLES = 350
@@ -179,24 +180,29 @@ class CBADVTraderClient(TraderClientBase):
 
     def trade_buy_market(self, ticker: str, amount: float) -> dict:
         """Buy at market price"""
-        return self.client.market_order_buy(product_id=ticker, base_size=amount)
+        result = self.client.market_order_buy(product_id=ticker, base_size=amount)
+        return self.trade_parse_order_result(result, ticker)
     
     def trade_sell_market(self, ticker: str, amount: float) -> dict:
         """Sell at market price"""
-        return self.client.market_order_sell(client_order_id='', product_id=ticker, base_size=amount)
+        result = self.client.market_order_sell(client_order_id='', product_id=ticker, base_size=amount)
+        return self.trade_parse_order_result(result, ticker)
 
     def trade_buy_limit(self, ticker: str, amount: float, price: float, type: str) -> dict:
         """Buy at a specific price"""
-        return self.client.limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=price, base_size=amount)
-    
+        result = self.client.limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=price, base_size=amount)
+        return self.trade_parse_order_result(result, ticker)
+
     def trade_sell_limit(self, ticker: str, amount: float, price: float, type: str) -> dict:
         """Sell at a specific price"""
-        return self.client.limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=price, base_size=amount)
+        result = self.client.limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=price, base_size=amount)
+        return self.trade_parse_order_result(result, ticker)
 
     def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str) -> dict:
         """Buy at a specific price when stop price is reached"""
         # TODO: implement stop direction
-        return self.client.stop_limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=price, stop_price=stop_price, base_size=amount)
+        result = self.client.stop_limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=price, stop_price=stop_price, base_size=amount)
+        return self.trade_parse_order_result(result, ticker)
     
     def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str) -> dict:
         """Sell at a specific price when stop price is reached"""
@@ -205,11 +211,13 @@ class CBADVTraderClient(TraderClientBase):
 
     def trade_cancel(self, ticker: str, order_id: str) -> dict:
         """Cancel an open order"""
-        return self.client.cancel_orders(order_ids=[order_id])
-    
+        result = self.client.cancel_orders(order_ids=[order_id])
+        return self.trade_parse_order_result(result, ticker)
+
     def trade_get_order(self, ticker: str, order_id: str) -> dict:
         """Get order information"""
-        return self.client.get_order(order_id=order_id)
+        result = self.client.get_order(order_id=order_id)
+        return self.trade_parse_order_result(result, ticker)
 
     def trade_get_open_orders(self, ticker: str) -> dict:
         """Get open orders"""
@@ -219,7 +227,8 @@ class CBADVTraderClient(TraderClientBase):
         """Get closed orders"""
         raise NotImplementedError
     
-    def trade_parse_order_result(self, result: str, ticker: str, sigid: int) -> dict:
+    def trade_parse_order_result(self, result, ticker: str) -> OrderResult:
         """Parse trade order result"""
-        raise NotImplementedError
-
+        print(result)
+        order_result = OrderResult(symbol=ticker)
+        return order_result
