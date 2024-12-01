@@ -18,7 +18,8 @@ class OrderType(Enum):
     LIMIT = 1
     MARKET = 2
     STOP_LOSS = 3
-    TAKE_PROFIT = 4
+    STOP_LOSS_LIMIT = 4
+    TAKE_PROFIT = 5
 
 class OrderSide(Enum):
     UNKNOWN = 0
