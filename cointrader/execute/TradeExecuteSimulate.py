@@ -8,7 +8,8 @@ import uuid
 class TraderExecuteSimulate(ExecuteBase):
     def __init__(self, client: TraderClientBase):
         self._client = client
-    
+        self._orders = {}
+
     def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
@@ -76,3 +77,6 @@ class TraderExecuteSimulate(ExecuteBase):
         result.size = amount
         result.filled_size = 0.0
         return result
+
+    def status(self, symbol: str, order_id: str) -> OrderResult:
+        raise NotImplementedError

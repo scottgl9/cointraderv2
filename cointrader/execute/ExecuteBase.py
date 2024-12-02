@@ -1,5 +1,6 @@
 # Base class for executing trades
 from cointrader.client.TraderClientBase import TraderClientBase
+from cointrader.order.OrderResult import OrderResult
 
 class ExecuteBase(object):
     _client = None
@@ -22,4 +23,10 @@ class ExecuteBase(object):
         raise NotImplementedError
     
     def stop_loss_sell(self, symbol: str, price: float, stop_price: float, amount: float):
+        raise NotImplementedError
+    
+    def status(self, symbol: str, order_id: str):
+        """
+        Get order status
+        """
         raise NotImplementedError

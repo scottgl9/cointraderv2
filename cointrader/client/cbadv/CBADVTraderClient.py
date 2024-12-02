@@ -1,7 +1,14 @@
 from cointrader.client.TraderClientBase import TraderClientBase
 from coinbase.rest import RESTClient
+from coinbase.rest.types.orders_types import GetOrderResponse
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.order.OrderResult import OrderResult
+from cointrader.order.OrderStatus import OrderStatus
+from cointrader.order.OrderSide import OrderSide
+from cointrader.order.OrderType import OrderType
+from cointrader.order.OrderLimitType import OrderLimitType
+from cointrader.order.OrderErrorReason import OrderErrorReason
+from datetime import datetime
 
 class CBADVTraderClient(TraderClientBase):
     MAX_CANDLES = 350
@@ -216,43 +223,85 @@ class CBADVTraderClient(TraderClientBase):
 
     def trade_buy_market(self, ticker: str, amount: float) -> dict:
         """Buy at market price"""
-        result = self.client.market_order_buy(product_id=ticker, base_size=amount)
+        try:
+            result = self.client.market_order_buy(client_order_id='', product_id=ticker, base_size=str(amount))
+        except Exception as e:
+            result = {}
+            result['success'] = False
+            result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
     
     def trade_sell_market(self, ticker: str, amount: float) -> dict:
         """Sell at market price"""
-        result = self.client.market_order_sell(client_order_id='', product_id=ticker, base_size=amount)
+        try:
+            result = self.client.market_order_sell(client_order_id='', product_id=ticker, base_size=str(amount))
+        except Exception as e:
+            result = {}
+            result['success'] = False
+            result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
+
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_buy_limit(self, ticker: str, amount: float, price: float, type: str) -> dict:
+    def trade_buy_limit(self, ticker: str, amount: float, price: float, type: str = "") -> dict:
         """Buy at a specific price"""
-        result = self.client.limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=price, base_size=amount)
+        try:
+            result = self.client.limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
+        except Exception as e:
+            result = {}
+            result['success'] = False
+            result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_sell_limit(self, ticker: str, amount: float, price: float, type: str) -> dict:
+    def trade_sell_limit(self, ticker: str, amount: float, price: float, type: str = "") -> dict:
         """Sell at a specific price"""
-        result = self.client.limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=price, base_size=amount)
+        try:
+            result = self.client.limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
+        except Exception as e:
+            result = {}
+            result['success'] = False
+            result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str) -> dict:
+    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str = "") -> dict:
         """Buy at a specific price when stop price is reached"""
         # TODO: implement stop direction
-        result = self.client.stop_limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=price, stop_price=stop_price, base_size=amount)
+        try:
+            result = self.client.stop_limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=str(price), stop_price=str(stop_price), base_size=str(amount))
+        except Exception as e:
+            result = {}
+            result['success'] = False
+            result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
-    
-    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str) -> dict:
+
+    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str = "") -> dict:
         """Sell at a specific price when stop price is reached"""
         # TODO: implement stop direction
-        return self.client.stop_limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=price, stop_price=stop_price, base_size=amount)
+        try:
+            result = self.client.stop_limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=str(price), stop_price=str(stop_price), base_size=str(amount))
+        except Exception as e:
+            result = {}
+            result['success'] = False
+            result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
+        return self.trade_parse_order_result(result, ticker)
 
     def trade_cancel(self, ticker: str, order_id: str) -> dict:
         """Cancel an open order"""
-        result = self.client.cancel_orders(order_ids=[order_id])
+        try:
+            result = self.client.cancel_orders(order_ids=[order_id])
+        except Exception as e:
+            result = {}
+            result['success'] = False
+            result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
     def trade_get_order(self, ticker: str, order_id: str) -> dict:
         """Get order information"""
-        result = self.client.get_order(order_id=order_id)
+        try:
+            result = self.client.get_order(order_id=order_id)
+        except Exception as e:
+            result = {}
+            result['success'] = False
+            result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
     def trade_get_open_orders(self, ticker: str) -> dict:
@@ -262,9 +311,118 @@ class CBADVTraderClient(TraderClientBase):
     def trade_get_closed_orders(self, ticker: str) -> dict:
         """Get closed orders"""
         raise NotImplementedError
-    
-    def trade_parse_order_result(self, result, ticker: str) -> OrderResult:
+
+    def trade_parse_order_result(self, result: GetOrderResponse, ticker: str) -> OrderResult:
         """Parse trade order result"""
-        print(result)
         order_result = OrderResult(symbol=ticker)
+        sub_result = None
+
+        result = result.to_dict()
+
+        print(result)
+        if 'response' in result:
+            if not result['success']:
+                response = result['response']
+                order_result.status = OrderStatus.REJECTED
+                if response['error'] == "UNKNOWN":
+                    order_result.error_reason = OrderErrorReason.UNKNOWN
+                elif response['error'] == "INSUFFICIENT_FUND":
+                    order_result.error_reason = OrderErrorReason.INSUFFIENT_BALANCE
+                else:
+                    order_result.error_reason = OrderErrorReason.UNKNOWN
+                    print("Unknown error: ", response['error'])
+                order_result.error_msg = response['message']
+            else:
+                order_result.id = result['response']['order_id']
+                order_result.symbol = result['response']['product_id']
+                if result['response']['side'] == 'BUY':
+                    order_result.side = OrderSide.BUY
+                elif result['response']['side'] == 'SELL':
+                    order_result.side = OrderSide.SELL
+
+                order_result.status = OrderStatus.PLACED
+                order_result.error_reason = OrderErrorReason.NONE
+
+                sub_result = result
+        elif 'order' in result:
+            sub_result = result['order']
+        
+        if sub_result:
+            if 'order_id' in sub_result:
+                order_result.id = sub_result['order_id']
+            if 'product_id' in sub_result:
+                order_result.symbol = sub_result['product_id']
+    
+            # get order side
+            if 'side' in sub_result:
+                if sub_result['side'] == 'BUY':
+                    order_result.side = OrderSide.BUY
+                elif sub_result['side'] == 'SELL':
+                    order_result.side = OrderSide.SELL
+            
+            if 'created_time' in sub_result and sub_result['created_time'] is not None:
+                # Convert to datetime object
+                dt = datetime.fromisoformat(sub_result['created_time'].replace("Z", "+00:00"))
+                # Convert to Unix timestamp
+                order_result.placed_ts = int(dt.timestamp())
+
+            if 'last_fill_time' in sub_result and sub_result['last_fill_time'] is not None:
+                # Convert to datetime object
+                dt = datetime.fromisoformat(sub_result['last_fill_time'].replace("Z", "+00:00"))
+                # Convert to Unix timestamp
+                order_result.filled_ts = int(dt.timestamp())
+
+            if 'filled_size' in sub_result:
+                order_result.filled_size = float(sub_result['filled_size'])
+
+            if 'total_fees' in sub_result:
+                order_result.fee = float(sub_result['total_fees'])
+
+            if 'time_in_force' in sub_result:
+                if sub_result['time_in_force'] == 'GOOD_UNTIL_CANCELLED':
+                    order_result.limit_type = OrderLimitType.GTC
+                elif sub_result['time_in_force'] == 'IMMEDIATE_OR_CANCEL':
+                    order_result.limit_type = OrderLimitType.IOC
+                else:
+                    order_result.limit_type = OrderLimitType.UNKNOWN
+
+            if 'average_filled_price' in sub_result:
+                order_result.price = float(sub_result['average_filled_price'])
+            elif 'filled_value' in sub_result:
+                order_result.price = float(sub_result['filled_value'])
+
+            if 'order_configuration' in sub_result:
+                order_configuration = sub_result['order_configuration']
+
+                if 'market_market_ioc' in order_configuration:
+                    order_type = 'market_market_ioc'
+                    order_result.type = OrderType.MARKET
+                    order_result.size = float(order_configuration[order_type]['base_size'])
+                    order_result.status = OrderStatus.PLACED
+                    order_result.error_reason = OrderErrorReason.NONE
+                elif 'limit_limit_gtc' in order_configuration:
+                    order_type = 'limit_limit_gtc'
+                    order_result.type = OrderType.LIMIT
+                    order_result.limit_price = float(order_configuration[order_type]['limit_price'])
+                    order_result.size = float(order_configuration[order_type]['base_size'])
+                    order_result.status = OrderStatus.PLACED
+                    order_result.error_reason = OrderErrorReason.NONE
+                    if 'post_only' in order_configuration[order_type]:
+                        order_result.post_only = order_configuration[order_type]['post_only']
+                elif 'stop_limit_gtc' in order_configuration:
+                    order_type = 'stop_limit_gtc'
+                    order_result.type = OrderType.STOP_LOSS_LIMIT
+                    order_result.limit_price = float(order_configuration[order_type]['limit_price'])
+                    order_result.size = float(order_configuration[order_type]['base_size'])
+                    order_result.status = OrderStatus.PLACED
+                    order_result.error_reason = OrderErrorReason.NONE
+                    if 'post_only' in order_configuration[order_type]:
+                        order_result.post_only = order_configuration[order_type]['post_only']
+                else:
+                    order_result.type = OrderType.UNKNOWN
+                
+                if 'status' in sub_result:
+                    if sub_result['status'] == 'FILLED':
+                        order_result.status = OrderStatus.FILLED
+
         return order_result

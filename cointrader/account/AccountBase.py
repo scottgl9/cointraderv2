@@ -10,7 +10,7 @@ class AccountBase(object):
     def __init__(self, client: TraderClientBase, market: MarketBase, logger=None):
         self._cxlent = client
         self._market = market
-        self.logger = logger
+        self._logger = logger
 
     def name(self):
         return self._name
@@ -27,13 +27,13 @@ class AccountBase(object):
     def get_asset_balance(self, asset : str) -> tuple[float, float]:
         raise NotImplementedError
 
-    def update_asset_balance(self, asset, available: float, hold: float):
+    def update_asset_balance(self, asset: str, available: float, hold: float):
         raise NotImplementedError
     
-    def load_symbol_info(self):
+    def load_symbol_info(self) -> bool:
         raise NotImplementedError
     
-    def save_symbol_info(self):
+    def save_symbol_info(self) -> bool:
         raise NotImplementedError
     
     def get_symbol_info(self, symbol) -> SymbolInfo:

@@ -7,8 +7,8 @@ from cointrader.market.Market import Market
 
 CLIENT_NAME = "cbadv"
 
-if __name__ == '__main__':
-    client = TraderSelectClient(CLIENT_NAME).get_client()
+def main(name):
+    client = TraderSelectClient(name).get_client()
 
     market = Market(client=client)
     account = Account(client=client, market=market)
@@ -21,3 +21,5 @@ if __name__ == '__main__':
     print(account.get_total_balance("BTC"))
 
 
+if __name__ == '__main__':
+    main(CLIENT_NAME)

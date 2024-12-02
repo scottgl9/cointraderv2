@@ -97,14 +97,14 @@ class Account(AccountBase):
         """
         return self._client.balance_get(asset)
 
-    def update_asset_balance(self, asset, available: float, hold: float):
+    def update_asset_balance(self, asset: str, available: float, hold: float):
         """
         Update the asset balance
         """
         self._balances[asset] = {'available': available, 'hold': hold}
         return self._client.balance_set(asset, available, hold)
 
-    def load_symbol_info(self):
+    def load_symbol_info(self) -> bool:
         """
         Load the information for all symbols
         """
@@ -118,7 +118,7 @@ class Account(AccountBase):
             self._symbol_info.load()
         return True
 
-    def save_symbol_info(self):
+    def save_symbol_info(self) -> bool:
         """
         Save the information for all symbols to a file
         """
