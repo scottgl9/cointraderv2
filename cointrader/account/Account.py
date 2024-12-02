@@ -1,20 +1,23 @@
 from .AccountBase import AccountBase
 from cointrader.client.TraderClientBase import TraderClientBase
+from cointrader.market.MarketBase import MarketBase
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.common.SymbolInfoConfig import SymbolInfoConfig
 
 class Account(AccountBase):
     _symbol_info = None
-    def __init__(self, client: TraderClientBase, symbol_info=None, logger=None):
-        super().__init__(logger)
+    def __init__(self, client: TraderClientBase, market: MarketBase, symbol_info=None, logger=None):
+        super().__init__(client, market, logger)
         self._name = client.name()
+        self._client = client
+        self._market = market
         if not symbol_info:
             symbol_info = SymbolInfoConfig(client=client, path=f'{self._name}_symbol_info.json')
         self._symbol_info = symbol_info
         self._balances = {}
         self._tickers_info = {}
         self._client = client
-    
+
     def client(self) -> TraderClientBase:
         return self._client
 
@@ -28,9 +31,65 @@ class Account(AccountBase):
         """
         Get the total balance of a currency
         """
+
+        # if currency is for example BTC, we need to first convert it to a stable currency
+        stable_currencies = self._client.info_get_stable_currencies()
+        currency_stable_price = 1.0
+        if currency not in stable_currencies:
+            currency_stable_price = 0.0
+            for stable in stable_currencies:
+                symbol = self._client.info_ticker_join(currency, stable)
+                try:
+                    currency_stable_price = self._market.market_ticker_price_get(ticker=symbol)
+                    break
+                except NotImplementedError:
+                    continue
+
+        if currency_stable_price == 0.0:
+            raise ValueError(f'Currency {currency} not found in {stable_currencies}')
+
         currencies = self._client.info_quote_currencies_list()
         if currency not in currencies:
             raise ValueError(f'Currency {currency} not found in {currencies}')
+        try:
+            prices = self._market.market_ticker_prices_all_get()
+        except NotImplementedError:
+            prices = {}
+            for c in currencies:
+                symbol = self._client.info_ticker_join(c, currency)
+                prices[symbol] = self._market.market_ticker_price_get(ticker=symbol)
+    
+        total_balance = 0.0
+        for asset, (balance, available) in self.get_account_balances().items():
+            total = balance + available
+            if total == 0.0:
+                continue
+
+            if asset == currency:
+                total_balance += total
+                continue
+
+            if currency not in stable_currencies:
+                symbol = self._client.info_ticker_join(asset, currency)
+                if symbol in prices:
+                    total_balance += total * prices[symbol]
+                #else:
+                #    print(symbol)
+            else:
+                # if trade pair exists, just add it to the total
+                symbol = self._client.info_ticker_join(asset, currency)
+                if symbol in prices:
+                    total_balance += total * prices[symbol]
+                else:
+                    # if there is not an existing trade pair, try to convert from an equivalent stable currency
+                    for equivalent in self._client.info_equivalent_stable_currencies():
+                        symbol = self._client.info_ticker_join(asset, equivalent)
+                        if symbol in prices:
+                            print(f'Converting {asset} to {currency} using {equivalent}')
+                            total_balance += total * prices[symbol]
+                            break
+
+        return total_balance
 
     def get_asset_balance(self, asset : str) -> tuple[float, float]:
         """

@@ -5,12 +5,16 @@ from cointrader.order.OrderResult import OrderResult
 
 class CBADVTraderClient(TraderClientBase):
     MAX_CANDLES = 350
+    LIMIT = 250
     def __init__(self, api_key, api_secret, logger=None):
         self._name = "cbadv"
         self.client = RESTClient(api_key=api_key, api_secret=api_secret)
         self.logger = logger
         self._quote_currency_list = ['BTC', 'ETH', 'USDC', 'USD', 'USDT']
-        self._excluded_currency_list = ['EUR', 'GBP']
+        self._excluded_currency_list = ['EUR', 'GBP', 'CDE', 'INTX']
+        self._stable_currency_list = ['USD', 'USDC', 'USDT']
+        self._equivalent_currency_list = self._stable_currency_list
+        self._primary_stable_currency = 'USD'
         self._granularity_mapping = {
             60: 'ONE_MINUTE',
             300: 'FIVE_MINUTE',
@@ -23,10 +27,41 @@ class CBADVTraderClient(TraderClientBase):
     def get_client(self) -> RESTClient:
         return self.client
 
+    def _info_get_products(self):
+        products = []
+        result = self.client.get_products(get_all_products=True).products
+        for product in result:
+            excluded = False
+            for exclude in self._excluded_currency_list:
+                if product.product_id.endswith(f"-{exclude}"):
+                    excluded = True
+                    break
+            if excluded:
+                continue
+            products.append(product)
+        return products
+
+    def _info_get_accounts(self):
+        accounts = self.client.get_accounts(limit=self.LIMIT).accounts
+        for account in accounts:
+            print(account.currency)
+        return accounts
+
+    def info_get_stable_currencies(self) -> list[str]:
+        return self._stable_currency_list
+    
+    def info_primary_stable_currency(self) -> str:
+        """Return primary stable currency"""
+        return self._primary_stable_currency
+
+    def info_equivalent_stable_currencies(self) -> list[str]:
+        """Return equivalent stable currency"""
+        return self._equivalent_currency_list
+
     def info_base_currencies_list(self) -> list[str]:
         """Return list of all base currency names"""
         result = []
-        products = self.client.get_products().products
+        products = self._info_get_products()
         for product in products:
             if product.base_currency_id not in result:
                 result.append(product.base_currency_id)
@@ -42,14 +77,15 @@ class CBADVTraderClient(TraderClientBase):
         Return list of all ticker names
         """
         result = []
-        products = self.client.get_products().products
+        products = self._info_get_products()
         for product in products:
             #  ignored currencies
             if self.info_ticker_get_quote(product.product_id) in self._excluded_currency_list:
                 continue
             result.append(product.product_id)
+
         return result
-   
+
     def info_ticker_join(self, base: str, quote: str) -> str:
         """Create a ticker from base and quote currency names"""
         return f"{base}-{quote}"
@@ -93,7 +129,7 @@ class CBADVTraderClient(TraderClientBase):
     def info_ticker_query_all(self) -> dict[str, SymbolInfo]:
         """Query all tickers"""
         result = {}
-        products = self.client.get_products(limit=250).products
+        products = self._info_get_products()
         for product in products:
             if self.info_ticker_get_quote(product.product_id) in self._excluded_currency_list:
                 continue
@@ -149,7 +185,7 @@ class CBADVTraderClient(TraderClientBase):
     def market_ticker_prices_all_get(self) -> dict:
         """Get all ticker prices"""
         result = {}
-        products = self.client.get_products(limit=250).products
+        products = self._info_get_products()
         for product in products:
             result[product.product_id] = float(product.price)
         return result

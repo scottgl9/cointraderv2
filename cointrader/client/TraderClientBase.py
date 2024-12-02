@@ -12,6 +12,18 @@ class TraderClientBase(object):
         """Return name of client"""
         return self._name
 
+    def info_get_stable_currencies(self) -> list[str]:
+        """Return list of stable currencies"""
+        raise NotImplementedError
+    
+    def info_equivalent_stable_currencies(self) -> list[str]:
+        """Return equivalent stable currencies"""
+        raise NotImplementedError
+    
+    def info_primary_stable_currency(self) -> str:
+        """Return primary stable currency"""
+        raise NotImplementedError
+
     # return list of all base currency names
     def info_base_currencies_list(self) -> list[str]:
         """Return list of all base currency names"""
@@ -97,11 +109,11 @@ class TraderClientBase(object):
         raise NotImplementedError
 
 
-    def market_get_ticker(self, ticker: str) -> dict:
+    def market_ticker_price_get(self, ticker: str) -> dict:
         """Get ticker information"""
         raise NotImplementedError
     
-    def market_get_tickers(self) -> dict:
+    def market_ticker_prices_all_get(self) -> dict:
         """Get all tickers"""
         raise NotImplementedError
 

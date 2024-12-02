@@ -1,10 +1,15 @@
 from cointrader.common.SymbolInfo import SymbolInfo
+from cointrader.market.MarketBase import MarketBase
+from cointrader.client.TraderClientBase import TraderClientBase
 
 class AccountBase(object):
     _logger = None
     _name = None
-
-    def __init__(self, logger=None):
+    _client = None
+    _market = None
+    def __init__(self, client: TraderClientBase, market: MarketBase, logger=None):
+        self._cxlent = client
+        self._market = market
         self.logger = logger
 
     def name(self):
