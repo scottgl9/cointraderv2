@@ -24,5 +24,8 @@ class TraderExecute(ExecuteBase):
     def stop_loss_sell(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
         return self._client.trade_sell_stop_limit(symbol, price, stop_price, amount)
 
-    def status(self, symbol: str, order_id: str) -> OrderResult:
+    def status(self, symbol: str, order_id: str, price: float = 0) -> OrderResult:
         return self._client.trade_get_order(symbol, order_id)
+
+    def cancel(self, symbol: str, order_id: str, price: float = 0) -> OrderResult:
+        return self._client.trade_cancel_order(symbol, order_id)

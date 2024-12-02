@@ -1,6 +1,7 @@
 # TraderClientBase is the base class for all exchange specific implementations
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.order.OrderResult import OrderResult
+from cointrader.order.OrderStopDirection import OrderStopDirection
 
 class TraderClientBase(object):
     _name = None
@@ -154,15 +155,15 @@ class TraderClientBase(object):
         """Sell at a specific price"""
         raise NotImplementedError
     
-    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str) -> dict:
+    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, stop_direction: OrderStopDirection, type: str = "") -> dict:
         """Buy at a specific price when stop price is reached"""
         raise NotImplementedError
     
-    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str) -> dict:
+    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, stop_direction: OrderStopDirection, type: str = "") -> dict:
         """Sell at a specific price when stop price is reached"""
         raise NotImplementedError
 
-    def trade_cancel(self, ticker: str, order_id: str) -> dict:
+    def trade_cancel_order(self, ticker: str, order_id: str) -> dict:
         """Cancel an open order"""
         raise NotImplementedError
     

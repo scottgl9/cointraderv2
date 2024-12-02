@@ -7,12 +7,15 @@ from cointrader.order.OrderStatus import OrderStatus
 from cointrader.order.OrderSide import OrderSide
 from cointrader.order.OrderType import OrderType
 from cointrader.order.OrderLimitType import OrderLimitType
+from cointrader.order.OrderStopDirection import OrderStopDirection
 from cointrader.order.OrderErrorReason import OrderErrorReason
 from datetime import datetime
 
 class CBADVTraderClient(TraderClientBase):
     MAX_CANDLES = 350
     LIMIT = 250
+    STOP_DIRECTION_DOWN = "STOP_DIRECTION_STOP_DOWN"
+    STOP_DIRECTION_UP = "STOP_DIRECTION_STOP_UP"
     def __init__(self, api_key, api_secret, logger=None):
         self._name = "cbadv"
         self.client = RESTClient(api_key=api_key, api_secret=api_secret)
@@ -262,29 +265,45 @@ class CBADVTraderClient(TraderClientBase):
             result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str = "") -> dict:
+    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, stop_direction: OrderStopDirection = OrderStopDirection.ABOVE, type: str = "") -> dict:
         """Buy at a specific price when stop price is reached"""
-        # TODO: implement stop direction
+        if stop_direction == OrderStopDirection.BELOW:
+            direction = self.STOP_DIRECTION_DOWN
+        else:
+            direction = self.STOP_DIRECTION_UP
         try:
-            result = self.client.stop_limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=str(price), stop_price=str(stop_price), base_size=str(amount))
+            result = self.client.stop_limit_order_gtc_buy(client_order_id='',
+                                                          product_id=ticker,
+                                                          limit_price=str(price),
+                                                          stop_price=str(stop_price),
+                                                          stop_direction=direction,
+                                                          base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
             result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, type: str = "") -> dict:
+    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, stop_direction: OrderStopDirection = OrderStopDirection.BELOW, type: str = "") -> dict:
         """Sell at a specific price when stop price is reached"""
-        # TODO: implement stop direction
+        if stop_direction == OrderStopDirection.ABOVE:
+            direction = self.STOP_DIRECTION_UP
+        else:
+            direction = self.STOP_DIRECTION_DOWN
         try:
-            result = self.client.stop_limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=str(price), stop_price=str(stop_price), base_size=str(amount))
+            result = self.client.stop_limit_order_gtc_sell(client_order_id='',
+                                                           product_id=ticker,
+                                                           limit_price=str(price),
+                                                           stop_price=str(stop_price),
+                                                           stop_direction=direction,
+                                                           base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
             result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_cancel(self, ticker: str, order_id: str) -> dict:
+    def trade_cancel_order(self, ticker: str, order_id: str) -> dict:
         """Cancel an open order"""
         try:
             result = self.client.cancel_orders(order_ids=[order_id])
@@ -317,6 +336,9 @@ class CBADVTraderClient(TraderClientBase):
         order_result = OrderResult(symbol=ticker)
         sub_result = None
 
+        if isinstance(result, dict):
+            print(result)
+
         result = result.to_dict()
 
         print(result)
@@ -344,6 +366,14 @@ class CBADVTraderClient(TraderClientBase):
                 order_result.error_reason = OrderErrorReason.NONE
 
                 sub_result = result
+        elif 'results' in result:
+            if len(result['results']) > 1:
+                print("WARNING: Multiple results found (not supported)")
+            r = result['results'][0]
+            if r['success']:
+                order_result.id = r['order_id']
+                if r['failure_reason'] == "UNKNOWN_CANCEL_FAILURE_REASON":
+                    order_result.status = OrderStatus.CANCELLED
         elif 'order' in result:
             sub_result = result['order']
         
@@ -409,20 +439,29 @@ class CBADVTraderClient(TraderClientBase):
                     order_result.error_reason = OrderErrorReason.NONE
                     if 'post_only' in order_configuration[order_type]:
                         order_result.post_only = order_configuration[order_type]['post_only']
-                elif 'stop_limit_gtc' in order_configuration:
-                    order_type = 'stop_limit_gtc'
+                elif 'stop_limit_stop_limit_gtc' in order_configuration:
+                    order_type = 'stop_limit_stop_limit_gtc'
                     order_result.type = OrderType.STOP_LOSS_LIMIT
                     order_result.limit_price = float(order_configuration[order_type]['limit_price'])
                     order_result.size = float(order_configuration[order_type]['base_size'])
+                    order_result.stop_price = float(order_configuration[order_type]['stop_price'])
+                    if order_configuration[order_type]['stop_direction'] == "STOP_DIRECTION_STOP_UP":
+                        order_result.stop_direction = OrderStopDirection.ABOVE
+                    elif order_configuration[order_type]['stop_direction'] == "STOP_DIRECTION_STOP_DOWN":
+                        order_result.stop_direction = OrderStopDirection.BELOW
                     order_result.status = OrderStatus.PLACED
                     order_result.error_reason = OrderErrorReason.NONE
                     if 'post_only' in order_configuration[order_type]:
                         order_result.post_only = order_configuration[order_type]['post_only']
                 else:
                     order_result.type = OrderType.UNKNOWN
-                
+
                 if 'status' in sub_result:
                     if sub_result['status'] == 'FILLED':
                         order_result.status = OrderStatus.FILLED
+                    elif sub_result['status'] == 'CANCELLED':
+                        order_result.status = OrderStatus.CANCELLED
+                    elif sub_result['status'] == 'CANCEL_QUEUED':
+                        order_result.status = OrderStatus.CANCELLED
 
         return order_result

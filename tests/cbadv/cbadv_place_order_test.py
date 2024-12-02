@@ -3,6 +3,7 @@ import pprint
 #sys.path.append('./tests')
 sys.path.append('.')
 from cointrader.client.TraderSelectClient import TraderSelectClient
+from cointrader.order.OrderResult import OrderResult
 
 CLIENT_NAME = "cbadv"
 
@@ -28,8 +29,30 @@ if __name__ == '__main__':
     #result = client.trade_buy_market("BTC-USD", 0.0001)
     #print(str(result))
 
-    result = client.trade_get_order("BTC-USD", "7a984742-b2cb-41c5-b8b4-dd3f1144fe07")
+    #result = client.trade_get_order("BTC-USD", "7a984742-b2cb-41c5-b8b4-dd3f1144fe07")
+    #print(str(result))
+
+    # {'success': True, 'response': {'order_id': '7a984742-b2cb-41c5-b8b4-dd3f1144fe07', 'product_id': 'BTC-USD', 'side': 'BUY', 'client_order_id': 'c5312526dced49a39859fafbbc64c066', 'attached_order_id': ''}, 'order_configuration': {'limit_limit_gtc': {'base_size': '0.0001', 'limit_price': '10000', 'post_only': False, 'rfq_disabled': False}}}
+    #buy_result = client.trade_buy_limit("BTC-USD", 0.0001, 10000)
+    #print(str(buy_result))
+
+    #print("Cancelling order with id {}".format(buy_result.id))
+    #result = client.trade_cancel("BTC-USD", buy_result.id)
+    #print(str(result))
+
+    # {'success': True, 'response': {'order_id': '630939ab-6105-4062-b44a-342bcee33800', 'product_id': 'BTC-USD', 'side': 'BUY', 'client_order_id': '39bec75543d64aaf94d3dc3feeb24972', 'attached_order_id': ''}, 'order_configuration': {'stop_limit_stop_limit_gtc': {'base_size': '5e-05', 'limit_price': '200001', 'stop_price': '200000', 'stop_direction': 'STOP_DIRECTION_STOP_UP'}}}
+    stop_result = client.trade_buy_stop_limit("BTC-USD", amount=0.00005, price=200001, stop_price=200000)
+    print(str(stop_result))
+    print(stop_result.id)
+
+    print("Order Status")
+    result = client.trade_get_order("BTC-USD", stop_result.id)
     print(str(result))
 
-    #result = client.trade_buy_limit("BTC-USD", 0.0001, 10000)
-    #print(str(result))
+    print(f"Cancel order {stop_result.id}")
+    result = client.trade_cancel_order("BTC-USD", stop_result.id)
+    print(str(result))
+
+    print("Order Status")
+    result = client.trade_get_order("BTC-USD", stop_result.id)
+    print(str(result))

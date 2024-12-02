@@ -78,5 +78,8 @@ class TraderExecuteSimulate(ExecuteBase):
         result.filled_size = 0.0
         return result
 
-    def status(self, symbol: str, order_id: str) -> OrderResult:
+    def status(self, symbol: str, order_id: str, price: float) -> OrderResult:
+        raise NotImplementedError
+
+    def cancel(self, symbol: str, order_id: str, price: float) -> OrderResult:
         raise NotImplementedError

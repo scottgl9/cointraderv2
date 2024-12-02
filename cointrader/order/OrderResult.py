@@ -4,6 +4,7 @@ from .OrderType import OrderType
 from .OrderSide import OrderSide
 from .OrderStatus import OrderStatus
 from .OrderLimitType import OrderLimitType
+from .OrderStopDirection import OrderStopDirection
 from .OrderErrorReason import OrderErrorReason
 
 class OrderResult(object):
@@ -16,6 +17,7 @@ class OrderResult(object):
         self.price = 0.0
         self.limit_price = 0.0
         self.stop_price = 0.0
+        self.stop_direction = OrderStopDirection.UNKNOWN
         self.size = 0.0
         self.filled_size = 0.0
         self.fee = 0.0
@@ -36,6 +38,7 @@ class OrderResult(object):
         self.price = data['price']
         self.limit_price = data['limit_price']
         self.stop_price = data['stop_price']
+        self.stop_direction = OrderStopDirection(data['stop_direction'])
         self.size = data['size']
         self.filled_size = data['filled_size']
         self.fee = data['fee']
@@ -57,6 +60,7 @@ class OrderResult(object):
             'price': self.price,
             'limit_price': self.limit_price,
             'stop_price': self.stop_price,
+            'stop_direction': self.stop_direction.name,
             'size': self.size,
             'filled_size': self.filled_size,
             'fee': self.fee,

@@ -7,7 +7,7 @@ class OrderStatus(Enum):
     PLACED = 2
     PARTIALLY_FILLED = 3
     FILLED = 4
-    CANCELED = 5
+    CANCELLED = 5
     PENDING_CANCEL = 6
     REJECTED = 7
     EXPIRED = 8
