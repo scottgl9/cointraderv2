@@ -1,6 +1,6 @@
 # Implement simulate trading execution for backtesting
 from cointrader.client.TraderClientBase import TraderClientBase
-from cointrader.base.ExecuteBase import ExecuteBase
+from .ExecuteBase import ExecuteBase
 from cointrader.order.OrderResult import OrderResult
 from cointrader.order.Order import OrderStatus, OrderType, OrderSide
 import uuid

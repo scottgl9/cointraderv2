@@ -1,7 +1,7 @@
 from .Trader import Trader
 from .TraderConfig import TraderConfig
 from cointrader.execute.TradeExecute import TraderExecute
-from cointrader.Account import Account
+from cointrader.account.Account import Account
 
 class MultiTrader(object):
     def __init__(self, account: Account, config: TraderConfig):

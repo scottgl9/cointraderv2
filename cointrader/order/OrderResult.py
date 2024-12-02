@@ -1,5 +1,7 @@
 # This file contains the OrderResult class which is used to store the result of an order request.
-from .Order import OrderStatus, OrderType, OrderSide
+from .OrderType import OrderType
+from .OrderSide import OrderSide
+from .OrderStatus import OrderStatus
 
 class OrderResult(object):
     def __init__(self, symbol: str):

@@ -2,9 +2,9 @@
 # Trader only operates on a designated symbol
 from cointrader.common.Kline import Kline
 from cointrader.common.Strategy import Strategy
-from cointrader.Account import Account
+from cointrader.account.Account import Account
 from .TraderConfig import TraderConfig
-from cointrader.base.ExecuteBase import ExecuteBase
+from cointrader.execute.ExecuteBase import ExecuteBase
 from .TraderPosition import TraderPosition
 import importlib
 

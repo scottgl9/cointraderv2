@@ -1,4 +1,4 @@
-from cointrader.base.AccountBase import AccountBase
+from .AccountBase import AccountBase
 from cointrader.client.TraderClientBase import TraderClientBase
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.common.SymbolInfoConfig import SymbolInfoConfig

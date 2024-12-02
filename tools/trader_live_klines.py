@@ -15,7 +15,7 @@ except ImportError:
 import pandas as pd
 
 from cointrader.client.TraderSelectClient import TraderSelectClient
-from cointrader.Account import Account
+from cointrader.account.Account import Account
 from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
 from cointrader.common.Kline import Kline

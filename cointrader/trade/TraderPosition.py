@@ -2,7 +2,7 @@ from cointrader.common.Strategy import Strategy
 from cointrader.common.Kline import Kline
 from cointrader.order.Order import Order, OrderSide, OrderType, OrderStatus
 from cointrader.order.Orders import Orders
-from cointrader.base.ExecuteBase import ExecuteBase
+from cointrader.execute.ExecuteBase import ExecuteBase
 from .TraderConfig import TraderConfig
 
 class TraderPosition(object):

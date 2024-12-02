@@ -1,30 +1,9 @@
 # Description: Order class for representing an order
 from enum import Enum
 from .OrderResult import OrderResult
-
-class OrderStatus(Enum):
-    UNKNOWN = 0
-    NEW = 1
-    PLACED = 2
-    PARTIALLY_FILLED = 3
-    FILLED = 4
-    CANCELED = 5
-    PENDING_CANCEL = 6
-    REJECTED = 7
-    EXPIRED = 8
-
-class OrderType(Enum):
-    UNKNOWN = 0
-    LIMIT = 1
-    MARKET = 2
-    STOP_LOSS = 3
-    STOP_LOSS_LIMIT = 4
-    TAKE_PROFIT = 5
-
-class OrderSide(Enum):
-    UNKNOWN = 0
-    BUY = 1
-    SELL = 2
+from .OrderSide import OrderSide
+from .OrderType import OrderType
+from .OrderStatus import OrderStatus
 
 class Order(object):
     def __init__(self, symbol: str, order_id: str, type: OrderType, side: OrderSide, price: float, limit_price: float, size: float, timestamp: int):

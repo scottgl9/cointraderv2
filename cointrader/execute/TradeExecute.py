@@ -1,5 +1,5 @@
 from cointrader.client.TraderClientBase import TraderClientBase
-from cointrader.base.ExecuteBase import ExecuteBase
+from .ExecuteBase import ExecuteBase
 
 class TraderExecute(ExecuteBase):
     def __init__(self, client: TraderClientBase):

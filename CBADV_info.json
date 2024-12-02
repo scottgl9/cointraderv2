@@ -1,0 +1,2450 @@
+{
+    "pairs": {
+        "AAVE-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "AAVE-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "ACH-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.000001",
+            "base_precision": 1,
+            "currency_precision": 6
+        },
+        "ACH-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.000001",
+            "base_precision": 1,
+            "currency_precision": 6
+        },
+        "ADA-EUR": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "ADA-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.0001",
+            "base_precision": 8,
+            "currency_precision": 4
+        },
+        "ADA-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.0001",
+            "base_precision": 8,
+            "currency_precision": 4
+        },
+        "ADA-USDT": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "AERO-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.00001",
+            "base_precision": 1,
+            "currency_precision": 5
+        },
+        "AERO-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.00001",
+            "base_precision": 1,
+            "currency_precision": 5
+        },
+        "AIOZ-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "AIOZ-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "AKT-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "AKT-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "ALGO-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "ALGO-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "AMP-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "AMP-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "ANKR-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "ANKR-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "APE-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "APE-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "APT-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "APT-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "ARB-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "ARB-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "ATOM-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "ATOM-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "AVAX-EUR": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "AVAX-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "AVAX-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "AVAX-USDT": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "AXL-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "AXL-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "AXS-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "AXS-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "BAT-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "BAT-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "BCH-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "BCH-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "BIGTIME-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "BIGTIME-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "BLAST-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "BLAST-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "BLUR-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "BLUR-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "BOBA-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "BOBA-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "BONK-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00000001",
+            "base_precision": 0,
+            "currency_precision": 8
+        },
+        "BONK-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00000001",
+            "base_precision": 0,
+            "currency_precision": 8
+        },
+        "BTC-EUR": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "BTC-GBP": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "BTC-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "BTC-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "BTC-USDT": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "CLV-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "CLV-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "COMP-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "COMP-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "COTI-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "COTI-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "CRO-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "CRO-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "CRV-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "CRV-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "CVX-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "CVX-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "DAI-USD": {
+            "min_qty": "0.00001",
+            "min_price": "1",
+            "base_step_size": "0.00001",
+            "currency_step_size": "0.0001",
+            "base_precision": 5,
+            "currency_precision": 4
+        },
+        "DAI-USDC": {
+            "min_qty": "0.00001",
+            "min_price": "1",
+            "base_step_size": "0.00001",
+            "currency_step_size": "0.0001",
+            "base_precision": 5,
+            "currency_precision": 4
+        },
+        "DEGEN-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.000001",
+            "base_precision": 0,
+            "currency_precision": 6
+        },
+        "DEGEN-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.000001",
+            "base_precision": 0,
+            "currency_precision": 6
+        },
+        "DOGE-EUR": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "DOGE-GBP": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "DOGE-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.00001",
+            "base_precision": 1,
+            "currency_precision": 5
+        },
+        "DOGE-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.00001",
+            "base_precision": 1,
+            "currency_precision": 5
+        },
+        "DOGE-USDT": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "DOT-EUR": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "DOT-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.001",
+            "base_precision": 8,
+            "currency_precision": 3
+        },
+        "DOT-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.001",
+            "base_precision": 8,
+            "currency_precision": 3
+        },
+        "EIGEN-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "EIGEN-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "ENS-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "ENS-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "EOS-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "EOS-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "ETC-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "ETC-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "ETH-DAI": {
+            "min_qty": "0.0001",
+            "min_price": "1",
+            "base_step_size": "0.0001",
+            "currency_step_size": "0.01",
+            "base_precision": 4,
+            "currency_precision": 2
+        },
+        "ETH-EUR": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "ETH-GBP": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "ETH-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "ETH-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "ETH-USDT": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "EURC-USDC": {
+            "min_qty": "1",
+            "min_price": "2",
+            "base_step_size": "1",
+            "currency_step_size": "0.0001",
+            "base_precision": 0,
+            "currency_precision": 4
+        },
+        "FET-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "FET-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "FIL-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "FIL-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "FLOKI-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.0000001",
+            "base_precision": 0,
+            "currency_precision": 7
+        },
+        "FLOKI-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.0000001",
+            "base_precision": 0,
+            "currency_precision": 7
+        },
+        "FLR-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "FLR-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "GLM-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "GLM-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "GRT-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "GRT-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "HBAR-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.00001",
+            "base_precision": 1,
+            "currency_precision": 5
+        },
+        "HBAR-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.00001",
+            "base_precision": 1,
+            "currency_precision": 5
+        },
+        "HNT-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "HNT-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "ICP-USD": {
+            "min_qty": "0.0001",
+            "min_price": "1",
+            "base_step_size": "0.0001",
+            "currency_step_size": "0.001",
+            "base_precision": 4,
+            "currency_precision": 3
+        },
+        "ICP-USDC": {
+            "min_qty": "0.0001",
+            "min_price": "1",
+            "base_step_size": "0.0001",
+            "currency_step_size": "0.001",
+            "base_precision": 4,
+            "currency_precision": 3
+        },
+        "ILV-USD": {
+            "min_qty": "0.0001",
+            "min_price": "1",
+            "base_step_size": "0.0001",
+            "currency_step_size": "0.01",
+            "base_precision": 4,
+            "currency_precision": 2
+        },
+        "ILV-USDC": {
+            "min_qty": "0.0001",
+            "min_price": "1",
+            "base_step_size": "0.0001",
+            "currency_step_size": "0.01",
+            "base_precision": 4,
+            "currency_precision": 2
+        },
+        "IMX-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "IMX-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "INJ-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "INJ-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "JASMY-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "JASMY-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "JTO-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "JTO-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "KSM-USD": {
+            "min_qty": "0.0001",
+            "min_price": "1",
+            "base_step_size": "0.0001",
+            "currency_step_size": "0.01",
+            "base_precision": 4,
+            "currency_precision": 2
+        },
+        "KSM-USDC": {
+            "min_qty": "0.0001",
+            "min_price": "1",
+            "base_step_size": "0.0001",
+            "currency_step_size": "0.01",
+            "base_precision": 4,
+            "currency_precision": 2
+        },
+        "LCX-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "LCX-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "LDO-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "LDO-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "LINK-EUR": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.01",
+            "base_precision": 2,
+            "currency_precision": 2
+        },
+        "LINK-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "LINK-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "LINK-USDT": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "LRC-USD": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.0001",
+            "base_precision": 6,
+            "currency_precision": 4
+        },
+        "LRC-USDC": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.0001",
+            "base_precision": 6,
+            "currency_precision": 4
+        },
+        "LTC-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "LTC-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "MANA-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "MANA-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "MATIC-EUR": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "MATIC-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "MATIC-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "MEDIA-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "MEDIA-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "METIS-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "METIS-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "MINA-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "MINA-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "MKR-USD": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.01",
+            "base_precision": 6,
+            "currency_precision": 2
+        },
+        "MKR-USDC": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.01",
+            "base_precision": 6,
+            "currency_precision": 2
+        },
+        "MUSE-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "MUSE-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "NEAR-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "NEAR-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "ONDO-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "ONDO-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "OP-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "OP-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "OP-USDT": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "OXT-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.0001",
+            "base_precision": 0,
+            "currency_precision": 4
+        },
+        "OXT-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.0001",
+            "base_precision": 0,
+            "currency_precision": 4
+        },
+        "PEPE-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00000001",
+            "base_precision": 0,
+            "currency_precision": 8
+        },
+        "PEPE-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00000001",
+            "base_precision": 0,
+            "currency_precision": 8
+        },
+        "POL-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "POL-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "PRIME-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "PRIME-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "PYR-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "PYR-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "QNT-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "QNT-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "RBN-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "RBN-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "RENDER-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "RENDER-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "RNDR-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "RNDR-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "ROSE-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.00001",
+            "base_precision": 1,
+            "currency_precision": 5
+        },
+        "ROSE-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.00001",
+            "base_precision": 1,
+            "currency_precision": 5
+        },
+        "SAND-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "SAND-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "SAND-USDT": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "SEI-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "SEI-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "SHIB-EUR": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00000001",
+            "base_precision": 0,
+            "currency_precision": 8
+        },
+        "SHIB-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00000001",
+            "base_precision": 0,
+            "currency_precision": 8
+        },
+        "SHIB-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00000001",
+            "base_precision": 0,
+            "currency_precision": 8
+        },
+        "SKL-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "SKL-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "SNX-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "SNX-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.001",
+            "base_precision": 3,
+            "currency_precision": 3
+        },
+        "SOL-EUR": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "SOL-GBP": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "SOL-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "SOL-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.01",
+            "base_precision": 8,
+            "currency_precision": 2
+        },
+        "SOL-USDT": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "STORJ-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "STORJ-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "STRK-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "STRK-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "STX-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "STX-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "SUI-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "SUI-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "SUKU-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "SUKU-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "SUPER-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "SUPER-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "SUSHI-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "SUSHI-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "SWELL-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "SWELL-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "SYN-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "SYN-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "TIA-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "TIA-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "TRB-USD": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "TRB-USDC": {
+            "min_qty": "0.001",
+            "min_price": "1",
+            "base_step_size": "0.001",
+            "currency_step_size": "0.01",
+            "base_precision": 3,
+            "currency_precision": 2
+        },
+        "TRU-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "TRU-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "UNI-USD": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.001",
+            "base_precision": 6,
+            "currency_precision": 3
+        },
+        "UNI-USDC": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.001",
+            "base_precision": 6,
+            "currency_precision": 3
+        },
+        "USDC-EUR": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "USDC-GBP": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "USDT-EUR": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "USDT-GBP": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "USDT-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.00001",
+            "base_precision": 2,
+            "currency_precision": 5
+        },
+        "USDT-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.0001",
+            "base_precision": 2,
+            "currency_precision": 4
+        },
+        "VET-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "VET-USDC": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.00001",
+            "base_precision": 0,
+            "currency_precision": 5
+        },
+        "WELL-USD": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.000001",
+            "base_precision": 0,
+            "currency_precision": 6
+        },
+        "WIF-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "WIF-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "XLM-EUR": {
+            "min_qty": "1",
+            "min_price": "1",
+            "base_step_size": "1",
+            "currency_step_size": "0.000001",
+            "base_precision": 0,
+            "currency_precision": 6
+        },
+        "XLM-USD": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.000001",
+            "base_precision": 8,
+            "currency_precision": 6
+        },
+        "XLM-USDC": {
+            "min_qty": "0.00000001",
+            "min_price": "1",
+            "base_step_size": "0.00000001",
+            "currency_step_size": "0.000001",
+            "base_precision": 8,
+            "currency_precision": 6
+        },
+        "XLM-USDT": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "XRP-EUR": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.0001",
+            "base_precision": 6,
+            "currency_precision": 4
+        },
+        "XRP-USD": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.0001",
+            "base_precision": 6,
+            "currency_precision": 4
+        },
+        "XRP-USDC": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.0001",
+            "base_precision": 6,
+            "currency_precision": 4
+        },
+        "XRP-USDT": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.0001",
+            "base_precision": 6,
+            "currency_precision": 4
+        },
+        "XTZ-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "XTZ-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "YFI-USD": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.01",
+            "base_precision": 6,
+            "currency_precision": 2
+        },
+        "YFI-USDC": {
+            "min_qty": "0.000001",
+            "min_price": "1",
+            "base_step_size": "0.000001",
+            "currency_step_size": "0.01",
+            "base_precision": 6,
+            "currency_precision": 2
+        },
+        "ZETA-USD": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "ZETA-USDC": {
+            "min_qty": "0.1",
+            "min_price": "1",
+            "base_step_size": "0.1",
+            "currency_step_size": "0.0001",
+            "base_precision": 1,
+            "currency_precision": 4
+        },
+        "ZRO-USD": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "ZRO-USDC": {
+            "min_qty": "0.01",
+            "min_price": "1",
+            "base_step_size": "0.01",
+            "currency_step_size": "0.001",
+            "base_precision": 2,
+            "currency_precision": 3
+        },
+        "ZRX-USD": {
+            "min_qty": "0.00001",
+            "min_price": "1",
+            "base_step_size": "0.00001",
+            "currency_step_size": "0.000001",
+            "base_precision": 5,
+            "currency_precision": 6
+        },
+        "ZRX-USDC": {
+            "min_qty": "0.00001",
+            "min_price": "1",
+            "base_step_size": "0.00001",
+            "currency_step_size": "0.000001",
+            "base_precision": 5,
+            "currency_precision": 6
+        }
+    },
+    "assets": {
+        "AAVE": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ACH": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ADA": {
+            "disabled": false,
+            "delisted": false
+        },
+        "AERO": {
+            "disabled": false,
+            "delisted": false
+        },
+        "AIOZ": {
+            "disabled": false,
+            "delisted": false
+        },
+        "AKT": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ALGO": {
+            "disabled": false,
+            "delisted": false
+        },
+        "AMP": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ANKR": {
+            "disabled": false,
+            "delisted": false
+        },
+        "APE": {
+            "disabled": false,
+            "delisted": false
+        },
+        "APT": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ARB": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ATOM": {
+            "disabled": false,
+            "delisted": false
+        },
+        "AVAX": {
+            "disabled": false,
+            "delisted": false
+        },
+        "AXL": {
+            "disabled": false,
+            "delisted": false
+        },
+        "AXS": {
+            "disabled": false,
+            "delisted": false
+        },
+        "BAT": {
+            "disabled": false,
+            "delisted": false
+        },
+        "BCH": {
+            "disabled": false,
+            "delisted": false
+        },
+        "BIGTIME": {
+            "disabled": false,
+            "delisted": false
+        },
+        "BLAST": {
+            "disabled": false,
+            "delisted": false
+        },
+        "BLUR": {
+            "disabled": false,
+            "delisted": false
+        },
+        "BOBA": {
+            "disabled": false,
+            "delisted": false
+        },
+        "BONK": {
+            "disabled": false,
+            "delisted": false
+        },
+        "BTC": {
+            "disabled": false,
+            "delisted": false
+        },
+        "CLV": {
+            "disabled": false,
+            "delisted": false
+        },
+        "COMP": {
+            "disabled": false,
+            "delisted": false
+        },
+        "COTI": {
+            "disabled": false,
+            "delisted": false
+        },
+        "CRO": {
+            "disabled": false,
+            "delisted": false
+        },
+        "CRV": {
+            "disabled": false,
+            "delisted": false
+        },
+        "CVX": {
+            "disabled": false,
+            "delisted": false
+        },
+        "DAI": {
+            "disabled": false,
+            "delisted": false
+        },
+        "DEGEN": {
+            "disabled": false,
+            "delisted": false
+        },
+        "DOGE": {
+            "disabled": false,
+            "delisted": false
+        },
+        "DOT": {
+            "disabled": false,
+            "delisted": false
+        },
+        "EIGEN": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ENS": {
+            "disabled": false,
+            "delisted": false
+        },
+        "EOS": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ETC": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ETH": {
+            "disabled": false,
+            "delisted": false
+        },
+        "EURC": {
+            "disabled": false,
+            "delisted": false
+        },
+        "FET": {
+            "disabled": false,
+            "delisted": false
+        },
+        "FIL": {
+            "disabled": false,
+            "delisted": false
+        },
+        "FLOKI": {
+            "disabled": false,
+            "delisted": false
+        },
+        "FLR": {
+            "disabled": false,
+            "delisted": false
+        },
+        "GLM": {
+            "disabled": false,
+            "delisted": false
+        },
+        "GRT": {
+            "disabled": false,
+            "delisted": false
+        },
+        "HBAR": {
+            "disabled": false,
+            "delisted": false
+        },
+        "HNT": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ICP": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ILV": {
+            "disabled": false,
+            "delisted": false
+        },
+        "IMX": {
+            "disabled": false,
+            "delisted": false
+        },
+        "INJ": {
+            "disabled": false,
+            "delisted": false
+        },
+        "JASMY": {
+            "disabled": false,
+            "delisted": false
+        },
+        "JTO": {
+            "disabled": false,
+            "delisted": false
+        },
+        "KSM": {
+            "disabled": false,
+            "delisted": false
+        },
+        "LCX": {
+            "disabled": false,
+            "delisted": false
+        },
+        "LDO": {
+            "disabled": false,
+            "delisted": false
+        },
+        "LINK": {
+            "disabled": false,
+            "delisted": false
+        },
+        "LRC": {
+            "disabled": false,
+            "delisted": false
+        },
+        "LTC": {
+            "disabled": false,
+            "delisted": false
+        },
+        "MANA": {
+            "disabled": false,
+            "delisted": false
+        },
+        "MATIC": {
+            "disabled": false,
+            "delisted": false
+        },
+        "MEDIA": {
+            "disabled": false,
+            "delisted": false
+        },
+        "METIS": {
+            "disabled": false,
+            "delisted": false
+        },
+        "MINA": {
+            "disabled": false,
+            "delisted": false
+        },
+        "MKR": {
+            "disabled": false,
+            "delisted": false
+        },
+        "MUSE": {
+            "disabled": false,
+            "delisted": false
+        },
+        "NEAR": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ONDO": {
+            "disabled": false,
+            "delisted": false
+        },
+        "OP": {
+            "disabled": false,
+            "delisted": false
+        },
+        "OXT": {
+            "disabled": false,
+            "delisted": false
+        },
+        "PEPE": {
+            "disabled": false,
+            "delisted": false
+        },
+        "POL": {
+            "disabled": false,
+            "delisted": false
+        },
+        "PRIME": {
+            "disabled": false,
+            "delisted": false
+        },
+        "PYR": {
+            "disabled": false,
+            "delisted": false
+        },
+        "QNT": {
+            "disabled": false,
+            "delisted": false
+        },
+        "RBN": {
+            "disabled": false,
+            "delisted": false
+        },
+        "RENDER": {
+            "disabled": false,
+            "delisted": false
+        },
+        "RNDR": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ROSE": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SAND": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SEI": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SHIB": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SKL": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SNX": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SOL": {
+            "disabled": false,
+            "delisted": false
+        },
+        "STORJ": {
+            "disabled": false,
+            "delisted": false
+        },
+        "STRK": {
+            "disabled": false,
+            "delisted": false
+        },
+        "STX": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SUI": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SUKU": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SUPER": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SUSHI": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SWELL": {
+            "disabled": false,
+            "delisted": false
+        },
+        "SYN": {
+            "disabled": false,
+            "delisted": false
+        },
+        "TIA": {
+            "disabled": false,
+            "delisted": false
+        },
+        "TRB": {
+            "disabled": false,
+            "delisted": false
+        },
+        "TRU": {
+            "disabled": false,
+            "delisted": false
+        },
+        "UNI": {
+            "disabled": false,
+            "delisted": false
+        },
+        "USDC": {
+            "disabled": false,
+            "delisted": false
+        },
+        "USDT": {
+            "disabled": false,
+            "delisted": false
+        },
+        "VET": {
+            "disabled": false,
+            "delisted": false
+        },
+        "WELL": {
+            "disabled": false,
+            "delisted": false
+        },
+        "WIF": {
+            "disabled": false,
+            "delisted": false
+        },
+        "XLM": {
+            "disabled": false,
+            "delisted": false
+        },
+        "XRP": {
+            "disabled": false,
+            "delisted": false
+        },
+        "XTZ": {
+            "disabled": false,
+            "delisted": false
+        },
+        "YFI": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ZETA": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ZRO": {
+            "disabled": false,
+            "delisted": false
+        },
+        "ZRX": {
+            "disabled": false,
+            "delisted": false
+        }
+    }
+}

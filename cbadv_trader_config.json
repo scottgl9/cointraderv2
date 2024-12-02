@@ -1,0 +1,20 @@
+{
+    "max_positions": 1,
+    "quote_currency": "USD",
+    "max_position_quote_size": 25.0,
+    "strategy": "Default",
+    "trade_symbols": [
+        "BTC-USD",
+        "ETH-USD",
+        "SOL-USD"
+    ],
+    "stop_loss_percent": 5.0,
+    "trailing_stop_loss": false,
+    "min_take_profit_percent": 5.0,
+    "stop_on_loss": true,
+    "max_total_loss_percent": 10.0,
+    "cooldown_period_seconds": 60,
+    "start_position_type": "market",
+    "end_position_type": "market",
+    "sell_all_on_stop": false
+}
