@@ -4,14 +4,22 @@ from cointrader.common.Kline import Kline
 class MarketStorage:
     def __init__(self, db_path='market_data.db'):
         self.connection = sqlite3.connect(db_path)
-        self.create_table()
 
-    def create_table(self):
+    def table_name(self, symbol):
+        return symbol.replace('-', '_') + '_klines'
+
+    def table_exists(self, symbol):
+        cursor = self.connection.cursor()
+        cursor.execute(f'''
+            SELECT name FROM sqlite_master WHERE type='table' AND name='{self.table_name(symbol)}'
+        ''')
+        return cursor.fetchone() is not None
+
+    def create_table(self, symbol):
         with self.connection:
-            self.connection.execute('''
-                CREATE TABLE IF NOT EXISTS klines (
+            self.connection.execute(f'''
+                CREATE TABLE IF NOT EXISTS {self.table_name(symbol)} (
                     id INTEGER PRIMARY KEY,
-                    symbol TEXT NOT NULL,
                     open REAL NOT NULL,
                     high REAL NOT NULL,
                     low REAL NOT NULL,
@@ -21,33 +29,58 @@ class MarketStorage:
                 )
             ''')
 
+    def kline_exists(self, symbol, ts):
+        """
+        Check if a kline exists in the database
+        """
+        cursor = self.connection.cursor()
+        cursor.execute(f'SELECT 1 FROM {self.table_name(symbol)} WHERE ts = ?', (ts,))
+        return cursor.fetchone() is not None
+
     def store_kline(self, symbol, kline: Kline):
+        """
+        Store a kline in the database
+        """
+        self.create_table(symbol)
         with self.connection:
-            self.connection.execute('''
-                INSERT INTO klines (symbol, open, high, low, close, volume, ts)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (symbol, kline.open, kline.high, kline.low, kline.close, kline.volume, kline.ts))
+            self.connection.execute(f'''
+                INSERT INTO {self.table_name(symbol)} (open, high, low, close, volume, ts)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (kline.open, kline.high, kline.low, kline.close, kline.volume, kline.ts))
 
     def store_kline(self, symbol, open, high, low, close, volume, ts):
+        """
+        Store a kline in the database
+        """
+        self.create_table(symbol)
         with self.connection:
-            self.connection.execute('''
-                INSERT INTO klines (symbol, open, high, low, close, volume, ts)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (symbol, open, high, low, close, volume, ts))
+            self.connection.execute(f'''
+                INSERT INTO {self.table_name(symbol)} (open, high, low, close, volume, ts)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (open, high, low, close, volume, ts))
 
     def get_kline(self, symbol, ts):
+        """
+        Get a kline from the database
+        """
         cursor = self.connection.cursor()
-        cursor.execute('SELECT * FROM klines WHERE symbol = ? AND ts = ?', (symbol, ts))
+        cursor.execute(f'SELECT * FROM {self.table_name(symbol)} WHERE ts = ?', (ts,))
         return cursor.fetchone()
 
     def get_klines(self, symbol):
+        """
+        Get all klines for a symbol from the database with the given symbol
+        """
         cursor = self.connection.cursor()
-        cursor.execute('SELECT * FROM klines WHERE symbol = ?', (symbol,))
+        cursor.execute(f'SELECT * FROM {self.table_name(symbol)}')
         return cursor.fetchall()
     
     def get_klines_range(self, symbol, start_ts, end_ts):
+        """
+        Get all klines for a symbol from the database in the specified range with the given symbol
+        """
         cursor = self.connection.cursor()
-        cursor.execute('SELECT * FROM klines WHERE symbol = ? AND ts >= ? AND ts <= ?', (symbol, start_ts, end_ts))
+        cursor.execute(f'SELECT * FROM {self.table_name(symbol)} WHERE ts >= ? AND ts <= ?', (start_ts, end_ts))
         return cursor.fetchall()
 
     def close(self):

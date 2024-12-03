@@ -18,6 +18,18 @@ class AccountBase(object):
     def exchange(self):
         raise NotImplementedError
 
+    def round_base(self, symbol: str, amount: float) -> float:
+        """
+        Round the amount to the base precision
+        """
+        raise NotImplementedError
+
+    def round_quote(self, symbol: str, amount: float) -> float:
+        """
+        Round the amount to the quote precision
+        """
+        raise NotImplementedError
+
     def get_account_balances(self) -> dict:
         raise NotImplementedError
 

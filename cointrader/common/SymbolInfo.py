@@ -18,7 +18,6 @@ class SymbolInfo(object):
         self.initialized = False
 
     def load_from_dict(self, data):
-        print(data)
         self.base_name = data['base_name']
         self.quote_name = data['quote_name']
         self.base_min_size = data['base_min_size']

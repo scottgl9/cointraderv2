@@ -14,7 +14,12 @@ def main(name):
     account = Account(exchange=exchange, market=market)
     account.load_symbol_info()
 
-    print(f"Acccount balances: {account.get_account_balances()}")
+    print(f"Acccount balances:")
+    balances = account.get_account_balances()
+    for currency, (balance, hold) in balances.items():
+        total = balance + hold
+        if total > 0.0:
+            print(f"{currency}: {total}")
     print("Total USD Balance:")
     print(account.get_total_balance("USD"))
     print("Total BTC Balance:")

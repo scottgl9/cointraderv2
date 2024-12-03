@@ -28,11 +28,15 @@ class TraderExecuteSimulate(ExecuteBase):
 
         # Update base balance
         base_balance, base_balance_hold = self._account.get_asset_balance(base)
-        self._account.update_asset_balance(base, base_balance + amount, base_balance_hold)
+        new_base_balance = self._account.round_base(symbol, base_balance + amount)
+        self._account.update_asset_balance(base, new_base_balance, base_balance_hold)
         
         # Update quote balance
         quote_balance, quote_balance_hold = self._account.get_asset_balance(quote)
-        self._account.update_asset_balance(quote, quote_balance - price * amount, quote_balance_hold)
+        new_quote_balance = self._account.round_quote(symbol, quote_balance - price * amount)
+        if new_quote_balance < 0:
+            raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
+        self._account.update_asset_balance(quote, new_quote_balance, quote_balance_hold)
 
         self._orders[result.id] = result
         return result
@@ -53,11 +57,15 @@ class TraderExecuteSimulate(ExecuteBase):
 
         # Update base balance
         base_balance, base_balance_hold = self._account.get_asset_balance(base)
-        self._account.update_asset_balance(base, base_balance - amount, base_balance_hold)
-        
+        new_base_balance = self._account.round_base(symbol, base_balance - amount)
+        if new_base_balance < 0:
+            raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
+        self._account.update_asset_balance(base, new_base_balance, base_balance_hold)
+
         # Update quote balance
         quote_balance, quote_balance_hold = self._account.get_asset_balance(quote)
-        self._account.update_asset_balance(quote, quote_balance + price * amount, quote_balance_hold)
+        new_quote_balance = self._account.round_quote(symbol, quote_balance + price * amount)
+        self._account.update_asset_balance(quote, new_quote_balance, quote_balance_hold)
 
         self._orders[result.id] = result
         return result
