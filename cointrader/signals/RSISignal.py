@@ -11,6 +11,12 @@ class RSISignal(Signal):
     def update(self, kline):
         return self.rsi.update(kline)
 
+    def increasing(self):
+        return self.rsi.increasing()
+    
+    def decreasing(self):
+        return self.rsi.decreasing()
+
     def cross_up(self):
         return False
     

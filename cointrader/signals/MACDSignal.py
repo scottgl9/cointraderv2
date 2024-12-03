@@ -31,6 +31,12 @@ class MACDSignal(Signal):
     def ready(self):
         return self.macd.ready()
 
+    def increasing(self):
+        return self.macd.increasing()
+    
+    def decreasing(self):
+        return self.macd.decreasing()
+
     def above(self):
         return self.macd.get_last_value()["macd"] > self.macd.get_last_value()["signal"]
     

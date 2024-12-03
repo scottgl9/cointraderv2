@@ -22,10 +22,12 @@ class SAMASignal(Signal):
         self._longsignal = False
         self._shortsignal = False
 
+        self.reset()
+
     def reset(self):
         # Reset the indicator and internal variables
         self.indicator.reset()
-        self._values.clear()
+        self._values = []
         self._cross_up = False
         self._cross_down = False
         self._last_up = False

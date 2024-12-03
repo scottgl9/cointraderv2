@@ -26,6 +26,12 @@ class EMA(Indicator):
         self._last_value = self.values[-1]
         return self._last_value
 
+    def increasing(self) -> bool:
+        return self.values[-1] > self.values[0]
+
+    def decreasing(self) -> bool:
+        return self.values[-1] < self.values[0]
+
     def get_last_value(self):
         return self._last_value
 

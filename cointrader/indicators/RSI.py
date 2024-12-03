@@ -2,7 +2,7 @@ from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
 class RSI(Indicator):
-    def __init__(self, name, period):
+    def __init__(self, name='rsi', period=14):
         super().__init__(name)
         self.period = period
         self.reset()
@@ -34,6 +34,12 @@ class RSI(Indicator):
         self._last_kline = kline
 
         return self._last_value
+
+    def increasing(self):
+        return self.gains[-1] > self.gains[0]
+
+    def decreasing(self):
+        return self.losses[-1] > self.losses[0]
 
     def get_last_value(self):
         return self._last_value

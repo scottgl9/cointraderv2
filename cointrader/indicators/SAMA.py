@@ -125,7 +125,7 @@ class SlopeAdaptiveMovingAverage(Indicator):
             slope_range = 0
 
         # Calculate 'dt' for the slope angle
-        dt = (ma_2 - ma) / src.close * slope_range if src != 0 else 0
+        dt = (ma_2 - ma) / src.close * slope_range if src.close != 0 else 0
         c = math.sqrt(1 + dt * dt)
 
         # Ensure the value inside 'acos' is within [-1, 1]
@@ -142,3 +142,16 @@ class SlopeAdaptiveMovingAverage(Indicator):
         Check if the indicator is ready.
         """
         return len(self.src_history) >= self.length + 1
+
+    def reset(self):
+        """
+        Reset the indicator.
+        """
+        self.src_history = []
+        self.ma_history = []
+        self.slope_history = []
+        self.up_history = []
+        self.down_history = []
+        self.swing_history = []
+        self.ma = None
+        self.swing = 0

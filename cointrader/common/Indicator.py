@@ -17,6 +17,12 @@ class Indicator:
 
     def update(self, kline : Kline) -> tuple:
         raise NotImplementedError
+    
+    def increasing(self) -> bool:
+        raise NotImplementedError
+    
+    def decreasing(self) -> bool:
+        raise NotImplementedError
 
     def get_last_value(self) -> tuple:
         raise NotImplementedError

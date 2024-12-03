@@ -21,6 +21,12 @@ class Signal:
     def update(self, kline : Kline):
         raise NotImplementedError
     
+    def increasing(self):
+        raise NotImplementedError
+    
+    def decreasing(self):
+        raise NotImplementedError
+
     def cross_up(self):
         raise NotImplementedError
     

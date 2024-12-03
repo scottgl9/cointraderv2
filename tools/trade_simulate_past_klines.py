@@ -97,7 +97,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trade simulation with past klines.')
     parser.add_argument('--initial_usd', type=float, default=10000.0, help='Initial USD amount for simulation')
     parser.add_argument('--client', type=str, default="cbadv", help='Account to use for simulation')
-    parser.add_argument('--granularity', type=int, default=3600, help='Granularity of klines')
+    parser.add_argument('--granularity', type=int, default=300, help='Granularity of klines')
     parser.add_argument('--symbols', type=str, default='BTC-USD', help='Symbol to use for simulation')
     args = parser.parse_args()
     main(args)
