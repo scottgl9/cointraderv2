@@ -1,17 +1,21 @@
-# TraderClientBase is the base class for all exchange specific implementations
+# TraderExchangeBase is the base class for all exchange specific implementations
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.order.OrderResult import OrderResult
 from cointrader.order.OrderStopDirection import OrderStopDirection
 
-class TraderClientBase(object):
+class TraderExchangeBase(object):
     _name = None
     def __init__(self) -> None:
         self._name = "generic"
 
 
     def name(self) -> str:
-        """Return name of client"""
+        """Return name of exchange"""
         return self._name
+
+    def get_client(self):
+        """Return exchange client"""
+        raise NotImplementedError
 
     def info_get_stable_currencies(self) -> list[str]:
         """Return list of stable currencies"""

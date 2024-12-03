@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
 from coinbase.websocket import WSClient, WebsocketResponse
-#from coinbase.rest import RESTClient
+#from coinbase.rest import RESTExchange
 from datetime import datetime, timedelta
 
 import json
@@ -16,7 +16,7 @@ except ImportError:
 
 import pandas as pd
 
-from cointrader.client.TraderSelectClient import TraderSelectClient
+from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.account.AccountSimulate import AccountSimulate
 from cointrader.execute.TradeExecuteSimulate import TraderExecuteSimulate
 from cointrader.market.Market import Market
@@ -46,20 +46,20 @@ def get_klines(market: Market, symbol: str, start_time: int, end_time: int, gran
     return klines
 
 def main(args):
-    name = args.client
+    name = args.exchange
     initial_usd = args.initial_usd
 
-    client = TraderSelectClient(name).get_client()
+    exchange = TraderSelectExchange(name).get_exchange()
 
-    market = Market(client=client)
-    account = AccountSimulate(client=client, market=market)
+    market = Market(exchange=exchange)
+    account = AccountSimulate(exchange=exchange, market=market)
     account.load_symbol_info()
 
     all_klines = {}
 
     account.update_asset_balance("USD", available=initial_usd, hold=0.0)
 
-    ex = TraderExecuteSimulate(client=client, account=account)
+    ex = TraderExecuteSimulate(exchange=exchange, account=account)
 
     print(account.get_account_balances())
     print("Start Total USD Balance:")
@@ -96,7 +96,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trade simulation with past klines.')
     parser.add_argument('--initial_usd', type=float, default=10000.0, help='Initial USD amount for simulation')
-    parser.add_argument('--client', type=str, default="cbadv", help='Account to use for simulation')
+    parser.add_argument('--exchange', type=str, default="cbadv", help='Account to use for simulation')
     parser.add_argument('--granularity', type=int, default=300, help='Granularity of klines')
     parser.add_argument('--symbols', type=str, default='BTC-USD', help='Symbol to use for simulation')
     args = parser.parse_args()

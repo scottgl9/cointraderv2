@@ -1,21 +1,21 @@
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.market.MarketBase import MarketBase
-from cointrader.client.TraderClientBase import TraderClientBase
+from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 
 class AccountBase(object):
     _logger = None
     _name = None
-    _client = None
+    _exchange = None
     _market = None
-    def __init__(self, client: TraderClientBase, market: MarketBase, logger=None):
-        self._cxlent = client
+    def __init__(self, exchange: TraderExchangeBase, market: MarketBase, logger=None):
+        self._cxlent = exchange
         self._market = market
         self._logger = logger
 
     def name(self):
         return self._name
 
-    def client(self):
+    def exchange(self):
         raise NotImplementedError
 
     def get_account_balances(self) -> dict:

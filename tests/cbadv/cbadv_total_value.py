@@ -8,17 +8,17 @@ except ImportError:
 
 from cointrader.account_old.cbadv.AccountCoinbaseAdvanced import AccountCoinbaseAdvanced
 from cointrader.config import *
-from coinbase.rest import RESTClient
+from coinbase.rest import RESTExchange
 
 if __name__ == '__main__':
-    client = RESTClient(api_key=CBADV_KEY, api_secret=CBADV_SECRET)
-    accnt = AccountCoinbaseAdvanced(client=client, simulate=False)
-    print(client.get_product(product_id='BTC-USD'))
-    print(client.get_accounts())
+    exchange = RESTExchange(api_key=CBADV_KEY, api_secret=CBADV_SECRET)
+    accnt = AccountCoinbaseAdvanced(exchange=exchange, simulate=False)
+    print(exchange.get_product(product_id='BTC-USD'))
+    print(exchange.get_accounts())
     print("getting account balances")
     balances = accnt.get_account_balances()
     print(balances)
-    #print(client.get_fees())
+    #print(exchange.get_fees())
     print("USD Total: {} USD".format(accnt.get_account_total_value('USD')))
     #print("BTC Total: {} BTC".format(accnt.get_account_total_value('BTC')))
     accnt.get_exchange_info()

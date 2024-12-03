@@ -1,16 +1,16 @@
 # handles all the configuration for all symbols (trade pairs)
 # manages loading and saving asset info from a file
 from .SymbolInfo import SymbolInfo
-from cointrader.client.TraderClientBase import TraderClientBase
+from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 import os
 import json
 
 class SymbolInfoConfig:
     filename = None
-    _client = None
-    def __init__(self, client: TraderClientBase, path: str):
+    _exchange = None
+    def __init__(self, exchange: TraderExchangeBase, path: str):
         self._symbol_info_all = {}
-        self._client = client
+        self._exchange = exchange
         self.path = path
 
     def file_exists(self) -> bool:
@@ -34,7 +34,7 @@ class SymbolInfoConfig:
         Fetch symbol info from the exchange
         """
         try:
-            info_all = self._client.info_ticker_query_all()
+            info_all = self._exchange.info_ticker_query_all()
             for symbol, info in info_all.items():
                 self._symbol_info_all[symbol] = info.to_dict()
         except Exception as e:

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import requests
 import json
 import pandas as pd
-from coinbase.rest import RESTClient
+from coinbase.rest import RESTExchange
 import time
 import sys
 try:

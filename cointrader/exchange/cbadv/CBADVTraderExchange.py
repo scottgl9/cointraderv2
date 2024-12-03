@@ -1,4 +1,4 @@
-from cointrader.client.TraderClientBase import TraderClientBase
+from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from coinbase.rest import RESTClient
 from coinbase.rest.types.orders_types import GetOrderResponse
 from cointrader.common.SymbolInfo import SymbolInfo
@@ -11,7 +11,7 @@ from cointrader.order.OrderStopDirection import OrderStopDirection
 from cointrader.order.OrderErrorReason import OrderErrorReason
 from datetime import datetime
 
-class CBADVTraderClient(TraderClientBase):
+class CBADVTraderExchange(TraderExchangeBase):
     MAX_CANDLES = 350
     LIMIT = 250
     STOP_DIRECTION_DOWN = "STOP_DIRECTION_STOP_DOWN"
@@ -227,7 +227,7 @@ class CBADVTraderClient(TraderClientBase):
     def trade_buy_market(self, ticker: str, amount: float) -> dict:
         """Buy at market price"""
         try:
-            result = self.client.market_order_buy(client_order_id='', product_id=ticker, base_size=str(amount))
+            result = self.client.market_order_buy(exchange_order_id='', product_id=ticker, base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
@@ -237,7 +237,7 @@ class CBADVTraderClient(TraderClientBase):
     def trade_sell_market(self, ticker: str, amount: float) -> dict:
         """Sell at market price"""
         try:
-            result = self.client.market_order_sell(client_order_id='', product_id=ticker, base_size=str(amount))
+            result = self.client.market_order_sell(exchange_order_id='', product_id=ticker, base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
@@ -248,7 +248,7 @@ class CBADVTraderClient(TraderClientBase):
     def trade_buy_limit(self, ticker: str, amount: float, price: float, type: str = "") -> dict:
         """Buy at a specific price"""
         try:
-            result = self.client.limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
+            result = self.client.limit_order_gtc_buy(exchange_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
@@ -258,7 +258,7 @@ class CBADVTraderClient(TraderClientBase):
     def trade_sell_limit(self, ticker: str, amount: float, price: float, type: str = "") -> dict:
         """Sell at a specific price"""
         try:
-            result = self.client.limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
+            result = self.client.limit_order_gtc_sell(exchange_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
@@ -272,7 +272,7 @@ class CBADVTraderClient(TraderClientBase):
         else:
             direction = self.STOP_DIRECTION_UP
         try:
-            result = self.client.stop_limit_order_gtc_buy(client_order_id='',
+            result = self.client.stop_limit_order_gtc_buy(exchange_order_id='',
                                                           product_id=ticker,
                                                           limit_price=str(price),
                                                           stop_price=str(stop_price),
@@ -291,7 +291,7 @@ class CBADVTraderClient(TraderClientBase):
         else:
             direction = self.STOP_DIRECTION_DOWN
         try:
-            result = self.client.stop_limit_order_gtc_sell(client_order_id='',
+            result = self.client.stop_limit_order_gtc_sell(exchange_order_id='',
                                                            product_id=ticker,
                                                            limit_price=str(price),
                                                            stop_price=str(stop_price),

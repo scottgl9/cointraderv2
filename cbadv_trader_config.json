@@ -1,5 +1,5 @@
 {
-    "max_positions": 5,
+    "max_positions": 1,
     "quote_currency": "USD",
     "max_position_quote_size": 25.0,
     "strategy": "Default",

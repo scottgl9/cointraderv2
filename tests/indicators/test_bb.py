@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 #sys.path.append('./tests')
 sys.path.append('.')
-from cointrader.client.TraderSelectClient import TraderSelectClient
+from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.indicators.BB import BollingerBands
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
@@ -19,18 +19,18 @@ if __name__ == '__main__':
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
-    client = TraderSelectClient(CLIENT_NAME).get_client()
-    #ticker = client.info_ticker_join("BTC", "USD")
+    exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
+    #ticker = exchange.info_ticker_join("BTC", "USD")
     ticker = args.ticker
-    tickers = client.info_ticker_names_list()
+    tickers = exchange.info_ticker_names_list()
     if ticker not in tickers:
         print("Ticker not found")
         sys.exit(1)
-    granularities = client.market_get_kline_granularities()
+    granularities = exchange.market_get_kline_granularities()
     if GRANULARITY not in granularities:
         print("Granularity not found")
         sys.exit(1)
-    max_klines = client.market_get_max_kline_count(GRANULARITY)
+    max_klines = exchange.market_get_max_kline_count(GRANULARITY)
 
     minutes = 0
     hours = 0
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     start = int((end - timedelta(hours=hours, minutes=minutes)).timestamp())
     end = int(end.timestamp())
 
-    candles = client.market_get_klines_range(ticker, start, end, GRANULARITY)
+    candles = exchange.market_get_klines_range(ticker, start, end, GRANULARITY)
     kline = Kline()
     kline.set_dict_names(ts='start')
 

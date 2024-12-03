@@ -1,5 +1,5 @@
 # Implement simulate trading execution for backtesting
-from cointrader.client.TraderClientBase import TraderClientBase
+from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from .ExecuteBase import ExecuteBase
 from cointrader.order.OrderResult import OrderResult
 from cointrader.order.Order import OrderStatus, OrderType, OrderSide
@@ -7,8 +7,8 @@ from cointrader.account.AccountBase import AccountBase
 import uuid
 
 class TraderExecuteSimulate(ExecuteBase):
-    def __init__(self, client: TraderClientBase, account: AccountBase):
-        self._client = client
+    def __init__(self, exchange: TraderExchangeBase, account: AccountBase):
+        self._exchange = exchange
         self._account = account
         self._orders = {}
 
@@ -23,8 +23,8 @@ class TraderExecuteSimulate(ExecuteBase):
         result.filled_size = amount
 
         # simulate account update
-        base = self._client.info_ticker_get_base(symbol)
-        quote = self._client.info_ticker_get_quote(symbol)
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
 
         # Update base balance
         base_balance, base_balance_hold = self._account.get_asset_balance(base)
@@ -48,8 +48,8 @@ class TraderExecuteSimulate(ExecuteBase):
         result.filled_size = amount
 
         # simulate account update
-        base = self._client.info_ticker_get_base(symbol)
-        quote = self._client.info_ticker_get_quote(symbol)
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
 
         # Update base balance
         base_balance, base_balance_hold = self._account.get_asset_balance(base)

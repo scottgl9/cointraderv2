@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 #sys.path.append('./tests')
 sys.path.append('.')
-from cointrader.client.TraderSelectClient import TraderSelectClient
+from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.indicators.EMA import EMA
 from cointrader.indicators.IchimokuCloud import IchimokuCloud
 from cointrader.common.Kline import Kline
@@ -20,17 +20,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plot Ichimoku Cloud indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     args = parser.parse_args()
-    client = TraderSelectClient(CLIENT_NAME).get_client()
+    exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
     ticker = args.ticker
-    tickers = client.info_ticker_names_list()
+    tickers = exchange.info_ticker_names_list()
     if ticker not in tickers:
         print("Ticker not found")
         sys.exit(1)
-    granularities = client.market_get_kline_granularities()
+    granularities = exchange.market_get_kline_granularities()
     if GRANULARITY not in granularities:
         print("Granularity not found")
         sys.exit(1)
-    max_klines = client.market_get_max_kline_count(GRANULARITY)
+    max_klines = exchange.market_get_max_kline_count(GRANULARITY)
 
     minutes = 0
     hours = 0
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     start = int((end - timedelta(hours=hours, minutes=minutes)).timestamp())
     end = int(end.timestamp())
 
-    candles = client.market_get_klines_range(ticker, start, end, GRANULARITY)
+    candles = exchange.market_get_klines_range(ticker, start, end, GRANULARITY)
     kline = Kline()
     kline.set_dict_names(ts='start')
 

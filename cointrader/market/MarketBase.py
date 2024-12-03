@@ -1,14 +1,14 @@
-from cointrader.client.TraderClientBase import TraderClientBase
+from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 
 class MarketBase(object):
-    _client = None
+    _exchange = None
     _logger = None
-    def __init__(self, client: TraderClientBase, logger=None):
-        self._cline = client
+    def __init__(self, exchange: TraderExchangeBase, logger=None):
+        self._cline = exchange
         self._logger = logger
     
-    def client(self):
-        return self._client
+    def exchange(self):
+        return self._exchange
 
     def market_ticker_price_get(self, ticker: str) -> float:
         """Get ticker price"""

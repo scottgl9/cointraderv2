@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
-from coinbase.websocket import WSClient, WebsocketResponse
-from coinbase.rest import RESTClient
+from coinbase.websocket import WSExchange, WebsocketResponse
+from coinbase.rest import RESTExchange
 
 import json
 import sys
@@ -52,22 +52,22 @@ if __name__ == '__main__':
     consoleHandler.setFormatter(logFormatter)
     logger.addHandler(consoleHandler)
     logger.setLevel(logging.WARNING)
-    client = RESTClient(api_key=CBADV_KEY, api_secret=CBADV_SECRET)
+    exchange = RESTExchange(api_key=CBADV_KEY, api_secret=CBADV_SECRET)
     rt = CBADVRealTime()
-    ws_client = WSClient(api_key=CBADV_KEY, api_secret=CBADV_SECRET, on_message=rt.on_message)
-    #accnt = AccountCoinbaseAdvanced(client=client, simulate=False, live=False, logger=logger)
+    ws_exchange = WSExchange(api_key=CBADV_KEY, api_secret=CBADV_SECRET, on_message=rt.on_message)
+    #accnt = AccountCoinbaseAdvanced(exchange=exchange, simulate=False, live=False, logger=logger)
 
     running = True
 
     product_ids = ["BTC-USD", "SOL-USD", "ETH-USD"]
-    ws_client.open()
-    ws_client.subscribe(product_ids=product_ids, channels=['candles']) #, 'matches'])
+    ws_exchange.open()
+    ws_exchange.subscribe(product_ids=product_ids, channels=['candles']) #, 'matches'])
 
     while running:
         try:
             time.sleep(1)
         except (KeyboardInterrupt, SystemExit):
-            ws_client.unsubscribe(product_ids=product_ids, channels=['candles'])#, 'matches'])
-            ws_client.close()
+            ws_exchange.unsubscribe(product_ids=product_ids, channels=['candles'])#, 'matches'])
+            ws_exchange.close()
             running = False
             print("Exiting...")

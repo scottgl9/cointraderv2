@@ -1,11 +1,11 @@
 # Base class for executing trades
-from cointrader.client.TraderClientBase import TraderClientBase
+from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.order.OrderResult import OrderResult
 
 class ExecuteBase(object):
-    _client = None
-    def __init__(self, client: TraderClientBase):
-        self._client = client
+    _exchange = None
+    def __init__(self, exchange: TraderExchangeBase):
+        self._exchange = exchange
 
     def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
         raise NotImplementedError
