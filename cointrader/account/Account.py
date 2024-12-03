@@ -93,14 +93,14 @@ class Account(AccountBase):
             if currency not in stable_currencies:
                 symbol = self._exchange.info_ticker_join(asset, currency)
                 if symbol in prices:
-                    total_balance += self.round_quote(symbol, total * prices[symbol])
+                    total_balance += total * prices[symbol]
                 #else:
                 #    print(symbol)
             else:
                 # if trade pair exists, just add it to the total
                 symbol = self._exchange.info_ticker_join(asset, currency)
                 if symbol in prices:
-                    total_balance += self.round_quote(symbol, total * prices[symbol])
+                    total_balance += total * prices[symbol]
                 else:
                     # if there is not an existing trade pair, try to convert from an equivalent stable currency
                     for equivalent in self._exchange.info_equivalent_stable_currencies():

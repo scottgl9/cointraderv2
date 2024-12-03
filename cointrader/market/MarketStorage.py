@@ -44,7 +44,6 @@ class MarketStorage:
         """
         Check if a kline exists in the database
         """
-        print(f'Checking if kline exists for {symbol} at {ts}')
         cursor = self.connection.cursor()
         cursor.execute(f'SELECT 1 FROM {self.table_name(symbol, granularity)} WHERE ts = ?', (ts,))
         result = cursor.fetchone()

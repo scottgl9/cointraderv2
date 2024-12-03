@@ -26,36 +26,18 @@ from cointrader.common.Kline import Kline
 from cointrader.config import *
 
 
-def get_klines(market: Market, symbol: str, start_time: int, end_time: int, granularity: int) -> list:
-    max_klines = market.market_get_max_kline_count(granularity)
-    minutes = 0
-    hours = 0
-    if granularity == 60:
-        minutes = max_klines
-    elif granularity == 300: # 5 minutes
-        minutes = max_klines * 5
-    elif granularity == 900: # 15 minutes
-        minutes = max_klines * 15
-    elif granularity == 3600: # 1 hour
-        hours = max_klines
-
-    end = datetime.now()
-    start = int((end - timedelta(hours=hours, minutes=minutes)).timestamp())
-    end = int(end.timestamp())
-    klines = market.market_get_klines_range(symbol, start, end, granularity)
-    return klines
-
 def main(args):
     name = args.exchange
     initial_usd = args.initial_usd
 
     exchange = TraderSelectExchange(name).get_exchange()
 
-    market = Market(exchange=exchange)
+    market = Market(exchange=exchange, db_path=args.db_path)
     account = AccountSimulate(exchange=exchange, market=market)
     account.load_symbol_info()
 
     all_klines = {}
+    symbols = args.symbols.split(',')
 
     account.update_asset_balance("USD", available=initial_usd, hold=0.0)
 
@@ -71,26 +53,32 @@ def main(args):
 
     mtrader = MultiTrader(account=account, execute=ex, config=tconfig)
 
-    running = True
+    start_ts = int(datetime.fromisoformat(args.start_date).timestamp())
+    if args.end_date == 'now':
+        end_ts = int(datetime.now().timestamp())
+    else:
+        end_ts = int(datetime.fromisoformat(args.end_date).timestamp())
 
-    symbol = 'SOL-USD'
+    kline_count = 0
 
-    klines = get_klines(market, symbol, 0, 0, args.granularity)
+    for symbol in symbols:
+        all_klines[symbol] = market.market_get_klines_range(symbol, start_ts=start_ts, end_ts=end_ts, granularity=args.granularity, store_db=True)
+        kline_count = len(all_klines[symbol])
 
     kline = Kline()
-    kline.set_dict_names(ts='start')
+    #kline.set_dict_names(ts='start')
 
-    for k in klines:
-        #print(k)
-        kline.from_dict(k)
-        kline.symbol = symbol
-        mtrader.market_update(kline)
+    for i in range(kline_count):
+        for symbol in symbols:
+            k = all_klines[symbol][i]
+            #print(k)
+            kline.from_dict(k)
+            kline.symbol = symbol
+            mtrader.market_update(kline)
 
     print(account.get_account_balances())
     print("Final Total USD Balance:")
     print(account.get_total_balance("USD"))
-
-    #while running:
 
 
 if __name__ == '__main__':
@@ -98,6 +86,9 @@ if __name__ == '__main__':
     parser.add_argument('--initial_usd', type=float, default=10000.0, help='Initial USD amount for simulation')
     parser.add_argument('--exchange', type=str, default="cbadv", help='Account to use for simulation')
     parser.add_argument('--granularity', type=int, default=300, help='Granularity of klines')
-    parser.add_argument('--symbols', type=str, default='BTC-USD', help='Symbol to use for simulation')
+    parser.add_argument('--db_path', type=str, default='market_data.db', help='Path to the database file')
+    parser.add_argument('--symbols', type=str, default='BTC-USD,ETH-USD,SOL-USD', help='Comma separated list of symbols')
+    parser.add_argument('--start_date', type=str, default='2024-12-02', help='Start date for klines')
+    parser.add_argument('--end_date', type=str, default='now', help='End date for klines')
     args = parser.parse_args()
     main(args)

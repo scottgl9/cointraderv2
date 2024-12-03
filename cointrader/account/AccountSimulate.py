@@ -72,14 +72,14 @@ class AccountSimulate(AccountBase):
         currencies = self._exchange.info_quote_currencies_list()
         if currency not in currencies:
             raise ValueError(f'Currency {currency} not found in {currencies}')
-        try:
-            prices = self._market.market_ticker_prices_all_get()
-        except NotImplementedError:
-            prices = {}
-            for c in currencies:
-                symbol = self._exchange.info_ticker_join(c, currency)
-                prices[symbol] = self._market.market_ticker_price_get(ticker=symbol)
-    
+        #try:
+        prices = self._market.market_ticker_prices_all_get()
+        #except NotImplementedError:
+        #    prices = {}
+        #    for c in currencies:
+        #        symbol = self._exchange.info_ticker_join(c, currency)
+        #        prices[symbol] = self._market.market_ticker_price_get(ticker=symbol)
+
         total_balance = 0.0
         for asset, (balance, available) in self.get_account_balances().items():
             total = balance + available
@@ -93,21 +93,21 @@ class AccountSimulate(AccountBase):
             if currency not in stable_currencies:
                 symbol = self._exchange.info_ticker_join(asset, currency)
                 if symbol in prices:
-                    total_balance += self.round_quote(symbol, total * prices[symbol])
+                    total_balance += symbol, total * prices[symbol]
                 #else:
                 #    print(symbol)
             else:
                 # if trade pair exists, just add it to the total
                 symbol = self._exchange.info_ticker_join(asset, currency)
                 if symbol in prices:
-                    total_balance += self.round_quote(symbol, total * prices[symbol])
+                    total_balance += total * prices[symbol]
                 else:
                     # if there is not an existing trade pair, try to convert from an equivalent stable currency
                     for equivalent in self._exchange.info_equivalent_stable_currencies():
                         symbol = self._exchange.info_ticker_join(asset, equivalent)
                         if symbol in prices:
                             print(f'Converting {asset} to {currency} using {equivalent}')
-                            total_balance += self.round_quote(total * prices[symbol])
+                            total_balance += total * prices[symbol]
                             break
 
         return total_balance

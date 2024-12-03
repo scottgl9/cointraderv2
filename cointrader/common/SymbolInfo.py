@@ -26,7 +26,7 @@ class SymbolInfo(object):
         self.quote_step_size = data['quote_step_size']
         self.is_currency_pair = data['is_currency_pair']
         self.base_precision = data['base_precision']
-        self.quote_precision = data['currency_precision']
+        self.quote_precision = data['quote_precision']
         self.orderTypes = data['orderTypes']
         self.initialized = True
 
