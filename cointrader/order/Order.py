@@ -5,54 +5,38 @@ from .OrderSide import OrderSide
 from .OrderType import OrderType
 from .OrderStatus import OrderStatus
 
-class Order(object):
-    def __init__(self, symbol: str, order_id: str, type: OrderType, side: OrderSide, price: float, limit_price: float, size: float, timestamp: int):
-        self._last_order_result = None
+class Order(OrderResult):
+    def __init__(self, symbol: str):
         self.symbol = symbol
-        self.order_id = order_id
-        self.status = OrderStatus.NEW
-        self.order_type = type
-        self.order_side = side
-        self.size = size
-        self.filled_size = 0.0
-        self.price = price
-        self.limit_price = limit_price
-        self.timestamp = timestamp
+        self._last_order_result = None
 
-    def update_order_result(self, result: OrderResult):
+    def update_order(self, result: OrderResult):
+        """
+        Update the order with the result of the last order status
+        """
         self._last_order_result = result
-        self.status = result.status
+        self.id = result.id
+        self.symbol = result.symbol
+        self.type = result.type
+        self.limit_type = result.limit_type
+        self.side = result.side
+        self.price = result.price
+        self.limit_price = result.limit_price
+        self.stop_price = result.stop_price
+        self.stop_direction = result.stop_direction
+        self.size = result.size
         self.filled_size = result.filled_size
-        self.timestamp = result.timestamp
+        self.fee = result.fee
+        self.placed_ts = result.placed_ts
+        self.filled_ts = result.filled_ts
+        self.msg = result.msg
+        self.post_only = result.post_only
+        self.status = result.status
+        self.error_reason = result.error_reason
+        self.error_msg = result.error_msg
 
-    def from_dict(self, data: dict):
-        self.symbol = data['symbol']
-        self.order_id = data['order_id']
-        self.status = data['status']
-        self.order_type = data['type']
-        self.order_side = data['side']
-        self.size = data['size']
-        self.filled_size = data['filled_size']
-        self.price = data['price']
-        self.limit_price = data['limit_price']
-        self.timestamp = data['timestamp']
-
-    def to_dict(self):
-        return {
-            'symbol': self.symbol,
-            'order_id': self.order_id,
-            'status': self.status,
-            'order_type': self.order_type,
-            'order_side': self.order_side,
-            'size': self.size,
-            'filled_size': self.filled_size,
-            'price': self.price,
-            'limit_price': self.limit_price,
-            'timestamp': self.timestamp
-        }
-
-    def __dict__(self):
-        return self.to_dict()
-
-    def __repr__(self) -> dict:
-        return self.to_dict()
+    def completed(self) -> bool:
+        """
+        Check if the order has been completed
+        """
+        return self.status == OrderStatus.FILLED

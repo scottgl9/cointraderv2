@@ -134,7 +134,7 @@ class TraderClientBase(object):
         """Get max kline count for a given interval"""
         raise NotImplementedError
 
-    def market_get_klines_range(self, ticker: str, start_ts: int, end_ts: int, granularity: int) -> dict:
+    def market_get_klines_range(self, ticker: str, start_ts: int, end_ts: int, granularity: int) -> list:
         """Get klines for a given range"""
         raise NotImplementedError
 

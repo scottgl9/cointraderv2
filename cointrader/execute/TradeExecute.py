@@ -1,9 +1,10 @@
 from cointrader.client.TraderClientBase import TraderClientBase
 from cointrader.order.OrderResult import OrderResult
+from cointrader.account.AccountBase import AccountBase
 from .ExecuteBase import ExecuteBase
 
 class TraderExecute(ExecuteBase):
-    def __init__(self, client: TraderClientBase):
+    def __init__(self, client: TraderClientBase, account: AccountBase):
         self._client = client
     
     def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:

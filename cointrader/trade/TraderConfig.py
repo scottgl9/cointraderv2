@@ -14,8 +14,8 @@ DEFAULT_TRADE_CONFIG = {
     'stop_on_loss': True,
     'max_total_loss_percent': 10.0,
     'cooldown_period_seconds': 60,
-    'start_position_type': 'market',
-    'end_position_type': 'market',
+    'start_position_type': 'MARKET',
+    'end_position_type': 'MARKET',
     'sell_all_on_stop': False
 }
 

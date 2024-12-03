@@ -216,7 +216,7 @@ class CBADVTraderClient(TraderClientBase):
         """Get max kline count for a given interval"""
         return self.MAX_CANDLES
 
-    def market_get_klines_range(self, ticker: str, start_ts: int, end_ts: int, granularity: int) -> dict:
+    def market_get_klines_range(self, ticker: str, start_ts: int, end_ts: int, granularity: int) -> list:
         """Get klines for ticker for a given interval and time range"""
         candles = self.client.get_candles(ticker, start_ts, end_ts, granularity=self._granularity_mapping[granularity])
         candles = candles['candles']

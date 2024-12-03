@@ -9,7 +9,7 @@ class Kline(object):
     volume = 0
     ts = 0
     # name of the symbol field in the dict
-    symbol_name = None
+    symbol_name = 'symbol'
     open_name = 'open'
     close_name = 'close'
     low_name = 'low'
@@ -75,3 +75,23 @@ class Kline(object):
         self.high = 0
         self.volume = 0
         self.ts = 0
+
+    def copy(self):
+        kline = Kline()
+        kline.symbol_name = self.symbol_name
+        kline.open_name = self.open_name
+        kline.close_name = self.close_name
+        kline.low_name = self.low_name
+        kline.high_name = self.high_name
+        kline.volume_name = self.volume_name
+        kline.ts_name = self.ts_name
+
+        kline.symbol = self.symbol
+        kline.open = self.open
+        kline.close = self.close
+        kline.low = self.low
+        kline.high = self.high
+        kline.volume = self.volume
+        kline.ts = self.ts
+
+        return kline
