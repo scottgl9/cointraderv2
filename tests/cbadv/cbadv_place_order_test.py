@@ -41,18 +41,21 @@ if __name__ == '__main__':
     #print(str(result))
 
     # {'success': True, 'response': {'order_id': '630939ab-6105-4062-b44a-342bcee33800', 'product_id': 'BTC-USD', 'side': 'BUY', 'exchange_order_id': '39bec75543d64aaf94d3dc3feeb24972', 'attached_order_id': ''}, 'order_configuration': {'stop_limit_stop_limit_gtc': {'base_size': '5e-05', 'limit_price': '200001', 'stop_price': '200000', 'stop_direction': 'STOP_DIRECTION_STOP_UP'}}}
-    stop_result = exchange.trade_buy_stop_limit("BTC-USD", amount=0.00005, price=200001, stop_price=200000)
-    print(str(stop_result))
-    print(stop_result.id)
+    #stop_result = exchange.trade_buy_stop_limit("BTC-USD", amount=0.00005, price=200001, stop_price=200000)
+    #print(str(stop_result))
+    #print(stop_result.id)
+
+    #print("Order Status")
+    #result = exchange.trade_get_order("BTC-USD", stop_result.id)
+    #print(str(result))
+
+    #print(f"Cancel order {stop_result.id}")
+    #result = exchange.trade_cancel_order("BTC-USD", stop_result.id)
+    #print(str(result))
+
+    result = exchange.trade_buy_market('XRP-USDC', 1)
+    print(result)
 
     print("Order Status")
-    result = exchange.trade_get_order("BTC-USD", stop_result.id)
-    print(str(result))
-
-    print(f"Cancel order {stop_result.id}")
-    result = exchange.trade_cancel_order("BTC-USD", stop_result.id)
-    print(str(result))
-
-    print("Order Status")
-    result = exchange.trade_get_order("BTC-USD", stop_result.id)
+    result = exchange.trade_get_order("XRP-USDC", result.id)
     print(str(result))

@@ -190,14 +190,21 @@ class CBADVTraderExchange(TraderExchangeBase):
     def market_ticker_price_get(self, ticker: str) -> float:
         """Get ticker information"""
         response = self.client.get_product(product_id=ticker)
-        return float(response.price)
+        try:
+            result = float(response.price)
+        except ValueError:
+            result = 0.0
+        return result
 
     def market_ticker_prices_all_get(self) -> dict:
         """Get all ticker prices"""
         result = {}
         products = self._info_get_products()
         for product in products:
-            result[product.product_id] = float(product.price)
+            try:
+                result[product.product_id] = float(product.price)
+            except ValueError:
+                result[product.product_id] = 0.0
         return result
 
     def market_get_orderbook(self, ticker: str, level: int) -> dict: 
@@ -227,7 +234,7 @@ class CBADVTraderExchange(TraderExchangeBase):
     def trade_buy_market(self, ticker: str, amount: float) -> dict:
         """Buy at market price"""
         try:
-            result = self.client.market_order_buy(exchange_order_id='', product_id=ticker, base_size=str(amount))
+            result = self.client.market_order_buy(client_order_id='', product_id=ticker, base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
@@ -237,7 +244,7 @@ class CBADVTraderExchange(TraderExchangeBase):
     def trade_sell_market(self, ticker: str, amount: float) -> dict:
         """Sell at market price"""
         try:
-            result = self.client.market_order_sell(exchange_order_id='', product_id=ticker, base_size=str(amount))
+            result = self.client.market_order_sell(client_order_id='', product_id=ticker, base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
@@ -248,7 +255,7 @@ class CBADVTraderExchange(TraderExchangeBase):
     def trade_buy_limit(self, ticker: str, amount: float, price: float, type: str = "") -> dict:
         """Buy at a specific price"""
         try:
-            result = self.client.limit_order_gtc_buy(exchange_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
+            result = self.client.limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
@@ -258,7 +265,7 @@ class CBADVTraderExchange(TraderExchangeBase):
     def trade_sell_limit(self, ticker: str, amount: float, price: float, type: str = "") -> dict:
         """Sell at a specific price"""
         try:
-            result = self.client.limit_order_gtc_sell(exchange_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
+            result = self.client.limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
         except Exception as e:
             result = {}
             result['success'] = False
@@ -272,7 +279,7 @@ class CBADVTraderExchange(TraderExchangeBase):
         else:
             direction = self.STOP_DIRECTION_UP
         try:
-            result = self.client.stop_limit_order_gtc_buy(exchange_order_id='',
+            result = self.client.stop_limit_order_gtc_buy(client_order_id='',
                                                           product_id=ticker,
                                                           limit_price=str(price),
                                                           stop_price=str(stop_price),
@@ -291,7 +298,7 @@ class CBADVTraderExchange(TraderExchangeBase):
         else:
             direction = self.STOP_DIRECTION_DOWN
         try:
-            result = self.client.stop_limit_order_gtc_sell(exchange_order_id='',
+            result = self.client.stop_limit_order_gtc_sell(client_order_id='',
                                                            product_id=ticker,
                                                            limit_price=str(price),
                                                            stop_price=str(stop_price),
@@ -337,9 +344,18 @@ class CBADVTraderExchange(TraderExchangeBase):
         sub_result = None
 
         if isinstance(result, dict):
-            print(result)
-
-        result = result.to_dict()
+            if 'success' in result:
+                if not result['success']:
+                    response = result['response']
+                    if 'error' in response:
+                        if response['error'] == "UNKNOWN":
+                            order_result.error_reason = OrderErrorReason.UNKNOWN
+                            order_result.error_msg = response['message']
+                            return order_result
+                        elif response['error'] == "INSUFFICIENT_FUND":
+                            order_result.error_reason = OrderErrorReason.INSUFFIENT_BALANCE
+                            order_result.error_msg = response['message']
+                            return order_result
 
         print(result)
         if 'response' in result:
