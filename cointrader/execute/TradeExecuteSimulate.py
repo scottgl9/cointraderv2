@@ -12,6 +12,9 @@ class TraderExecuteSimulate(ExecuteBase):
         self._account = account
         self._orders = {}
 
+    def account(self) -> AccountBase:
+        return self._account
+
     def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
         print(f'market_buy: {symbol}, {price}, {amount}')
         result = OrderResult(symbol)
@@ -20,8 +23,8 @@ class TraderExecuteSimulate(ExecuteBase):
         result.side = OrderSide.BUY
         result.type = OrderType.MARKET
         result.price = price
-        result.size = amount
-        result.filled_size = amount
+        result.size = self._account.round_base(symbol, amount)
+        result.filled_size = result.size
 
         if amount < self._account.get_base_min_size(symbol):
             raise ValueError(f'{symbol} Amount is less than the minimum size of {self._account.get_base_min_size(symbol)}')
@@ -32,7 +35,7 @@ class TraderExecuteSimulate(ExecuteBase):
 
         # Update base balance
         base_balance, base_balance_hold = self._account.get_asset_balance(base)
-        new_base_balance =  base_balance + self._account.round_base(symbol, amount)
+        new_base_balance =  base_balance + amount
         self._account.update_asset_balance(base, new_base_balance, base_balance_hold)
         
         # Update quote balance
@@ -54,12 +57,11 @@ class TraderExecuteSimulate(ExecuteBase):
         result.side = OrderSide.SELL
         result.type = OrderType.MARKET
         result.price = price
-        result.size = amount
-        result.filled_size = amount
+        result.size = self._account.round_base(symbol, amount)
+        result.filled_size = result.size
 
         if amount < self._account.get_base_min_size(symbol):
             raise ValueError(f'{symbol} Amount is less than the minimum size of {self._account.get_base_min_size(symbol)}')
-
 
         # simulate account update
         base = self._exchange.info_ticker_get_base(symbol)
@@ -67,7 +69,7 @@ class TraderExecuteSimulate(ExecuteBase):
 
         # Update base balance
         base_balance, base_balance_hold = self._account.get_asset_balance(base)
-        new_base_balance = base_balance - self._account.round_base(symbol, amount)
+        new_base_balance = base_balance - amount
         if new_base_balance < 0:
             print(f'base_balance: {base_balance}, new_base_balance: {new_base_balance}')
             raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')

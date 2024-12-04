@@ -6,7 +6,11 @@ from .ExecuteBase import ExecuteBase
 class TraderExecute(ExecuteBase):
     def __init__(self, exchange: TraderExchangeBase, account: AccountBase):
         self._exchange = exchange
-    
+        self._account = account
+
+    def account(self) -> AccountBase:
+        return self._account
+
     def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
         return self._exchange.trade_buy_market(symbol, amount)
     

@@ -77,10 +77,23 @@ def main(args):
             kline.symbol = symbol
             mtrader.market_update(kline)
 
+    last_prices = {}
+    for symbol in symbols:
+        last_prices[symbol] = all_klines[symbol][-1]['close']
+
     print(account.get_account_balances())
     print("Final Total USD Balance:")
-    print(account.get_total_balance("USD"))
+    print(account.get_total_balance("USD", prices=last_prices))
 
+    print("\nRemaining open positions:")
+    for symbol in symbols:
+        position = mtrader.position_count(symbol)
+        print(f"{symbol} position_count: {position}")
+
+    print("\nNet profit on closed positions:")
+    for symbol in symbols:
+        profit = mtrader.net_profit_percent(symbol)
+        print(f"{symbol} net profit: {profit:.2f}%")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trade simulation with past klines.')

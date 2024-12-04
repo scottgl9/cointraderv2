@@ -8,21 +8,37 @@ from .TraderConfig import TraderConfig
 class TraderPosition(object):
     _symbol = None
     _config = None
-    def __init__(self, symbol: str, strategy: Strategy, execute: ExecuteBase, config: TraderConfig):
+    def __init__(self, symbol: str, id: int, strategy: Strategy, execute: ExecuteBase, config: TraderConfig):
+        self._id = id
         self._symbol = symbol
         self._config = config
         self._buy_order = None
         self._sell_order = None
         self._strategy = strategy
         self._execute = execute
+        self._account = execute.account()
+        self._opened_position = False
+        self._opened_position_completed = False
         self._closed_position = False
+        self._closed_position_completed = False
         self._stop_loss_set = False
         self._entry_price = 0
         self._current_price = 0
         self._stop_loss = 0
         self._timestamp = 0
+        self._buy_amount = 0.0
+
+    def id(self):
+        return self._id
+
+    def opened_position(self):
+        return self._opened_position
+    
+    def closed_position(self):
+        return self._closed_position
 
     def open_position(self, price: float, stop_loss: float, size: float, timestamp: int):
+        self._opened_position = True
         self._entry_price = price
         self._stop_loss = stop_loss
         self._timestamp = timestamp
@@ -36,23 +52,34 @@ class TraderPosition(object):
 
         self._buy_order = Order(symbol=self._symbol)
         self._buy_order.update_order(result)
+        if self._buy_order.status == OrderStatus.FILLED:
+            self._buy_amount = self._buy_order.filled_size
+            self._opened_position_completed = True
 
     def get_position(self) -> Order:
-        return self._order
+        return self._buy_order
 
     def close_position(self, price: float, timestamp: int):
+        self._closed_position = True
         self.current_price = price
         self._timestamp = timestamp
 
+        # get balance of the asset
+        balance = self._account.get_asset_balance('ETH')
+        print(f"Balance: {balance}")
+
         if self._config.end_position_type() == OrderType.MARKET.name:
-            result = self._execute.market_sell(self._symbol, price=price, amount=self._buy_order.filled_size)
+            result = self._execute.market_sell(self._symbol, price=price, amount=self._buy_amount)
         elif self._config.end_position_type() == OrderType.LIMIT.name:
-            result = self._execute.limit_sell(self._symbol, price=price, amount=self._buy_order.filled_size)
+            result = self._execute.limit_sell(self._symbol, price=price, amount=self._buy_amount)
         elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
-            result = self._execute.stop_loss_sell(self._symbol, price=price, stop_price=self._stop_loss, amount=self._buy_order.filled_size)
+            result = self._execute.stop_loss_sell(self._symbol, price=price, stop_price=self._stop_loss, amount=self._buy_amount)
 
         self._sell_order = Order(symbol=self._symbol)
         self._sell_order.update_order(result)
+
+        if self._sell_order.status == OrderStatus.FILLED:
+            self._closed_position_completed = True
 
     def market_update(self, kline: Kline):
         self._current_price = kline.close

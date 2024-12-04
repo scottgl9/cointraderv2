@@ -117,10 +117,13 @@ class Account(AccountBase):
                 result[asset] = (balance, hold)
         return result
 
-    def get_total_balance(self, currency : str) -> float:
+    def get_total_balance(self, currency : str, prices: dict = None) -> float:
         """
         Get the total balance of a currency
         """
+
+        if not prices:
+            prices = self._market.market_ticker_prices_all_get()
 
         # if currency is for example BTC, we need to first convert it to a stable currency
         stable_currencies = self._exchange.info_get_stable_currencies()
@@ -130,7 +133,7 @@ class Account(AccountBase):
             for stable in stable_currencies:
                 symbol = self._exchange.info_ticker_join(currency, stable)
                 try:
-                    currency_stable_price = self._market.market_ticker_price_get(ticker=symbol)
+                    currency_stable_price = prices[symbol] #self._market.market_ticker_price_get(ticker=symbol)
                     break
                 except NotImplementedError:
                     continue

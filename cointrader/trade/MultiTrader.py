@@ -17,7 +17,19 @@ class MultiTrader(object):
 
     def market_update(self, kline):
         if kline.symbol not in self._traders.keys():
+            print(f"Symbol {kline.symbol} not found in traders")
             return
         
         trader = self._traders[kline.symbol]
         trader.market_update(kline)
+
+    def net_profit_percent(self, symbol: str):
+        if symbol not in self._traders.keys():
+            return 0.0
+        return self._traders[symbol].net_profit_percent()
+    
+    def position_count(self, symbol: str):
+        if symbol not in self._traders.keys():
+            return 0
+        return self._traders[symbol].position_count()
+

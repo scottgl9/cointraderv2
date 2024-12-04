@@ -21,6 +21,7 @@ class Trader(object):
         self._account = account
         self._execute = execute
         self._config = config
+        self._cur_id = 0
         self._positions = []
         self._strategy_name = config.strategy()
         #strategy_module = __import__(f'cointrader.strategies.{self._strategy_name}', fromlist=[self._strategy_name])
@@ -29,12 +30,19 @@ class Trader(object):
         strategy_module = importlib.import_module(f'cointrader.strategies.{self._strategy_name}')
         self._strategy = getattr(strategy_module, self._strategy_name)(symbol=symbol)
         self._max_positions = config.max_positions()
+        self._net_profit_percent = 0.0
 
         print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
 
     def symbol(self) -> str:
         return self._symbol
     
+    def position_count(self) -> int:
+        """
+        Get the number of positions open
+        """
+        return len(self._positions)
+
     def market_preload(self, klines: list[Kline]):
         """
         Preload klines for the strategy
@@ -48,10 +56,12 @@ class Trader(object):
         for position in self._positions:
             if position.closed():
                 print(f"{self._symbol} Profit: {position.profit_percent()}")
+                self._net_profit_percent += position.profit_percent()
                 self._positions.remove(position)
                 continue
             position.market_update(kline)
-        
+
+        # check if we have too many positions
         if len(self._positions) > self._max_positions:
             return
 
@@ -62,15 +72,17 @@ class Trader(object):
             if size < self._account.get_base_min_size(self._symbol):
                 print(f"Size too small: {size}")
                 return
-            position = TraderPosition(symbol=self._symbol, strategy=self._strategy, execute=self._execute, config=self._config)
+            position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config)
             position.open_position(price=kline.close, stop_loss=0, size=size, timestamp=kline.ts)
             self._positions.append(position)
+            self._cur_id += 1
 
         # Close a position on a sell signal
         if self._strategy.sell() and len(self._positions) > 0:
             print(f'Sell signal for {self._symbol}')
             for position in self._positions:
-                position.close_position(price=kline.close, timestamp=kline.ts)
+                if not position.closed_position():
+                    position.close_position(price=kline.close, timestamp=kline.ts)
 
-    def get_total_profit(self, currency: str) -> float:
-        pass
+    def net_profit_percent(self) -> float:
+        return self._net_profit_percent

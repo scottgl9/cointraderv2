@@ -64,7 +64,7 @@ class AccountBase(object):
     def get_account_balances(self) -> dict:
         raise NotImplementedError
 
-    def get_total_balance(self, currency : str) -> float:
+    def get_total_balance(self, currency : str, prices: dict = None) -> float:
         raise NotImplementedError
 
     def get_asset_balance(self, asset : str) -> tuple[float, float]:
