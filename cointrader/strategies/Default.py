@@ -17,15 +17,14 @@ class Default(Strategy):
     def buy(self):
         if self.rsi.ready() and self.rsi.decreasing():
             return False
-        if self.macd.ready() and self.macd.cross_up():
-            return True
         if self.sama.ready() and self.sama.buy_signal():
-            return True
+            if self.macd.ready() and self.macd.cross_up():
+                return True
         return False
 
     def sell(self):
         if self.macd.ready() and self.macd.cross_down():
             return True
-        #if self.sama.ready() and self.sama.sell_signal():
-        #    return True
+        if self.sama.ready() and self.sama.sell_signal():
+            return True
         return False

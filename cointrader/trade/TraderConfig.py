@@ -3,6 +3,7 @@ import json
 
 # Example of a trade config
 DEFAULT_TRADE_CONFIG = {
+    'simulate': False,
     'max_positions': 1,
     'quote_currency': 'USD',
     'max_position_quote_size': 25.0,
@@ -77,6 +78,9 @@ class TraderConfig(object):
     
     def __repr__(self):
         return self.__dict__()
+
+    def simulate(self):
+        return self.get('simulate')
 
     def max_positions(self):
         return self.get('max_positions')

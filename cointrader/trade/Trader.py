@@ -23,6 +23,8 @@ class Trader(object):
         self._config = config
         self._cur_id = 0
         self._positions = []
+        self._buys = []
+        self._sells = []
         self._strategy_name = config.strategy()
         #strategy_module = __import__(f'cointrader.strategies.{self._strategy_name}', fromlist=[self._strategy_name])
         #strategy_module = __import__(self._strategy_name, fromlist=[f'cointrader.strategies'])
@@ -52,11 +54,15 @@ class Trader(object):
 
     def market_update(self, kline: Kline):
         self._strategy.update(kline)
-
+        # if position has been closed, remove it from the list
         for position in self._positions:
             if position.closed():
                 print(f"{self._symbol} Profit: {position.profit_percent()}")
                 self._net_profit_percent += position.profit_percent()
+
+                if self._config.simulate():
+                    self._buys.append(position.buy_info())
+                    self._sells.append(position.sell_info())
                 self._positions.remove(position)
                 continue
             position.market_update(kline)
@@ -86,3 +92,9 @@ class Trader(object):
 
     def net_profit_percent(self) -> float:
         return self._net_profit_percent
+
+    def buys(self) -> list:
+        return self._buys
+    
+    def sells(self) -> list:
+        return self._sells

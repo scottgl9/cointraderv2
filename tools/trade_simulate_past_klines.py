@@ -3,6 +3,7 @@ import logging
 from coinbase.websocket import WSClient, WebsocketResponse
 #from coinbase.rest import RESTExchange
 from datetime import datetime, timedelta
+from matplotlib import pyplot as plt
 
 import json
 import sys
@@ -24,7 +25,7 @@ from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
 from cointrader.common.Kline import Kline
 from cointrader.config import *
-
+from cointrader.indicators.EMA import EMA
 
 def main(args):
     name = args.exchange
@@ -62,9 +63,14 @@ def main(args):
 
     kline_count = 0
 
+    emas = {}
+    ema_values = {}
+
     for symbol in symbols:
         all_klines[symbol] = market.market_get_klines_range(symbol, start_ts=start_ts, end_ts=end_ts, granularity=args.granularity, store_db=True)
         kline_count = len(all_klines[symbol])
+        emas[symbol] = EMA(period=12)
+        ema_values[symbol] = []
 
     kline = Kline()
     #kline.set_dict_names(ts='start')
@@ -76,13 +82,15 @@ def main(args):
             kline.from_dict(k)
             kline.symbol = symbol
             mtrader.market_update(kline)
+            value = emas[symbol].update(kline)
+            ema_values[symbol].append(value)
 
     last_prices = {}
     for symbol in symbols:
         last_prices[symbol] = all_klines[symbol][-1]['close']
 
     print(account.get_account_balances())
-    print("Final Total USD Balance:")
+    print("\nFinal Total USD Balance:")
     print(account.get_total_balance("USD", prices=last_prices))
 
     print("\nRemaining open positions:")
@@ -95,6 +103,38 @@ def main(args):
         profit = mtrader.net_profit_percent(symbol)
         print(f"{symbol} net profit: {profit:.2f}%")
 
+    buys = {}
+    sells = {}
+
+    #print("\nBuys and Sells:")
+    for symbol in symbols:
+        buys[symbol] = mtrader.buys(symbol)
+        #print(f"{symbol} buys: {buys}")
+        sells[symbol] = mtrader.sells(symbol)
+        #print(f"{symbol} sells: {sells}")
+
+    if args.plot:
+        for symbol in symbols:
+            klines = all_klines[symbol]
+            times = [datetime.fromtimestamp(k['ts']) for k in klines]
+            closes = [k['close'] for k in klines]
+            buy_times = [datetime.fromtimestamp(buy['ts']) for buy in buys[symbol]]
+            buy_prices = [buy['price'] for buy in buys[symbol]]
+            sell_times = [datetime.fromtimestamp(sell['ts']) for sell in sells[symbol]]
+            sell_prices = [sell['price'] for sell in sells[symbol]]
+
+            plt.figure()
+            plt.plot(times, closes, label=symbol)
+            #plt.plot(times, ema_values[symbol], label='EMA')
+            plt.scatter(buy_times, buy_prices, color='green', marker='^', label='Buys')
+            plt.scatter(sell_times, sell_prices, color='red', marker='v', label='Sells')
+            plt.title(f"{symbol} Price Over Time")
+            plt.xlabel("Time")
+            plt.ylabel("Price")
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trade simulation with past klines.')
     parser.add_argument('--initial_usd', type=float, default=10000.0, help='Initial USD amount for simulation')
@@ -104,5 +144,6 @@ if __name__ == '__main__':
     parser.add_argument('--symbols', type=str, default='BTC-USD,ETH-USD,SOL-USD', help='Comma separated list of symbols')
     parser.add_argument('--start_date', type=str, default='2024-12-02', help='Start date for klines')
     parser.add_argument('--end_date', type=str, default='now', help='End date for klines')
+    parser.add_argument('--plot', action='store_true', help='Plot the results')
     args = parser.parse_args()
     main(args)

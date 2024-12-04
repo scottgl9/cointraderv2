@@ -24,6 +24,10 @@ class TraderPosition(object):
         self._stop_loss_set = False
         self._entry_price = 0
         self._current_price = 0
+        self._buy_price = 0.0
+        self._sell_price = 0.0
+        self._buy_price_ts = 0
+        self._sell_price_ts = 0
         self._stop_loss = 0
         self._timestamp = 0
         self._buy_amount = 0.0
@@ -36,6 +40,18 @@ class TraderPosition(object):
     
     def closed_position(self):
         return self._closed_position
+
+    def opened_position_completed(self):
+        return self._opened_position_completed
+    
+    def closed_position_completed(self):
+        return self._closed_position_completed
+    
+    def buy_info(self):
+        return {'price': self._buy_price, 'ts': self._buy_price_ts}
+
+    def sell_info(self):
+        return {'price': self._sell_price, 'ts': self._sell_price_ts}
 
     def open_position(self, price: float, stop_loss: float, size: float, timestamp: int):
         self._opened_position = True
@@ -54,6 +70,8 @@ class TraderPosition(object):
         self._buy_order.update_order(result)
         if self._buy_order.status == OrderStatus.FILLED:
             self._buy_amount = self._buy_order.filled_size
+            self._buy_price = self._buy_order.price
+            self._buy_price_ts = timestamp #self._buy_order.filled_ts
             self._opened_position_completed = True
 
     def get_position(self) -> Order:
@@ -79,6 +97,8 @@ class TraderPosition(object):
         self._sell_order.update_order(result)
 
         if self._sell_order.status == OrderStatus.FILLED:
+            self._sell_price = self._sell_order.price
+            self._sell_price_ts = timestamp #self._sell_order.filled_ts
             self._closed_position_completed = True
 
     def market_update(self, kline: Kline):

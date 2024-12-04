@@ -37,74 +37,24 @@ class SAMASignal(Signal):
 
     def update(self, kline: Kline):
         # Update the indicator with the closing price
-        src = kline
-        result = self.indicator.update(src)
+        result = self.indicator.update(kline)
         if not result:
             return
+            #{
+            #'ma': self.ma,
+            #'slope': slope,
+            #'longsignal': longsignal,
+            #'shortsignal': shortsignal
+            # }
 
-        ma = result['ma']
-        slope = result['slope']
-
-        # Determine trend direction
-        up = slope >= self.indicator.flat
-        down = slope <= -self.indicator.flat
-
-        # Detect cross up and cross down
-        if self.indicator.ready():
-            prev_up = self._last_up
-            prev_down = self._last_down
-            self._cross_up = up and not prev_up
-            self._cross_down = down and not prev_down
-        else:
-            self._cross_up = False
-            self._cross_down = False
-
-        self._last_up = up
-        self._last_down = down
-
-        # Generate swing state and signals
-        prev_swing = self.indicator.swing
-        if self._cross_up and self.indicator.swing <= 0:
-            self.indicator.swing = 1
-        elif self._cross_down and self.indicator.swing >= 0:
-            self.indicator.swing = -1
-
-        self._longsignal = self.indicator.swing == 1 and prev_swing != 1
-        self._shortsignal = self.indicator.swing == -1 and prev_swing != -1
-
-        # Store the current value
-        self._values.append({
-            'ma': ma,
-            'slope': slope,
-            'longsignal': self._longsignal,
-            'shortsignal': self._shortsignal,
-            'swing': self.indicator.swing
-        })
-
-    def ready(self):
-        # The signal is ready when the indicator is ready
-        return self.indicator.ready()
-
-    def cross_up(self):
-        return self._cross_up
-
-    def cross_down(self):
-        return self._cross_down
-
-    def above(self):
-        # Check if the price is above the moving average
-        if self.indicator.ma is not None and len(self.indicator.src_history) > 0:
-            return self.indicator.src_history[-1] > self.indicator.ma
-        return False
-
-    def below(self):
-        # Check if the price is below the moving average
-        if self.indicator.ma is not None and len(self.indicator.src_history) > 0:
-            return self.indicator.src_history[-1] < self.indicator.ma
-        return False
+        self._longsignal = result['longsignal']
+        self._shortsignal = result['shortsignal']
 
     def buy_signal(self):
         return self._longsignal
 
     def sell_signal(self):
         return self._shortsignal
+    
+    def ready(self):
+        return self.indicator.ready()
