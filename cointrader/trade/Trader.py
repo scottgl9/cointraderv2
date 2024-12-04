@@ -58,7 +58,10 @@ class Trader(object):
         # Open a position on a buy signal
         if self._strategy.buy() and len(self._positions) < self._max_positions:
             print(f'Buy signal for {self._symbol}')
-            size = self._config.max_position_quote_size() / kline.close
+            size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / kline.close)
+            if size < self._account.get_base_min_size(self._symbol):
+                print(f"Size too small: {size}")
+                return
             position = TraderPosition(symbol=self._symbol, strategy=self._strategy, execute=self._execute, config=self._config)
             position.open_position(price=kline.close, stop_loss=0, size=size, timestamp=kline.ts)
             self._positions.append(position)

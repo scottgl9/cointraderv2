@@ -35,6 +35,7 @@ def main(args):
     market = Market(exchange=exchange, db_path=args.db_path)
     account = AccountSimulate(exchange=exchange, market=market)
     account.load_symbol_info()
+    account.load_asset_info()
 
     all_klines = {}
     symbols = args.symbols.split(',')

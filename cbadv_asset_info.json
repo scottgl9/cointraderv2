@@ -1,0 +1,1167 @@
+{
+  "00": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "1INCH": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-07,
+    "precision": 7
+  },
+  "A8": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "AAVE": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "ABT": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ACH": {
+    "min_size": 0.1,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "ACX": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ADA": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "AERGO": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "AERO": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "AGLD": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "AIOZ": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "AKT": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ALCX": {
+    "min_size": 0.0001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ALEO": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ALEPH": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ALGO": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ALICE": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "APE": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "API3": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "APT": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ARB": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ARKM": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ARPA": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "AST": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ATOM": {
+    "min_size": 2e-05,
+    "step_size": 1e-07,
+    "precision": 7
+  },
+  "AUCTION": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "AUDIO": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "AURORA": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "AVAX": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "AVT": {
+    "min_size": 0.01,
+    "step_size": 0.01,
+    "precision": 2
+  },
+  "AXL": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "AXS": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-07,
+    "precision": 7
+  },
+  "BADGER": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "BAL": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "BAND": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "BAT": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "BCH": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "BICO": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "BIT": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "BLUR": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "BLZ": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "BNT": {
+    "min_size": 1e-06,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "BOBA": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "BTC": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "BTRST": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "C98": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "CBETH": {
+    "min_size": 1e-05,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "CGLD": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "CHZ": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "CLV": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "COMP": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "CORECHAIN": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "COTI": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "COW": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "CRO": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "CRV": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-07,
+    "precision": 7
+  },
+  "CTSI": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "CTX": {
+    "min_size": 0.001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "CVC": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "CVX": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "DAI": {
+    "min_size": 1e-05,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "DAR": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "DASH": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "DEXT": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "DIA": {
+    "min_size": 0.01,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "DIMO": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "DNT": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "DOGE": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "DOT": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "DRIFT": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "DYP": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "EGLD": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "EIGEN": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ELA": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ENS": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "EOS": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "ERN": {
+    "min_size": 0.001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ETC": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "ETH": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "FARM": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "FET": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "FIDA": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "FIL": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "FIS": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "FLOW": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "FORT": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "FORTH": {
+    "min_size": 0.001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "FOX": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "FX": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "GAL": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "GFI": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "GHST": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "GLM": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "GMT": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "GNO": {
+    "min_size": 0.0001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "GODS": {
+    "min_size": 0.01,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "GRT": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "GST": {
+    "min_size": 0.01,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "GTC": {
+    "min_size": 0.01,
+    "step_size": 0.01,
+    "precision": 2
+  },
+  "GUSD": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "HBAR": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "HFT": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "HIGH": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "HNT": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "HONEY": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "HOPR": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ICP": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-07,
+    "precision": 7
+  },
+  "IDEX": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ILV": {
+    "min_size": 0.0001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "IMX": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "INDEX": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "INJ": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "INV": {
+    "min_size": 0.0001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "IO": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "JTO": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "KARRAT": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "KAVA": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "KNC": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "KRL": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "KSM": {
+    "min_size": 0.0001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "LCX": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "LDO": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "LINK": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "LIT": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "LOKA": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "LPT": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "LQTY": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "LRC": {
+    "min_size": 1e-06,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "LRDS": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "LSETH": {
+    "min_size": 1e-05,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "LTC": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "MAGIC": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "MANA": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-07,
+    "precision": 7
+  },
+  "MASK": {
+    "min_size": 0.01,
+    "step_size": 0.01,
+    "precision": 2
+  },
+  "MATH": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "MATIC": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "MEDIA": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "METIS": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "MINA": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "MKR": {
+    "min_size": 1e-06,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "MLN": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "MNDE": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "MOG": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "MOODENG": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "MOVE": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "MPL": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "MSOL": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "MUSE": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "NEAR": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "NEON": {
+    "min_size": 0.01,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "NKN": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "NMR": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "OCEAN": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "OGN": {
+    "min_size": 0.01,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "OMNI": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ONDO": {
+    "min_size": 0.01,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "OP": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ORCA": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ORN": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "OSMO": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "PAX": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "PERP": {
+    "min_size": 0.001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "PIRATE": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "PLU": {
+    "min_size": 0.01,
+    "step_size": 0.01,
+    "precision": 2
+  },
+  "POL": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "POLS": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "POWR": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "PRIME": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "PRO": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "PRQ": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "PUNDIX": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "PYR": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "PYUSD": {
+    "min_size": 0.01,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "QNT": {
+    "min_size": 0.0001,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "RAD": {
+    "min_size": 0.01,
+    "step_size": 0.01,
+    "precision": 2
+  },
+  "RARE": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "RARI": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "RBN": {
+    "min_size": 0.01,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "RENDER": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "RLC": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "RNDR": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "RONIN": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ROSE": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "RPL": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "SAFE": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SAND": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SD": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SEAM": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SEI": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SHDW": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "SKL": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SNX": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-07,
+    "precision": 7
+  },
+  "SOL": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "STG": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "STORJ": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "STRK": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "STX": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SUI": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SUKU": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SUPER": {
+    "min_size": 0.01,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "SUSHI": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "SYN": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "TIA": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "TIME": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "TNSR": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "TRAC": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "TRB": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "TRU": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "UMA": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "UNI": {
+    "min_size": 1e-06,
+    "step_size": 1e-07,
+    "precision": 7
+  },
+  "USD": {
+    "min_size": 1.0,
+    "step_size": 0.01,
+    "precision": 2
+  },
+  "USDC": {
+    "min_size": 1.0,
+    "step_size": 0.01,
+    "precision": 2
+  },
+  "USDT": {
+    "min_size": 0.01,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "VELO": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "VOXEL": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "WAXL": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "WBTC": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "WCFG": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "WIF": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "XCN": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "XLM": {
+    "min_size": 1e-08,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "XRP": {
+    "min_size": 1e-06,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "XTZ": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "XYO": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "YFI": {
+    "min_size": 1e-06,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "ZEC": {
+    "min_size": 1e-05,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "ZEN": {
+    "min_size": 0.001,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ZETA": {
+    "min_size": 0.1,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ZETACHAIN": {
+    "min_size": 0.01,
+    "step_size": 0.0001,
+    "precision": 4
+  },
+  "ZK": {
+    "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "ZRO": {
+    "min_size": 0.01,
+    "step_size": 0.001,
+    "precision": 3
+  },
+  "ZRX": {
+    "min_size": 1e-05,
+    "step_size": 1e-06,
+    "precision": 6
+  }
+}

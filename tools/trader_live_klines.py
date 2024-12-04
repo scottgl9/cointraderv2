@@ -53,6 +53,7 @@ def main(name):
     market = Market(exchange=exchange)
     account = Account(exchange=exchange, market=market)
     account.load_symbol_info()
+    account.load_asset_info()
 
     print(f'Account name: {account.name()}')
     if not account.load_symbol_info():

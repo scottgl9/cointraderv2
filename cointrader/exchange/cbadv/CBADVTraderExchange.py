@@ -116,7 +116,10 @@ class CBADVTraderExchange(TraderExchangeBase):
         result = SymbolInfo()
         result.base_name = response.base_currency_id
         result.quote_name = response.quote_currency_id
-        result.price = float(response.price)
+        if response.price:
+            result.price = float(response.price)
+        else:
+            result.price = 0.0
         result.base_min_size = float(response.base_min_size)
         result.base_step_size = float(response.base_increment)
         result.quote_min_size = float(response.quote_min_size)
@@ -357,7 +360,6 @@ class CBADVTraderExchange(TraderExchangeBase):
                             order_result.error_msg = response['message']
                             return order_result
 
-        print(result)
         if 'response' in result:
             if not result['success']:
                 response = result['response']

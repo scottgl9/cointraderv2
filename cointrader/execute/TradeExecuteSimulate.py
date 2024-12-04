@@ -23,18 +23,21 @@ class TraderExecuteSimulate(ExecuteBase):
         result.size = amount
         result.filled_size = amount
 
+        if amount < self._account.get_base_min_size(symbol):
+            raise ValueError(f'{symbol} Amount is less than the minimum size of {self._account.get_base_min_size(symbol)}')
+
         # simulate account update
         base = self._exchange.info_ticker_get_base(symbol)
         quote = self._exchange.info_ticker_get_quote(symbol)
 
         # Update base balance
         base_balance, base_balance_hold = self._account.get_asset_balance(base)
-        new_base_balance =  self._account.round_base(symbol, base_balance + amount)
+        new_base_balance =  base_balance + self._account.round_base(symbol, amount)
         self._account.update_asset_balance(base, new_base_balance, base_balance_hold)
         
         # Update quote balance
         quote_balance, quote_balance_hold = self._account.get_asset_balance(quote)
-        new_quote_balance = self._account.round_quote(symbol, quote_balance - price * amount)
+        new_quote_balance = quote_balance - self._account.round_quote(symbol, price * amount)
         if new_quote_balance < 0:
             print(f'quote_balance: {quote_balance}, quote_balance_hold: {quote_balance_hold}, new_quote_balance: {new_quote_balance}')
             raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
@@ -54,13 +57,17 @@ class TraderExecuteSimulate(ExecuteBase):
         result.size = amount
         result.filled_size = amount
 
+        if amount < self._account.get_base_min_size(symbol):
+            raise ValueError(f'{symbol} Amount is less than the minimum size of {self._account.get_base_min_size(symbol)}')
+
+
         # simulate account update
         base = self._exchange.info_ticker_get_base(symbol)
         quote = self._exchange.info_ticker_get_quote(symbol)
 
         # Update base balance
         base_balance, base_balance_hold = self._account.get_asset_balance(base)
-        new_base_balance = self._account.round_base(symbol, base_balance - amount)
+        new_base_balance = base_balance - self._account.round_base(symbol, amount)
         if new_base_balance < 0:
             print(f'base_balance: {base_balance}, new_base_balance: {new_base_balance}')
             raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
@@ -68,7 +75,7 @@ class TraderExecuteSimulate(ExecuteBase):
 
         # Update quote balance
         quote_balance, quote_balance_hold = self._account.get_asset_balance(quote)
-        new_quote_balance = self._account.round_quote(symbol, quote_balance + price * amount)
+        new_quote_balance = quote_balance + self._account.round_quote(symbol, price * amount)
         self._account.update_asset_balance(quote, new_quote_balance, quote_balance_hold)
 
         self._orders[result.id] = result

@@ -1,4 +1,5 @@
 from cointrader.common.SymbolInfo import SymbolInfo
+from cointrader.common.AssetInfo import AssetInfo
 from cointrader.market.MarketBase import MarketBase
 from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 
@@ -18,6 +19,30 @@ class AccountBase(object):
     def exchange(self):
         raise NotImplementedError
 
+    def get_base_precision(self, symbol: str) -> int:
+        """
+        Get the base precision
+        """
+        raise NotImplementedError
+
+    def get_quote_precision(self, symbol: str) -> int:
+        """
+        Get the quote precision
+        """
+        raise NotImplementedError
+
+    def get_base_min_size(self, symbol: str) -> float:
+        """
+        Get the base min size
+        """
+        raise NotImplementedError
+
+    def get_quote_min_size(self, symbol: str) -> float:
+        """
+        Get the quote min size
+        """
+        raise NotImplementedError
+
     def round_base(self, symbol: str, amount: float) -> float:
         """
         Round the amount to the base precision
@@ -27,6 +52,12 @@ class AccountBase(object):
     def round_quote(self, symbol: str, amount: float) -> float:
         """
         Round the amount to the quote precision
+        """
+        raise NotImplementedError
+
+    def round_asset(self, asset: str, amount: float) -> float:
+        """
+        Round the amount to the asset precision
         """
         raise NotImplementedError
 
@@ -50,3 +81,21 @@ class AccountBase(object):
     
     def get_symbol_info(self, symbol) -> SymbolInfo:
         raise NotImplementedError
+
+    def load_asset_info(self) -> bool:
+        """
+        Load the information for all assets
+        """
+        raise NotImplementedError
+
+    def save_asset_info(self) -> bool:
+        """
+        Save the information for all assets to a file
+        """
+        raise NotImplementedError
+
+    def get_asset_info(self, asset) -> AssetInfo:
+        """
+        Get the information for an asset
+        """
+        return NotImplementedError

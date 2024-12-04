@@ -13,6 +13,7 @@ def main(name):
     market = Market(exchange=exchange)
     account = Account(exchange=exchange, market=market)
     account.load_symbol_info()
+    account.load_asset_info()
 
     print(f"Acccount balances:")
     balances = account.get_account_balances()

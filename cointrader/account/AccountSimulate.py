@@ -4,22 +4,63 @@ from .AccountBase import AccountBase
 from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.common.SymbolInfoConfig import SymbolInfoConfig
+from cointrader.common.AssetInfoConfig import AssetInfoConfig
+from cointrader.common.AssetInfo import AssetInfo
 from cointrader.market.MarketBase import MarketBase
 
 class AccountSimulate(AccountBase):
     _symbol_info = None
-    def __init__(self, exchange: TraderExchangeBase, market: MarketBase, symbol_info=None, logger=None):
+    def __init__(self, exchange: TraderExchangeBase, market: MarketBase, symbol_info=None, asset_info=None, logger=None):
         super().__init__(exchange=exchange, market=market, logger=logger)
         self._name = exchange.name()
         if not symbol_info:
             symbol_info = SymbolInfoConfig(exchange=exchange, path=f'{self._name}_symbol_info.json')
+        if not asset_info:
+            asset_info = AssetInfoConfig(exchange=exchange, path=f'{self._name}_asset_info.json')
         self._symbol_info = symbol_info
+        self._asset_info = asset_info
         self._balances = {}
         self._tickers_info = {}
         self._exchange = exchange
 
     def exchange(self) -> TraderExchangeBase:
         return self._exchange
+
+    def get_base_precision(self, symbol: str) -> int:
+        """
+        Get the base precision
+        """
+        try:
+            return self._symbol_info.get_symbol_info(symbol).base_precision
+        except KeyError:
+            return 8
+        
+    def get_quote_precision(self, symbol: str) -> int:
+        """
+        Get the quote precision
+        """
+        try:
+            return self._symbol_info.get_symbol_info(symbol).quote_precision
+        except KeyError:
+            return 8
+
+    def get_base_min_size(self, symbol: str) -> float:
+        """
+        Get the base min size
+        """
+        try:
+            return self._symbol_info.get_symbol_info(symbol).base_min_size
+        except KeyError:
+            return 0.0
+
+    def get_quote_min_size(self, symbol: str) -> float:
+        """
+        Get the quote min size
+        """
+        try:
+            return self._symbol_info.get_symbol_info(symbol).quote_min_size
+        except KeyError:
+            return 0.0
 
     def round_base(self, symbol: str, amount: float) -> float:
         """
@@ -29,7 +70,10 @@ class AccountSimulate(AccountBase):
             base_precision = self._symbol_info.get_symbol_info(symbol).base_precision
         except KeyError:
             base_precision = 8
-        return round(amount, base_precision)
+
+        amount_str = f"{amount:.{base_precision}f}"
+        #print(f'round_base: {symbol} {amount} -> {amount_str}')
+        return float(amount_str)
 
     def round_quote(self, symbol: str, amount: float) -> float:
         """
@@ -40,7 +84,25 @@ class AccountSimulate(AccountBase):
         except KeyError:
             quote_precision = 8
 
-        return round(amount, quote_precision)
+        amount_str = f"{amount:.{quote_precision}f}"
+        #print(f'round_quote: {symbol} {amount} -> {amount_str}')
+        return float(amount_str)
+
+    def round_asset(self, asset: str, amount: float) -> float:
+        """
+        Round the amount to the asset precision
+        """
+        asset_precision = 8
+        try:
+            asset_info = self._asset_info.get_asset_info(asset)
+            if asset_info:
+                asset_precision = asset_info.precision
+        except KeyError:
+            pass
+
+        amount_str = f"{amount:.{asset_precision}f}"
+        #print(f'round_asset: {asset} {amount} -> {amount_str} {asset_precision}')
+        return float(amount_str)
 
     def get_account_balances(self) -> dict:
         """
@@ -110,22 +172,31 @@ class AccountSimulate(AccountBase):
                             total_balance += total * prices[symbol]
                             break
 
-        return total_balance
+        return self.round_asset(currency, total_balance)
 
     def get_asset_balance(self, asset : str) -> tuple[float, float]:
         """
         Get the asset balance
         """
         try:
-            return self._balances[asset]
+            balance, hold = self._balances[asset]
+            if balance != 0.0:
+                balance = self.round_asset(asset, balance)
+            if hold != 0.0:
+                hold = self.round_asset(asset, hold)
+            return tuple([balance, hold])
         except KeyError:
-            return 0.0, 0.0
+            return tuple([0.0, 0.0])
 
     def update_asset_balance(self, asset, available: float, hold: float):
         """
         Update the asset balance
         """
-        self._balances[asset] = (available, hold)
+        if available != 0.0:
+            available = self.round_asset(asset, available)
+        if hold != 0.0:
+            hold = self.round_asset(asset, hold)
+        self._balances[asset] = tuple([available, hold])
 
     def load_symbol_info(self):
         """
@@ -147,8 +218,34 @@ class AccountSimulate(AccountBase):
         """
         self._symbol_info.save()
 
-    def get_symbol_info(self, symbol) -> SymbolInfo:
+    def get_symbol_info(self, symbol: str) -> SymbolInfo:
         """
         Get the information for a symbol
         """
         return self._symbol_info.get_symbol_info(symbol)
+
+    def load_asset_info(self) -> bool:
+        """
+        Load the information for all assets
+        """
+        print(f'Loading asset info from {self._name}')
+        if not self._asset_info.file_exists():
+            print(f'Loading asset info from {self._name}')
+            if not self._asset_info.fetch():
+                return False
+            self.save_asset_info()
+        else:
+            self._asset_info.load()
+        return True
+
+    def save_asset_info(self) -> bool:
+        """
+        Save the information for all assets to a file
+        """
+        self._asset_info.save()
+
+    def get_asset_info(self, asset: str) -> AssetInfo:
+        """
+        Get the information for an asset
+        """
+        return self._asset_info.get_asset_info(asset)
