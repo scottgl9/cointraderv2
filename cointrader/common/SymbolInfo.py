@@ -1,4 +1,5 @@
 # This file contains the SymbolInfo class which is used to store information about a trading pair
+from decimal import Decimal
 
 class SymbolInfo(object):
     initialized = False
@@ -20,13 +21,13 @@ class SymbolInfo(object):
     def load_from_dict(self, data):
         self.base_name = data['base_name']
         self.quote_name = data['quote_name']
-        self.base_min_size = data['base_min_size']
-        self.quote_min_size = data['quote_min_size']
-        self.base_step_size = data['base_step_size']
-        self.quote_step_size = data['quote_step_size']
+        self.base_min_size = Decimal(data['base_min_size'])
+        self.quote_min_size = Decimal(data['quote_min_size'])
+        self.base_step_size = Decimal(data['base_step_size'])
+        self.quote_step_size = Decimal(data['quote_step_size'])
         self.is_currency_pair = data['is_currency_pair']
-        self.base_precision = data['base_precision']
-        self.quote_precision = data['quote_precision']
+        self.base_precision = Decimal(data['base_precision'])
+        self.quote_precision = Decimal(data['quote_precision'])
         self.orderTypes = data['orderTypes']
         self.initialized = True
 

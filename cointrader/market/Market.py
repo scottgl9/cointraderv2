@@ -1,6 +1,7 @@
 from .MarketBase import MarketBase
 from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from .MarketStorage import MarketStorage
+from decimal import Decimal
 
 class Market(MarketBase):
     _exchange = None
@@ -10,7 +11,7 @@ class Market(MarketBase):
         self._db_path = db_path
         self._storage = MarketStorage(db_path)
 
-    def market_ticker_price_get(self, ticker: str) -> float:
+    def market_ticker_price_get(self, ticker: str) -> Decimal:
         """Get ticker price"""
         return self._exchange.market_ticker_price_get(ticker)
 

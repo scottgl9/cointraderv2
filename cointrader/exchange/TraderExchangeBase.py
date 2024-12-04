@@ -2,6 +2,7 @@
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.order.OrderResult import OrderResult
 from cointrader.order.OrderStopDirection import OrderStopDirection
+from decimal import Decimal
 
 class TraderExchangeBase(object):
     _name = None
@@ -84,32 +85,32 @@ class TraderExchangeBase(object):
         """Get account ids if account is multi-account"""
         raise NotImplementedError
 
-    def account_get_maker_fee(self) -> float:
+    def account_get_maker_fee(self) -> Decimal:
         """Get maker trade fee"""
         raise NotImplementedError
 
-    def account_get_taker_fee(self) -> float:
+    def account_get_taker_fee(self) -> Decimal:
         """Get taker trade fee"""
         raise NotImplementedError
 
 
-    def balance_get(self, currency: str) -> float:
+    def balance_get(self, currency: str) -> Decimal:
         """Get balance of currency"""
         raise NotImplementedError
 
-    def balance_set(self, currency: str, value: float) -> None:
+    def balance_set(self, currency: str, value: Decimal) -> None:
         """Set balance of currency (used for testing)"""
         raise NotImplementedError
 
-    def balance_get(self, currency: str) -> tuple[float, float]:
+    def balance_get(self, currency: str) -> tuple[Decimal, Decimal]:
         """Get balance of currency"""
         raise NotImplementedError
 
-    def balance_set(self, currency: str, available: float, hold: float) -> None:
+    def balance_set(self, currency: str, available: Decimal, hold: Decimal) -> None:
         """Set balance of currency (used for testing)"""
         raise NotImplementedError
 
-    def balance_all_get(self) -> dict[str, tuple[float, float]]:
+    def balance_all_get(self) -> dict[str, tuple[Decimal, Decimal]]:
         """Get all balances with non-zero values"""
         raise NotImplementedError
 
@@ -143,27 +144,27 @@ class TraderExchangeBase(object):
         raise NotImplementedError
 
 
-    def trade_buy_market(self, ticker: str, amount: float) -> dict:
+    def trade_buy_market(self, ticker: str, amount: Decimal) -> dict:
         """Buy at market price"""
         raise NotImplementedError
     
-    def trade_sell_market(self, ticker: str, amount: float) -> dict:
+    def trade_sell_market(self, ticker: str, amount: Decimal) -> dict:
         """Sell at market price"""
         raise NotImplementedError
 
-    def trade_buy_limit(self, ticker: str, amount: float, price: float, type: str) -> dict:
+    def trade_buy_limit(self, ticker: str, amount: Decimal, price: Decimal, type: str) -> dict:
         """Buy at a specific price"""
         raise NotImplementedError
     
-    def trade_sell_limit(self, ticker: str, amount: float, price: float, type: str) -> dict:
+    def trade_sell_limit(self, ticker: str, amount: Decimal, price: Decimal, type: str) -> dict:
         """Sell at a specific price"""
         raise NotImplementedError
     
-    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, stop_direction: OrderStopDirection, type: str = "") -> dict:
+    def trade_buy_stop_limit(self, ticker: str, amount: Decimal, price: Decimal, stop_price: Decimal, stop_direction: OrderStopDirection, type: str = "") -> dict:
         """Buy at a specific price when stop price is reached"""
         raise NotImplementedError
     
-    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, stop_direction: OrderStopDirection, type: str = "") -> dict:
+    def trade_sell_stop_limit(self, ticker: str, amount: Decimal, price: Decimal, stop_price: Decimal, stop_direction: OrderStopDirection, type: str = "") -> dict:
         """Sell at a specific price when stop price is reached"""
         raise NotImplementedError
 

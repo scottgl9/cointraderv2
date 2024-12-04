@@ -1,6 +1,7 @@
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.market.MarketBase import MarketBase
 from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
+from decimal import Decimal
 
 class AccountBase(object):
     _logger = None
@@ -18,13 +19,13 @@ class AccountBase(object):
     def exchange(self):
         raise NotImplementedError
 
-    def round_base(self, symbol: str, amount: float) -> float:
+    def round_base(self, symbol: str, amount: Decimal) -> Decimal:
         """
         Round the amount to the base precision
         """
         raise NotImplementedError
 
-    def round_quote(self, symbol: str, amount: float) -> float:
+    def round_quote(self, symbol: str, amount: Decimal) -> Decimal:
         """
         Round the amount to the quote precision
         """
@@ -33,13 +34,13 @@ class AccountBase(object):
     def get_account_balances(self) -> dict:
         raise NotImplementedError
 
-    def get_total_balance(self, currency : str) -> float:
+    def get_total_balance(self, currency : str) -> Decimal:
         raise NotImplementedError
 
-    def get_asset_balance(self, asset : str) -> tuple[float, float]:
+    def get_asset_balance(self, asset : str) -> tuple[Decimal, Decimal]:
         raise NotImplementedError
 
-    def update_asset_balance(self, asset: str, available: float, hold: float):
+    def update_asset_balance(self, asset: str, available: Decimal, hold: Decimal):
         raise NotImplementedError
     
     def load_symbol_info(self) -> bool:

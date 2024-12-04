@@ -3,6 +3,7 @@ from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.market.MarketBase import MarketBase
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.common.SymbolInfoConfig import SymbolInfoConfig
+from decimal import Decimal
 
 class Account(AccountBase):
     _symbol_info = None
@@ -21,7 +22,7 @@ class Account(AccountBase):
     def exchange(self) -> TraderExchangeBase:
         return self._exchange
 
-    def round_base(self, symbol: str, amount: float) -> float:
+    def round_base(self, symbol: str, amount: Decimal) -> Decimal:
         """
         Round the amount to the base precision
         """
@@ -31,7 +32,7 @@ class Account(AccountBase):
             base_precision = 8
         return round(amount, base_precision)
 
-    def round_quote(self, symbol: str, amount: float) -> float:
+    def round_quote(self, symbol: str, amount: Decimal) -> Decimal:
         """
         Round the amount to the quote precision
         """
@@ -48,7 +49,7 @@ class Account(AccountBase):
         """
         return self._exchange.balance_all_get()
 
-    def get_total_balance(self, currency : str) -> float:
+    def get_total_balance(self, currency : str) -> Decimal:
         """
         Get the total balance of a currency
         """
@@ -80,7 +81,7 @@ class Account(AccountBase):
                 symbol = self._exchange.info_ticker_join(c, currency)
                 prices[symbol] = self._market.market_ticker_price_get(ticker=symbol)
     
-        total_balance = 0.0
+        total_balance = Decimal(0.0)
         for asset, (balance, available) in self.get_account_balances().items():
             total = balance + available
             if total == 0.0:
@@ -112,13 +113,13 @@ class Account(AccountBase):
 
         return total_balance
 
-    def get_asset_balance(self, asset : str) -> tuple[float, float]:
+    def get_asset_balance(self, asset : str) -> tuple[Decimal, Decimal]:
         """
         Get the asset balance
         """
         return self._exchange.balance_get(asset)
 
-    def update_asset_balance(self, asset: str, available: float, hold: float):
+    def update_asset_balance(self, asset: str, available: Decimal, hold: Decimal):
         """
         Update the asset balance
         """

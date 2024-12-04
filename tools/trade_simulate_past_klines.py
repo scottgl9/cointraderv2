@@ -3,7 +3,7 @@ import logging
 from coinbase.websocket import WSClient, WebsocketResponse
 #from coinbase.rest import RESTExchange
 from datetime import datetime, timedelta
-
+from decimal import Decimal, getcontext
 import json
 import sys
 import time
@@ -27,6 +27,7 @@ from cointrader.config import *
 
 
 def main(args):
+    getcontext().prec = 8
     name = args.exchange
     initial_usd = args.initial_usd
 
@@ -83,7 +84,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trade simulation with past klines.')
-    parser.add_argument('--initial_usd', type=float, default=10000.0, help='Initial USD amount for simulation')
+    parser.add_argument('--initial_usd', type=Decimal, default=10000.0, help='Initial USD amount for simulation')
     parser.add_argument('--exchange', type=str, default="cbadv", help='Account to use for simulation')
     parser.add_argument('--granularity', type=int, default=300, help='Granularity of klines')
     parser.add_argument('--db_path', type=str, default='market_data.db', help='Path to the database file')

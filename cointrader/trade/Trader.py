@@ -7,6 +7,7 @@ from .TraderConfig import TraderConfig
 from cointrader.execute.ExecuteBase import ExecuteBase
 from .TraderPosition import TraderPosition
 import importlib
+from decimal import Decimal
 
 class Trader(object):
     _symbol = None
@@ -69,5 +70,5 @@ class Trader(object):
             for position in self._positions:
                 position.close_position(price=kline.close, timestamp=kline.ts)
 
-    def get_total_profit(self, currency: str) -> float:
+    def get_total_profit(self, currency: str) -> Decimal:
         pass

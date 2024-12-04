@@ -10,6 +10,7 @@ from cointrader.order.OrderLimitType import OrderLimitType
 from cointrader.order.OrderStopDirection import OrderStopDirection
 from cointrader.order.OrderErrorReason import OrderErrorReason
 from datetime import datetime
+from decimal import Decimal
 
 class CBADVTraderExchange(TraderExchangeBase):
     MAX_CANDLES = 350
@@ -116,13 +117,13 @@ class CBADVTraderExchange(TraderExchangeBase):
         result = SymbolInfo()
         result.base_name = response.base_currency_id
         result.quote_name = response.quote_currency_id
-        result.price = float(response.price)
-        result.base_min_size = float(response.base_min_size)
-        result.base_step_size = float(response.base_increment)
-        result.quote_min_size = float(response.quote_min_size)
-        result.quote_step_size = float(response.quote_increment)
+        result.price = Decimal(response.price)
+        result.base_min_size = Decimal(response.base_min_size)
+        result.base_step_size = Decimal(response.base_increment)
+        result.quote_min_size = Decimal(response.quote_min_size)
+        result.quote_step_size = Decimal(response.quote_increment)
 
-        def get_precision(step_size: float) -> int:
+        def get_precision(step_size: Decimal) -> int:
             """Get precision based on step size"""
             step_size_str = f"{step_size:.10f}".rstrip('0')
             if '.' in step_size_str:
@@ -155,45 +156,45 @@ class CBADVTraderExchange(TraderExchangeBase):
         """Get account ids if account is multi-account"""
         raise NotImplementedError
 
-    def account_get_maker_fee(self) -> float:
+    def account_get_maker_fee(self) -> Decimal:
         """Get maker trade fee"""
         return self.client.get_transaction_summary().fee_tier['maker_fee_rate']
 
-    def account_get_taker_fee(self) -> float:
+    def account_get_taker_fee(self) -> Decimal:
         """Get taker trade fee"""
         return self.client.get_transaction_summary().fee_tier['taker_fee_rate']
 
 
-    def balance_get(self, currency: str) -> tuple[float, float]:
+    def balance_get(self, currency: str) -> tuple[Decimal, Decimal]:
         """Get balance of currency"""
         accounts = self.client.get_accounts(limit=250).accounts
         for account in accounts:
             if account.currency == currency:
-                available_balance = float(account.available_balance['value'])
-                hold_balance = float(account.hold['value'])
+                available_balance = Decimal(account.available_balance['value'])
+                hold_balance = Decimal(account.hold['value'])
                 return (available_balance, hold_balance)
 
-    def balance_set(self, currency: str, available: float, hold: float) -> None:
+    def balance_set(self, currency: str, available: Decimal, hold: Decimal) -> None:
         """Set balance of currency (used for testing)"""
         pass
 
-    def balance_all_get(self) -> dict[str, tuple[float, float]]:
+    def balance_all_get(self) -> dict[str, tuple[Decimal, Decimal]]:
         """Get all balances"""
         accounts = self.client.get_accounts(limit=250).accounts
         result = {}
         for account in accounts:
-            available_balance = float(account.available_balance['value'])
-            hold_balance = float(account.hold['value'])
+            available_balance = Decimal(account.available_balance['value'])
+            hold_balance = Decimal(account.hold['value'])
             result[account.currency] = (available_balance, hold_balance)
         return result
 
-    def market_ticker_price_get(self, ticker: str) -> float:
+    def market_ticker_price_get(self, ticker: str) -> Decimal:
         """Get ticker information"""
         response = self.client.get_product(product_id=ticker)
         try:
-            result = float(response.price)
+            result = Decimal(response.price)
         except ValueError:
-            result = 0.0
+            result = Decimal(0.0)
         return result
 
     def market_ticker_prices_all_get(self) -> dict:
@@ -201,10 +202,12 @@ class CBADVTraderExchange(TraderExchangeBase):
         result = {}
         products = self._info_get_products()
         for product in products:
+            if not product.price:
+                continue
             try:
-                result[product.product_id] = float(product.price)
+                result[product.product_id] = Decimal(product.price)
             except ValueError:
-                result[product.product_id] = 0.0
+                result[product.product_id] = Decimal(0.0)
         return result
 
     def market_get_orderbook(self, ticker: str, level: int) -> dict: 
@@ -231,7 +234,7 @@ class CBADVTraderExchange(TraderExchangeBase):
         candles = [candle.__dict__ for candle in candles]
         return candles
 
-    def trade_buy_market(self, ticker: str, amount: float) -> dict:
+    def trade_buy_market(self, ticker: str, amount: Decimal) -> dict:
         """Buy at market price"""
         try:
             result = self.client.market_order_buy(client_order_id='', product_id=ticker, base_size=str(amount))
@@ -241,7 +244,7 @@ class CBADVTraderExchange(TraderExchangeBase):
             result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
     
-    def trade_sell_market(self, ticker: str, amount: float) -> dict:
+    def trade_sell_market(self, ticker: str, amount: Decimal) -> dict:
         """Sell at market price"""
         try:
             result = self.client.market_order_sell(client_order_id='', product_id=ticker, base_size=str(amount))
@@ -252,7 +255,7 @@ class CBADVTraderExchange(TraderExchangeBase):
 
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_buy_limit(self, ticker: str, amount: float, price: float, type: str = "") -> dict:
+    def trade_buy_limit(self, ticker: str, amount: Decimal, price: Decimal, type: str = "") -> dict:
         """Buy at a specific price"""
         try:
             result = self.client.limit_order_gtc_buy(client_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
@@ -262,7 +265,7 @@ class CBADVTraderExchange(TraderExchangeBase):
             result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_sell_limit(self, ticker: str, amount: float, price: float, type: str = "") -> dict:
+    def trade_sell_limit(self, ticker: str, amount: Decimal, price: Decimal, type: str = "") -> dict:
         """Sell at a specific price"""
         try:
             result = self.client.limit_order_gtc_sell(client_order_id='', product_id=ticker, limit_price=str(price), base_size=str(amount))
@@ -272,7 +275,7 @@ class CBADVTraderExchange(TraderExchangeBase):
             result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_buy_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, stop_direction: OrderStopDirection = OrderStopDirection.ABOVE, type: str = "") -> dict:
+    def trade_buy_stop_limit(self, ticker: str, amount: Decimal, price: Decimal, stop_price: Decimal, stop_direction: OrderStopDirection = OrderStopDirection.ABOVE, type: str = "") -> dict:
         """Buy at a specific price when stop price is reached"""
         if stop_direction == OrderStopDirection.BELOW:
             direction = self.STOP_DIRECTION_DOWN
@@ -291,7 +294,7 @@ class CBADVTraderExchange(TraderExchangeBase):
             result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
         return self.trade_parse_order_result(result, ticker)
 
-    def trade_sell_stop_limit(self, ticker: str, amount: float, price: float, stop_price: float, stop_direction: OrderStopDirection = OrderStopDirection.BELOW, type: str = "") -> dict:
+    def trade_sell_stop_limit(self, ticker: str, amount: Decimal, price: Decimal, stop_price: Decimal, stop_direction: OrderStopDirection = OrderStopDirection.BELOW, type: str = "") -> dict:
         """Sell at a specific price when stop price is reached"""
         if stop_direction == OrderStopDirection.ABOVE:
             direction = self.STOP_DIRECTION_UP
@@ -419,10 +422,10 @@ class CBADVTraderExchange(TraderExchangeBase):
                 order_result.filled_ts = int(dt.timestamp())
 
             if 'filled_size' in sub_result:
-                order_result.filled_size = float(sub_result['filled_size'])
+                order_result.filled_size = Decimal(sub_result['filled_size'])
 
             if 'total_fees' in sub_result:
-                order_result.fee = float(sub_result['total_fees'])
+                order_result.fee = Decimal(sub_result['total_fees'])
 
             if 'time_in_force' in sub_result:
                 if sub_result['time_in_force'] == 'GOOD_UNTIL_CANCELLED':
@@ -433,9 +436,9 @@ class CBADVTraderExchange(TraderExchangeBase):
                     order_result.limit_type = OrderLimitType.UNKNOWN
 
             if 'average_filled_price' in sub_result:
-                order_result.price = float(sub_result['average_filled_price'])
+                order_result.price = Decimal(sub_result['average_filled_price'])
             elif 'filled_value' in sub_result:
-                order_result.price = float(sub_result['filled_value'])
+                order_result.price = Decimal(sub_result['filled_value'])
 
             if 'order_configuration' in sub_result:
                 order_configuration = sub_result['order_configuration']
@@ -443,14 +446,14 @@ class CBADVTraderExchange(TraderExchangeBase):
                 if 'market_market_ioc' in order_configuration:
                     order_type = 'market_market_ioc'
                     order_result.type = OrderType.MARKET
-                    order_result.size = float(order_configuration[order_type]['base_size'])
+                    order_result.size = Decimal(order_configuration[order_type]['base_size'])
                     order_result.status = OrderStatus.PLACED
                     order_result.error_reason = OrderErrorReason.NONE
                 elif 'limit_limit_gtc' in order_configuration:
                     order_type = 'limit_limit_gtc'
                     order_result.type = OrderType.LIMIT
-                    order_result.limit_price = float(order_configuration[order_type]['limit_price'])
-                    order_result.size = float(order_configuration[order_type]['base_size'])
+                    order_result.limit_price = Decimal(order_configuration[order_type]['limit_price'])
+                    order_result.size = Decimal(order_configuration[order_type]['base_size'])
                     order_result.status = OrderStatus.PLACED
                     order_result.error_reason = OrderErrorReason.NONE
                     if 'post_only' in order_configuration[order_type]:
@@ -458,9 +461,9 @@ class CBADVTraderExchange(TraderExchangeBase):
                 elif 'stop_limit_stop_limit_gtc' in order_configuration:
                     order_type = 'stop_limit_stop_limit_gtc'
                     order_result.type = OrderType.STOP_LOSS_LIMIT
-                    order_result.limit_price = float(order_configuration[order_type]['limit_price'])
-                    order_result.size = float(order_configuration[order_type]['base_size'])
-                    order_result.stop_price = float(order_configuration[order_type]['stop_price'])
+                    order_result.limit_price = Decimal(order_configuration[order_type]['limit_price'])
+                    order_result.size = Decimal(order_configuration[order_type]['base_size'])
+                    order_result.stop_price = Decimal(order_configuration[order_type]['stop_price'])
                     if order_configuration[order_type]['stop_direction'] == "STOP_DIRECTION_STOP_UP":
                         order_result.stop_direction = OrderStopDirection.ABOVE
                     elif order_configuration[order_type]['stop_direction'] == "STOP_DIRECTION_STOP_DOWN":

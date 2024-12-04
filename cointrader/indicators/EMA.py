@@ -9,6 +9,8 @@ class EMA(Indicator):
         self.reset()
 
     def update(self, kline : Kline):
+        kline.close = float(kline.close)
+
         self.klines.append(kline)
         self.timestamps.append(kline.ts)
         if len(self.values) == 0:

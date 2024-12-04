@@ -29,6 +29,9 @@ class SlopeAdaptiveMovingAverage(Indicator):
         """
         Update the indicator with the latest closing price.
         """
+        src.close = float(src.close)
+        src.high = float(src.high)
+        src.low = float(src.low)
         self.src_history.append(src)
 
         # Calculate highest high and lowest low over 'length + 1' periods

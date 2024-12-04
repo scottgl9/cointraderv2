@@ -32,7 +32,7 @@ def main():
     df = pd.read_json(klines, orient='records')
     #df['start'] = pd.to_datetime(df['start'], unit='s')
 
-    df[numeric_columns] = df[numeric_columns].astype(float)
+    df[numeric_columns] = df[numeric_columns].astype(Decimal)
     df.set_index('start', inplace=True)
 
     # Plot historical data

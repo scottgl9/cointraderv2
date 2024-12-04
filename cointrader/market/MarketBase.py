@@ -1,4 +1,5 @@
 from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
+from decimal import Decimal
 
 class MarketBase(object):
     _exchange = None
@@ -10,7 +11,7 @@ class MarketBase(object):
     def exchange(self):
         return self._exchange
 
-    def market_ticker_price_get(self, ticker: str) -> float:
+    def market_ticker_price_get(self, ticker: str) -> Decimal:
         """Get ticker price"""
         raise NotImplementedError
 

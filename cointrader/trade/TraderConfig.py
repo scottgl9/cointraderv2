@@ -1,5 +1,6 @@
 import os
 import json
+from decimal import Decimal
 
 # Example of a trade config
 DEFAULT_TRADE_CONFIG = {
@@ -108,10 +109,10 @@ class TraderConfig(object):
     def set_trade_symbols(self, trade_symbols: dict):
         self.set('trade_symbols', trade_symbols)
 
-    def stop_loss_percent(self) -> float:
+    def stop_loss_percent(self) -> Decimal:
         return self.get('stop_loss_percent')
     
-    def set_stop_loss_percent(self, stop_loss_percent: float):
+    def set_stop_loss_percent(self, stop_loss_percent: Decimal):
         self.set('stop_loss_percent', stop_loss_percent)
 
     def trailing_stop_loss(self) -> bool:
@@ -120,10 +121,10 @@ class TraderConfig(object):
     def set_trailing_stop_loss(self, trailing_stop_loss: bool):
         self.set('trailing_stop_loss', trailing_stop_loss)
 
-    def min_take_profit_percent(self) -> float:
+    def min_take_profit_percent(self) -> Decimal:
         return self.get('min_take_profit_percent')
     
-    def set_min_take_profit_percent(self, min_take_profit_percent: float):
+    def set_min_take_profit_percent(self, min_take_profit_percent: Decimal):
         self.set('take_profit_percent', min_take_profit_percent)
 
     def stop_on_loss(self) -> bool:
@@ -132,10 +133,10 @@ class TraderConfig(object):
     def set_stop_on_loss(self, stop_on_loss: bool):
         self.set('stop_on_loss', stop_on_loss)
 
-    def max_total_loss_percent(self) -> float:
+    def max_total_loss_percent(self) -> Decimal:
         return self.get('max_total_loss_percent')
     
-    def set_max_total_loss_percent(self, max_total_loss_percent: float):
+    def set_max_total_loss_percent(self, max_total_loss_percent: Decimal):
         self.set('max_total_loss_percent', max_total_loss_percent)
 
     def cooldown_period_seconds(self) -> int:

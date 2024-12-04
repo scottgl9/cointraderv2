@@ -1,4 +1,5 @@
 # Kline (OHLCV) class
+from decimal import Decimal
 
 class Kline(object):
     symbol = None
@@ -20,11 +21,11 @@ class Kline(object):
     def __init__(self, symbol=None, open=0, close=0, low=0, high=0,
                  volume=0, ts=0):
         self.symbol = symbol
-        self.open = open
-        self.close = close
-        self.low = low
-        self.high = high
-        self.volume = volume
+        self.open = Decimal(open)
+        self.close = Decimal(close)
+        self.low = Decimal(low)
+        self.high = Decimal(high)
+        self.volume = Decimal(volume)
         self.ts = ts
 
     def set_dict_names(self, symbol=None, open='open', close='close', 
@@ -40,21 +41,21 @@ class Kline(object):
     def from_dict(self, data):
         if self.symbol_name:
             self.symbol = data.get(self.symbol_name)
-        self.open = float(data.get(self.open_name))
-        self.close = float(data.get(self.close_name))
-        self.low = float(data.get(self.low_name))
-        self.high = float(data.get(self.high_name))
-        self.volume = float(data.get(self.volume_name))
+        self.open = Decimal(data.get(self.open_name))
+        self.close = Decimal(data.get(self.close_name))
+        self.low = Decimal(data.get(self.low_name))
+        self.high = Decimal(data.get(self.high_name))
+        self.volume = Decimal(data.get(self.volume_name))
         self.ts = int(data.get(self.ts_name))
 
     def __dict__(self):
         return {
             self.symbol_name: self.symbol,
-            self.open_name: float(self.open),
-            self.close_name: float(self.close),
-            self.low_name: float(self.low),
-            self.high_name: float(self.high),
-            self.volume_name: float(self.volume),
+            self.open_name: Decimal(self.open),
+            self.close_name: Decimal(self.close),
+            self.low_name: Decimal(self.low),
+            self.high_name: Decimal(self.high),
+            self.volume_name: Decimal(self.volume),
             self.ts_name: int(self.ts)
         }
 

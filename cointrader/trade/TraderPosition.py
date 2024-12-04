@@ -4,6 +4,7 @@ from cointrader.order.Order import Order, OrderSide, OrderType, OrderStatus
 from cointrader.order.Orders import Orders
 from cointrader.execute.ExecuteBase import ExecuteBase
 from .TraderConfig import TraderConfig
+from decimal import Decimal
 
 class TraderPosition(object):
     _symbol = None
@@ -22,7 +23,7 @@ class TraderPosition(object):
         self._stop_loss = 0
         self._timestamp = 0
 
-    def open_position(self, price: float, stop_loss: float, size: float, timestamp: int):
+    def open_position(self, price: Decimal, stop_loss: Decimal, size: Decimal, timestamp: int):
         self._entry_price = price
         self._stop_loss = stop_loss
         self._timestamp = timestamp
@@ -40,7 +41,7 @@ class TraderPosition(object):
     def get_position(self) -> Order:
         return self._order
 
-    def close_position(self, price: float, timestamp: int):
+    def close_position(self, price: Decimal, timestamp: int):
         self.current_price = price
         self._timestamp = timestamp
 

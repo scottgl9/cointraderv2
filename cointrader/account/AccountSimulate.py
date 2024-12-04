@@ -5,6 +5,7 @@ from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.common.SymbolInfoConfig import SymbolInfoConfig
 from cointrader.market.MarketBase import MarketBase
+from decimal import Decimal, ROUND_DOWN
 
 class AccountSimulate(AccountBase):
     _symbol_info = None
@@ -21,26 +22,30 @@ class AccountSimulate(AccountBase):
     def exchange(self) -> TraderExchangeBase:
         return self._exchange
 
-    def round_base(self, symbol: str, amount: float) -> float:
+    def round_base(self, symbol: str, amount: Decimal) -> Decimal:
         """
         Round the amount to the base precision
         """
-        try:
-            base_precision = self._symbol_info.get_symbol_info(symbol).base_precision
-        except KeyError:
-            base_precision = 8
-        return round(amount, base_precision)
+        #try:
+        #    base_precision = self._symbol_info.get_symbol_info(symbol).base_precision
+        #except KeyError:
+        #    base_precision = 8
+        #return round(amount, base_precision)
 
-    def round_quote(self, symbol: str, amount: float) -> float:
+        base_step_size = self._symbol_info.get_symbol_info(symbol).base_step_size
+        return amount.quantize(Decimal(base_step_size), rounding=ROUND_DOWN)
+
+    def round_quote(self, symbol: str, amount: Decimal) -> Decimal:
         """
         Round the amount to the quote precision
         """
-        try:
-            quote_precision = self._symbol_info.get_symbol_info(symbol).quote_precision
-        except KeyError:
-            quote_precision = 8
-
-        return round(amount, quote_precision)
+        #try:
+        #    quote_precision = self._symbol_info.get_symbol_info(symbol).quote_precision
+        #except KeyError:
+        #    quote_precision = 8
+        #return round(amount, quote_precision)
+        quote_step_size = self._symbol_info.get_symbol_info(symbol).quote_step_size
+        return amount.quantize(Decimal(quote_step_size), rounding=ROUND_DOWN)
 
     def get_account_balances(self) -> dict:
         """
@@ -48,7 +53,7 @@ class AccountSimulate(AccountBase):
         """
         return self._balances
 
-    def get_total_balance(self, currency : str) -> float:
+    def get_total_balance(self, currency : str) -> Decimal:
         """
         Get the total balance of a currency
         """
@@ -112,16 +117,16 @@ class AccountSimulate(AccountBase):
 
         return total_balance
 
-    def get_asset_balance(self, asset : str) -> tuple[float, float]:
+    def get_asset_balance(self, asset : str) -> tuple[Decimal, Decimal]:
         """
         Get the asset balance
         """
         try:
             return self._balances[asset]
         except KeyError:
-            return 0.0, 0.0
+            return Decimal(0.0), Decimal(0.0)
 
-    def update_asset_balance(self, asset, available: float, hold: float):
+    def update_asset_balance(self, asset, available: Decimal, hold: Decimal):
         """
         Update the asset balance
         """

@@ -5,6 +5,7 @@ from cointrader.order.OrderResult import OrderResult
 from cointrader.order.Order import OrderStatus, OrderType, OrderSide
 from cointrader.account.AccountBase import AccountBase
 import uuid
+from decimal import Decimal
 
 class TraderExecuteSimulate(ExecuteBase):
     def __init__(self, exchange: TraderExchangeBase, account: AccountBase):
@@ -12,8 +13,10 @@ class TraderExecuteSimulate(ExecuteBase):
         self._account = account
         self._orders = {}
 
-    def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def market_buy(self, symbol: str, price: Decimal, amount: Decimal) -> OrderResult:
         print(f'market_buy: {symbol}, {price}, {amount}')
+        if isinstance(amount, float):
+            amount = Decimal(amount)
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.FILLED
@@ -29,6 +32,7 @@ class TraderExecuteSimulate(ExecuteBase):
 
         # Update base balance
         base_balance, base_balance_hold = self._account.get_asset_balance(base)
+        print(f'base_balance: {type(base_balance)}, base_balance_hold: {type(base_balance_hold)} amount: {type(amount)}')
         new_base_balance =  self._account.round_base(symbol, base_balance + amount)
         self._account.update_asset_balance(base, new_base_balance, base_balance_hold)
         
@@ -43,8 +47,10 @@ class TraderExecuteSimulate(ExecuteBase):
         self._orders[result.id] = result
         return result
 
-    def market_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def market_sell(self, symbol: str, price: Decimal, amount: Decimal) -> OrderResult:
         print(f'market_sell: {symbol}, {price}, {amount}')
+        if isinstance(amount, float):
+            amount = Decimal(amount)
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.FILLED
@@ -74,7 +80,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._orders[result.id] = result
         return result
     
-    def limit_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def limit_buy(self, symbol: str, price: Decimal, amount: Decimal) -> OrderResult:
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
@@ -86,7 +92,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._orders[result.id] = result
         return result
 
-    def limit_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def limit_sell(self, symbol: str, price: Decimal, amount: Decimal) -> OrderResult:
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
@@ -98,7 +104,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._orders[result.id] = result
         return result
 
-    def stop_loss_buy(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
+    def stop_loss_buy(self, symbol: str, price: Decimal, stop_price: Decimal, amount: Decimal) -> OrderResult:
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
@@ -111,7 +117,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._orders[result.id] = result
         return result
     
-    def stop_loss_sell(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
+    def stop_loss_sell(self, symbol: str, price: Decimal, stop_price: Decimal, amount: Decimal) -> OrderResult:
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
@@ -124,10 +130,10 @@ class TraderExecuteSimulate(ExecuteBase):
         self._orders[result.id] = result
         return result
 
-    def status(self, symbol: str, order_id: str, price: float) -> OrderResult:
+    def status(self, symbol: str, order_id: str, price: Decimal) -> OrderResult:
         if order_id in self._orders:
             return self._orders[order_id]
         return None
 
-    def cancel(self, symbol: str, order_id: str, price: float) -> OrderResult:
+    def cancel(self, symbol: str, order_id: str, price: Decimal) -> OrderResult:
         raise NotImplementedError
