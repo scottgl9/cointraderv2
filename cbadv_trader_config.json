@@ -1,7 +1,8 @@
 {
+    "simulate": true,
     "max_positions": 5,
     "quote_currency": "USD",
-    "max_position_quote_size": 25.0,
+    "max_position_quote_size": 50.0,
     "strategy": "Default",
     "trade_symbols": [
         "BTC-USD",

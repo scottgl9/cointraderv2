@@ -1,28 +1,22 @@
 import sys
-from matplotlib import pyplot as plt
+import mplfinance as mpf
 import numpy as np
 import pandas as pd
-#sys.path.append('./tests')
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.KAMA import KAMA
+from cointrader.indicators.RSI import RSI
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
-#import matplotlib.pyplot as plt
 import argparse
-from ta.momentum import KAMAIndicator
-from ta.utils import dropna
 
 CLIENT_NAME = "cbadv"
 GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot KAMA indicator')
+    parser = argparse.ArgumentParser(description='Plot RSI indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
-    #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
-    #ticker = exchange.info_ticker_join("BTC", "USD")
     ticker = args.ticker
     tickers = exchange.info_ticker_names_list()
     if ticker not in tickers:
@@ -60,8 +54,8 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    kama = KAMA('KAMA', 10, 2, 30)
-    kama_values = []
+    rsi = RSI(period=14)
+    rsi_values = []
 
     opens = []
     closes = []
@@ -72,11 +66,8 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = kama.update(kline)
-        if kama.ready():
-            kama_values.append(result)
-        else :
-            kama_values.append(np.nan)
+        result = rsi.update(kline)
+        rsi_values.append(result)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -84,34 +75,25 @@ if __name__ == '__main__':
         volumes.append(kline.volume)
         date = pd.to_datetime(kline.ts, unit='s')
         dates.append(date)
-        #timestamps.append(kline.ts)
 
-    # Create a DataFrame for the candlestick chart
-    data = {
-        #'Date': dates,
-        'open': opens,
-        'high': highs,
-        'low': lows,
-        'close': closes,
-        'volume': volumes
-    }
-    df = pd.DataFrame(data)
-    df = dropna(df)
+# Create a DataFrame for the candlestick chart
+data = {
+    'Date': dates,
+    'Open': opens,
+    'High': highs,
+    'Low': lows,
+    'Close': closes
+}
+df = pd.DataFrame(data)
+df.set_index('Date', inplace=True)
 
-    #df = add_all_ta_features(
-    #    df, open="open", high="high", low="low", close="close", volume="volume")
-    #print(df['Close'])
-    kama_indicator = KAMAIndicator(close=pd.Series(closes), window=10, pow1=2, pow2=30, fillna=True)
-    df['kama'] = kama_indicator.kama()
+rsi_plot = mpf.make_addplot(rsi_values, panel=1, color='purple', width=1.5, ylabel='RSI')
 
-
-    # plot KAMA side by side to validate the indicator works correctly
-    plt.figure(figsize=(14, 7))
-    plt.plot(dates, df['close'].values, label='Close Price', color='blue')
-    plt.plot(dates, df['kama'].values, label='KAMA (ta)', color='red')
-    plt.plot(dates, kama_values, label='KAMA (custom)', color='green')
-    plt.title(f'KAMA Indicator Comparison for {ticker}')
-    plt.xlabel('Date')
-    plt.ylabel('Price')
-    plt.legend()
-    plt.show()
+mpf.plot(
+    df,
+    type='candle',
+    style='charles',
+    title=f'{ticker} {granularity_name} chart with RSI',
+    ylabel='Price',
+    addplot=[rsi_plot],
+)
