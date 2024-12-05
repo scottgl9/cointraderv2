@@ -9,8 +9,6 @@ class EMA(Indicator):
         self.reset()
 
     def update(self, kline : Kline):
-        self.klines.append(kline)
-        self.timestamps.append(kline.ts)
         if len(self.values) == 0:
             self.values.append(kline.close)
         else:
@@ -19,8 +17,6 @@ class EMA(Indicator):
         
         if len(self.values) > self.period:
             self.values.pop(0)
-            self.timestamps.pop(0)
-            self.klines.pop(0)
 
         self._last_kline = kline
         self._last_value = self.values[-1]
@@ -40,8 +36,6 @@ class EMA(Indicator):
 
     def reset(self):
         self.values = []
-        self.timestamps = []
-        self.klines = []
 
     def ready(self):
         return len(self.values) == self.period

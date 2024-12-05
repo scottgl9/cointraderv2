@@ -1,19 +1,22 @@
 import sys
-import mplfinance as mpf
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.RSI import RSI
+from cointrader.indicators.ADX import ADX
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 import argparse
+from ta.volatility import AverageTrueRange
+from ta.trend import ADXIndicator
+from ta.utils import dropna
 
 CLIENT_NAME = "cbadv"
 GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot RSI indicator')
+    parser = argparse.ArgumentParser(description='Plot ADX indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     args = parser.parse_args()
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
@@ -54,8 +57,8 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    rsi = RSI(period=14)
-    rsi_values = []
+    adx = ADX('ADX', 14)
+    adx_values = []
 
     opens = []
     closes = []
@@ -66,11 +69,11 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = rsi.update(kline)
-        if rsi.ready():
-            rsi_values.append(result)
+        result = adx.update(kline)
+        if adx.ready():
+            adx_values.append(result)
         else:
-            rsi_values.append(np.nan)
+            adx_values.append(np.nan)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -79,24 +82,39 @@ if __name__ == '__main__':
         date = pd.to_datetime(kline.ts, unit='s')
         dates.append(date)
 
-# Create a DataFrame for the candlestick chart
-data = {
-    'Date': dates,
-    'Open': opens,
-    'High': highs,
-    'Low': lows,
-    'Close': closes
-}
-df = pd.DataFrame(data)
-df.set_index('Date', inplace=True)
+    # Create a DataFrame for the candlestick chart
+    data = {
+        'open': opens,
+        'high': highs,
+        'low': lows,
+        'close': closes,
+        'volume': volumes
+    }
+    df = pd.DataFrame(data)
+    df = dropna(df)
 
-rsi_plot = mpf.make_addplot(rsi_values, panel=1, color='purple', width=1.5, ylabel='RSI')
+    adx_indicator = ADXIndicator(high=pd.Series(highs), low=pd.Series(lows), close=pd.Series(closes), window=14, fillna=True)
+    df['adx'] = adx_indicator.adx()
 
-mpf.plot(
-    df,
-    type='candle',
-    style='charles',
-    title=f'{ticker} {granularity_name} chart with RSI',
-    ylabel='Price',
-    addplot=[rsi_plot],
-)
+    atr_indicator = AverageTrueRange(high=pd.Series(highs), low=pd.Series(lows), close=pd.Series(closes), window=14, fillna=True)
+    df['atr'] = atr_indicator.average_true_range()
+
+    # Create a figure with two subplots
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
+
+    # Plot ADX and ATR on the first subplot
+    ax1.plot(dates, df['adx'].values, label='ADX (ta)', color='red')
+    ax1.plot(dates, adx_values, label='ADX (custom)', color='green')
+    ax1.set_title(f'ADX Indicator Comparison for {ticker}')
+    ax1.set_ylabel('ADX Value')
+    ax1.legend()
+
+    # Plot close values on the second subplot
+    ax2.plot(dates, df['close'].values, label='Close Price', color='blue')
+    ax2.set_title(f'Close Price for {ticker}')
+    ax2.set_xlabel('Date')
+    ax2.set_ylabel('Close Price')
+    ax2.legend()
+
+    # Show the plot
+    plt.show()

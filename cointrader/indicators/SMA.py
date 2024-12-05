@@ -2,27 +2,27 @@ from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
 class SMA(Indicator):
-    def __init__(self, name, period):
-        super().__init__(name)
+    def __init__(self, name='sma', period=14):
+        Indicator.__init__(self, name)
         self.period = period
-        self.values = []
+        self.reset()
 
-    def update(self, kline : Kline):
-        self.values.append(kline.close)
+    def update(self, kline: Kline):
+        tail = 0.0
+        if len(self.prices) < self.period:
+            tail = 0.0
+            self.prices.append(float(kline.close))
+        else:
+            tail = self.prices[int(self.age)]
+            self.prices[int(self.age)] = float(kline.close)
 
-        sma_value = kline.close
-
-        if len(self.values) == self.period:
-            sma_value = sum(self.values) / self.period
-            self.values.append(sma_value)
-        
-        if len(self.values) > self.period:
-            self.values.pop(0)
-
-        self._last_value = sma_value
+        self.sum += float(kline.close) - tail
+        if len(self.prices) != 0:
+            self.result = self.sum / float(len(self.prices))
+        self.age = (self.age + 1) % self.period
+        self._last_value = self.result
         self._last_kline = kline
-        
-        return self._last_value
+        return self.result
 
     def get_last_value(self):
         return self._last_value
@@ -31,7 +31,12 @@ class SMA(Indicator):
         return self._last_kline
 
     def reset(self):
-        self.values = []
-    
+        self.prices = []
+        self._last_kline = None
+        self._last_value = 0
+        self.result = 0.0
+        self.age = 0
+        self.sum = 0.0
+
     def ready(self):
-        return len(self.values) == self.period
+        return len(self.prices) == self.period
