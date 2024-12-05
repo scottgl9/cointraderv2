@@ -4,34 +4,34 @@ from cointrader.common.Kline import Kline
 class ATR(Indicator):
     def __init__(self, name='atr', period=14):
         super().__init__(name)
-        self.period = period
+        self.window = period
         self.reset()
 
     def update(self, kline: Kline):
-        self.klines.append(kline)
-        
-        if len(self.klines) > 1:
-            prev_kline = self.klines[-2]
-            tr = max(kline.high - kline.low, abs(kline.high - prev_kline.close), abs(kline.low - prev_kline.close))
-            self.tr_values.append(tr)
-        else:
-            self.tr_values.append(kline.high - kline.low)
-        
-        if len(self.tr_values) >= self.period:
-            if len(self.atr_values) == 0:
-                self.atr_values.append(sum(self.tr_values[-self.period:]) / self.period)
-            else:
-                atr = (self.atr_values[-1] * (self.period - 1) + self.tr_values[-1]) / self.period
-                self.atr_values.append(atr)
-        
-        if len(self.tr_values) > self.period:
-            self.tr_values.pop(0)
-            self.klines.pop(0)
-
-        self._last_value = self.atr_values[-1] if self.atr_values else None
+        result = self.update_with_value(kline.close, kline.low, kline.high)
         self._last_kline = kline
+        return result
 
-        return self._last_value
+    def update_with_value(self, close, low, high):
+        if not self.count:
+            tr = high - low
+        else:
+            tr = max([high - low, abs(high - self.last_close), abs(low - self.last_close)])
+        if self.count < self.window - 1:
+            self._tr_sum += tr
+            self.count += 1
+        elif not self.atr:
+            self._tr_sum += tr
+            self.atr = self._tr_sum / self.window
+            self.count += 1
+        else:
+            self.prior_atr = self.atr
+            self.atr = ((self.prior_atr * float(self.window - 1)) + tr) / self.window
+
+        self.last_close = close
+        self.result = self.atr
+        self._last_value = self.result
+        return self.result
 
     def get_last_value(self):
         return self._last_value
@@ -40,9 +40,13 @@ class ATR(Indicator):
         return self._last_kline
 
     def reset(self):
-        self.tr_values = []
-        self.atr_values = []
-        self.klines = []
+        self.result = 0.0
+        self.last_close = 0.0
+        self._tr_sum = 0
+        self.count = 0
+        self.atr = 0
+        self.prior_atr = 0
+        self._last_value = None
 
-    def ready(self):
-        return len(self.atr_values) == self.period
+    def ready(self) -> bool:
+        return self.count >= self.window

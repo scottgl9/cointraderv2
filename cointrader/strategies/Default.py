@@ -15,6 +15,8 @@ class Default(Strategy):
     def update(self, kline):
         self.macd.update(kline)
         self.sama.update(kline)
+        self.zlema.update(kline)
+        self.rsi.update(kline)
 
     def buy(self):
         if self.rsi.ready() and self.rsi.decreasing():

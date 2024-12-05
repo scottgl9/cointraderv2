@@ -4,19 +4,18 @@ import numpy as np
 import pandas as pd
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.ADX import ADX
+from cointrader.indicators.ATR import ATR
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 import argparse
 from ta.volatility import AverageTrueRange
-from ta.trend import ADXIndicator
 from ta.utils import dropna
 
 CLIENT_NAME = "cbadv"
 GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot ADX indicator')
+    parser = argparse.ArgumentParser(description='Plot ATR indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     args = parser.parse_args()
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
@@ -57,8 +56,8 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    adx = ADX('ADX', 14)
-    adx_values = []
+    atr = ATR('ATR', 14)
+    atr_values = []
 
     opens = []
     closes = []
@@ -69,11 +68,11 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = adx.update(kline)
-        if adx.ready():
-            adx_values.append(result)
+        result = atr.update(kline)
+        if atr.ready():
+            atr_values.append(result)
         else:
-            adx_values.append(np.nan)
+            atr_values.append(np.nan)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -93,10 +92,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(data)
     df = dropna(df)
 
-    print(adx_values)
-
-    adx_indicator = ADXIndicator(high=pd.Series(highs), low=pd.Series(lows), close=pd.Series(closes), window=14, fillna=True)
-    df['adx'] = adx_indicator.adx()
+    print(atr_values)
 
     atr_indicator = AverageTrueRange(high=pd.Series(highs), low=pd.Series(lows), close=pd.Series(closes), window=14, fillna=True)
     df['atr'] = atr_indicator.average_true_range()
@@ -104,11 +100,11 @@ if __name__ == '__main__':
     # Create a figure with two subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
 
-    # Plot ADX and ATR on the first subplot
-    ax1.plot(dates, df['adx'].values, label='ADX (ta)', color='red')
-    ax1.plot(dates, adx_values, label='ADX (custom)', color='green')
-    ax1.set_title(f'ADX Indicator Comparison for {ticker}')
-    ax1.set_ylabel('ADX Value')
+    # Plot ATR on the first subplot
+    ax1.plot(dates, df['atr'].values, label='ATR (ta)', color='red')
+    ax1.plot(dates, atr_values, label='ATR (custom)', color='green')
+    ax1.set_title(f'ATR Indicator Comparison for {ticker}')
+    ax1.set_ylabel('ATR Value')
     ax1.legend()
 
     # Plot close values on the second subplot

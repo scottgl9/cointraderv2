@@ -10,7 +10,7 @@ class MACD(Indicator):
         self.signal_ema = EMA(f"{name}_signal", signal_period)
 
     def update(self, kline: Kline):
-        result = self.update_with_value(kline)
+        result = self.update_with_value(kline.close)
         self._last_kline = kline
         return result
 
@@ -19,7 +19,7 @@ class MACD(Indicator):
         long_ema_value = self.long_ema.update_with_value(value)
         macd_value = short_ema_value - long_ema_value
 
-        signal_value = self.signal_ema.update(macd_value)
+        signal_value = self.signal_ema.update_with_value(macd_value)
         histogram_value = macd_value - signal_value
         
         self._last_value = {

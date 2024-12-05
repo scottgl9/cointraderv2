@@ -1,28 +1,22 @@
 from cointrader.common.Signal import Signal
-from cointrader.indicators.RSI import RSI
+from cointrader.indicators.ADX import ADX
 
-class RSISignal(Signal):
+class ADXignal(Signal):
     def __init__(self, period=14, overbought=70, oversold=30):
         self.period = period
         self.overbought = overbought
         self.oversold = oversold
-        self.rsi = RSI(period)
+        self.adx = ADX(period)
 
     def update(self, kline):
-        return self.rsi.update(kline)
+        return self.adx.update(kline)
 
     def increasing(self):
         return self.rsi.increasing()
     
     def decreasing(self):
         return self.rsi.decreasing()
-
-    def cross_up(self):
-        return False
-    
-    def cross_down(self):
-        return False
-    
+   
     def above(self):
         return self.rsi > self.overbought
     
@@ -36,4 +30,4 @@ class RSISignal(Signal):
         return self.rsi.decreasing()
     
     def ready(self):
-        return self.rsi.ready()
+        return self.adx.ready()
