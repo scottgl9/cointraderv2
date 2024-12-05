@@ -19,8 +19,8 @@ class Default(Strategy):
         self.rsi.update(kline)
 
     def buy(self):
-        if self.rsi.ready() and self.rsi.decreasing():
-            return False
+        #if self.rsi.ready() and self.rsi.decreasing():
+        #    return False
         if self.zlema.ready() and self.zlema.cross_up():
             return True
         #if self.sama.ready() and self.sama.buy_signal():

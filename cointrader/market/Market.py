@@ -27,7 +27,7 @@ class Market(MarketBase):
         return self._exchange.market_get_max_kline_count(granularity)
 
     def market_get_klines_range(self, ticker: str, start_ts: int, end_ts: int, granularity: int, store_db=False) -> dict:
-        """Get klines for a given range"""
+        """Get klines for a given range, and stores them in the database if store_db is True"""
         if store_db:
             max_klines = self._exchange.market_get_max_kline_count(granularity)
             # if the table exists, get klines from the database
@@ -57,3 +57,10 @@ class Market(MarketBase):
                 return klines
         else:
             return self._exchange.market_get_klines_range(ticker, start_ts, end_ts, granularity)
+
+    def market_get_stored_klines_range(self, ticker: str, start_ts: int, end_ts: int, granularity: int) -> dict:
+        """
+        Get klines for a given range from the database only
+        """
+        """Get klines for a given range from the database"""
+        return self._storage.get_klines_range(ticker, start_ts, end_ts, granularity)

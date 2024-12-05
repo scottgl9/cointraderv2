@@ -7,6 +7,7 @@ from .TraderConfig import TraderConfig
 from cointrader.execute.ExecuteBase import ExecuteBase
 from .TraderPosition import TraderPosition
 import importlib
+from colorama import Fore, Back, Style
 
 class Trader(object):
     _symbol = None
@@ -57,8 +58,12 @@ class Trader(object):
         # if position has been closed, remove it from the list
         for position in self._positions:
             if position.closed():
-                print(f"{self._symbol} Profit: {position.profit_percent()}")
-                self._net_profit_percent += position.profit_percent()
+                profit_percent = position.profit_percent()
+                if profit_percent > 0:
+                    print(f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}{Style.RESET_ALL}")
+                self._net_profit_percent += profit_percent
 
                 if self._config.simulate():
                     self._buys.append(position.buy_info())

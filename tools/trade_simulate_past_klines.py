@@ -66,16 +66,23 @@ def main(args):
     emas = {}
     ema_values = {}
 
+
+    # determin which symbol has the fewest klines
+    lowest_kline_count = 0
+
+    # get all klines for each symbol stored in the market db
     for symbol in symbols:
-        all_klines[symbol] = market.market_get_klines_range(symbol, start_ts=start_ts, end_ts=end_ts, granularity=args.granularity, store_db=True)
+        all_klines[symbol] = market.market_get_stored_klines_range(symbol, start_ts=start_ts, end_ts=end_ts, granularity=args.granularity)
         kline_count = len(all_klines[symbol])
+        if lowest_kline_count == 0 or kline_count < lowest_kline_count:
+            lowest_kline_count = kline_count
         emas[symbol] = EMA(period=12)
         ema_values[symbol] = []
 
     kline = Kline()
     #kline.set_dict_names(ts='start')
 
-    for i in range(kline_count):
+    for i in range(lowest_kline_count):
         for symbol in symbols:
             k = all_klines[symbol][i]
             #print(k)

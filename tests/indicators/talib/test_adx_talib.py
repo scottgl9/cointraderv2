@@ -93,8 +93,6 @@ if __name__ == '__main__':
     df = pd.DataFrame(data)
     df = dropna(df)
 
-    print(adx_values)
-
     adx_indicator = ADXIndicator(high=pd.Series(highs), low=pd.Series(lows), close=pd.Series(closes), window=14, fillna=True)
     df['adx'] = adx_indicator.adx()
 
