@@ -5,7 +5,7 @@ import pandas as pd
 #sys.path.append('./tests')
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.KAMA import KAMA
+from cointrader.indicators.EMA import EMA
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 #import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ CLIENT_NAME = "cbadv"
 GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot KAMA indicator')
+    parser = argparse.ArgumentParser(description='Plot EMA indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
@@ -58,8 +58,10 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    kama = KAMA('KAMA', 10)
-    kama_values = []
+    ema12 = EMA(period=12)
+    ema12_values = []
+    ema24 = EMA(period=24)
+    ema24_values = []
 
     opens = []
     closes = []
@@ -70,11 +72,10 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = kama.update(kline)
-        if kama.ready():
-            kama_values.append(result)
-        else :
-            kama_values.append(np.nan)
+        result = ema12.update(kline)
+        ema12_values.append(result)
+        result = ema24.update(kline)
+        ema24_values.append(result)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -84,24 +85,25 @@ if __name__ == '__main__':
         dates.append(date)
         #timestamps.append(kline.ts)
 
-# Create a DataFrame for the candlestick chart
-data = {
-    'Date': dates,
-    'Open': opens,
-    'High': highs,
-    'Low': lows,
-    'Close': closes
-}
-df = pd.DataFrame(data)
-df.set_index('Date', inplace=True)
+    # Create a DataFrame for the candlestick chart
+    data = {
+        'Date': dates,
+        'Open': opens,
+        'High': highs,
+        'Low': lows,
+        'Close': closes
+    }
+    df = pd.DataFrame(data)
+    df.set_index('Date', inplace=True)
 
-kama_plot = mpf.make_addplot(kama_values, panel=0, color='blue', width=1.5)
+    ema12_plot = mpf.make_addplot(ema12_values, panel=0, color='blue', width=1.5)
+    ema24_plot = mpf.make_addplot(ema24_values, panel=0, color='red', width=1.5)
 
-mpf.plot(
-    df,
-    type='candle',
-    style='charles',
-    title=f'{ticker} {granularity_name} chart with KAMA',
-    ylabel='Price',
-    addplot=[kama_plot],
-)
+    mpf.plot(
+        df,
+        type='candle',
+        style='charles',
+        title=f'{ticker} {granularity_name} chart with EMA12 and EMA24',
+        ylabel='Price',
+        addplot=[ema12_plot, ema24_plot],
+    )

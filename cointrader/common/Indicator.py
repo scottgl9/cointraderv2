@@ -15,9 +15,12 @@ class Indicator:
     def reset(self):
         raise NotImplementedError
 
-    def update(self, kline : Kline) -> tuple:
+    def update(self, kline : Kline) -> dict:
         raise NotImplementedError
     
+    def update_with_value(self, value) -> dict:
+        raise NotImplementedError
+
     def increasing(self) -> bool:
         raise NotImplementedError
     

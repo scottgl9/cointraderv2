@@ -36,7 +36,7 @@ class AssetInfoConfig:
         try:
             info_all = self._exchange.info_ticker_query_all()
             for symbol, info in info_all.items():
-                if not info.base_min_size or not info.base_step_size or not info.base_precision:
+                if not info.base_min_size or not info.base_step_size:
                     print(f"Missing base info for {symbol}")
                     continue
                 base, quote = self._exchange.info_ticker_split(symbol)

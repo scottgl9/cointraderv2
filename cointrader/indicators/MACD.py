@@ -10,14 +10,16 @@ class MACD(Indicator):
         self.signal_ema = EMA(f"{name}_signal", signal_period)
 
     def update(self, kline: Kline):
-        short_ema_value = self.short_ema.update(kline)
-        long_ema_value = self.long_ema.update(kline)
+        result = self.update_with_value(kline)
+        self._last_kline = kline
+        return result
+
+    def update_with_value(self, value: float) -> dict:
+        short_ema_value = self.short_ema.update_with_value(value)
+        long_ema_value = self.long_ema.update_with_value(value)
         macd_value = short_ema_value - long_ema_value
 
-        macd_kline = kline.copy()
-        macd_kline.close = macd_value
-
-        signal_value = self.signal_ema.update(macd_kline)
+        signal_value = self.signal_ema.update(macd_value)
         histogram_value = macd_value - signal_value
         
         self._last_value = {
@@ -25,8 +27,6 @@ class MACD(Indicator):
             "signal": signal_value,
             "histogram": histogram_value
         }
-
-        self._last_kline = kline
 
         return self._last_value
 

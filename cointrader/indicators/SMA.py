@@ -8,20 +8,24 @@ class SMA(Indicator):
         self.reset()
 
     def update(self, kline: Kline):
+        result = self.update_with_value(kline.close)
+        self._last_kline = kline
+        return result
+
+    def update_with_value(self, value):
         tail = 0.0
         if len(self.prices) < self.period:
             tail = 0.0
-            self.prices.append(float(kline.close))
+            self.prices.append(float(value))
         else:
             tail = self.prices[int(self.age)]
-            self.prices[int(self.age)] = float(kline.close)
+            self.prices[int(self.age)] = float(value)
 
-        self.sum += float(kline.close) - tail
+        self.sum += float(value) - tail
         if len(self.prices) != 0:
             self.result = self.sum / float(len(self.prices))
         self.age = (self.age + 1) % self.period
         self._last_value = self.result
-        self._last_kline = kline
         return self.result
 
     def get_last_value(self):

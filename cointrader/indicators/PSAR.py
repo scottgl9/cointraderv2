@@ -10,17 +10,19 @@ class PSAR(Indicator):
         self.psar = None
         self.trend = None
         self.af_increment = af
-        self.klines = []
+        #self.klines = []
+        self.reset()
 
     def update(self, kline: Kline):
         self.klines.append(kline)
-        if len(self.klines) < 2:
+        if not self._last_kline:
             self.psar = kline.low
             self.ep = kline.high
             self.trend = 1
             return self.psar
 
-        prev_kline = self.klines[-2]
+        #prev_kline = self.klines[-2]
+        prev_kline = self._last_kline
         if self.trend == 1:
             self.psar = self.psar + self.af * (self.ep - self.psar)
             if kline.low < self.psar:
@@ -59,7 +61,8 @@ class PSAR(Indicator):
         self.ep = None
         self.psar = None
         self.trend = None
-        self.klines = []
+        #self.klines = []
+        self._last_kline = None
 
     def ready(self):
         return len(self.klines) > 1

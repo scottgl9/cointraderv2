@@ -5,8 +5,7 @@ import pandas as pd
 #sys.path.append('./tests')
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.EMA import EMA
-from cointrader.indicators.ADX import ADX
+from cointrader.indicators.KAMA import KAMA
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 #import matplotlib.pyplot as plt
@@ -16,11 +15,10 @@ CLIENT_NAME = "cbadv"
 GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot ADX indicator')
-    parser.add_argument('--ticker', type=str, help='Ticker symbol (ex. BTC-USD)', default='BTC-USD')
+    parser = argparse.ArgumentParser(description='Plot KAMA indicator')
+    parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
-
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
     #ticker = exchange.info_ticker_join("BTC", "USD")
     ticker = args.ticker
@@ -60,8 +58,8 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    adx = ADX(period=14)
-    adx_values = []
+    kama = KAMA('KAMA', 10)
+    kama_values = []
 
     opens = []
     closes = []
@@ -72,11 +70,11 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = adx.update(kline)
-        #if not adx.ready():
-        #    result = np.nan
-        print(result)
-        adx_values.append(result)
+        result = kama.update(kline)
+        if kama.ready():
+            kama_values.append(result)
+        else :
+            kama_values.append(np.nan)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -86,25 +84,24 @@ if __name__ == '__main__':
         dates.append(date)
         #timestamps.append(kline.ts)
 
-# Create a DataFrame for the candlestick chart
-data = {
-    'Date': dates,
-    'Open': opens,
-    'High': highs,
-    'Low': lows,
-    'Close': closes
-}
-df = pd.DataFrame(data)
-df.set_index('Date', inplace=True)
+    # Create a DataFrame for the candlestick chart
+    data = {
+        'Date': dates,
+        'Open': opens,
+        'High': highs,
+        'Low': lows,
+        'Close': closes
+    }
+    df = pd.DataFrame(data)
+    df.set_index('Date', inplace=True)
 
-adx_plot = mpf.make_addplot(adx_values, panel=1, color='blue', width=1.5)
+    kama_plot = mpf.make_addplot(kama_values, panel=0, color='blue', width=1.5)
 
-mpf.plot(
-    df,
-    type='candle',
-    style='charles',
-    title=f'{ticker} {granularity_name} chart with ADX',
-    ylabel='Price',
-    addplot=[adx_plot],
-    panel_ratios=(3, 1),
-)
+    mpf.plot(
+        df,
+        type='candle',
+        style='charles',
+        title=f'{ticker} {granularity_name} chart with KAMA',
+        ylabel='Price',
+        addplot=[kama_plot],
+    )

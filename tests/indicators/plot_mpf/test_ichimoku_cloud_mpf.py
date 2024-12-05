@@ -96,28 +96,28 @@ if __name__ == '__main__':
         date = pd.to_datetime(kline.ts, unit='s')
         dates.append(date)
 
-# Create a DataFrame for the candlestick chart
-data = {
-    'Date': dates,
-    'Open': opens,
-    'High': highs,
-    'Low': lows,
-    'Close': closes
-}
-df = pd.DataFrame(data)
-df.set_index('Date', inplace=True)
+    # Create a DataFrame for the candlestick chart
+    data = {
+        'Date': dates,
+        'Open': opens,
+        'High': highs,
+        'Low': lows,
+        'Close': closes
+    }
+    df = pd.DataFrame(data)
+    df.set_index('Date', inplace=True)
 
-tenkan_sen_plot = mpf.make_addplot(tenkan_sen_values, panel=0, color='blue', width=1.5)
-kijun_sen_plot = mpf.make_addplot(kijun_sen_values, panel=0, color='red', width=1.5)
-senkou_span_a_plot = mpf.make_addplot(senkou_span_a_values, panel=0, color='green', width=1.5)
-senkou_span_b_plot = mpf.make_addplot(senkou_span_b_values, panel=0, color='brown', width=1.5)
-chikou_span_plot = mpf.make_addplot(chikou_span_values, panel=0, color='purple', width=1.5)
+    tenkan_sen_plot = mpf.make_addplot(tenkan_sen_values, panel=0, color='blue', width=1.5)
+    kijun_sen_plot = mpf.make_addplot(kijun_sen_values, panel=0, color='red', width=1.5)
+    senkou_span_a_plot = mpf.make_addplot(senkou_span_a_values, panel=0, color='green', width=1.5)
+    senkou_span_b_plot = mpf.make_addplot(senkou_span_b_values, panel=0, color='brown', width=1.5)
+    chikou_span_plot = mpf.make_addplot(chikou_span_values, panel=0, color='purple', width=1.5)
 
-mpf.plot(
-    df,
-    type='candle',
-    style='charles',
-    title=f'{ticker} {granularity_name} chart with Ichimoku Cloud',
-    ylabel='Price',
-    addplot=[tenkan_sen_plot, kijun_sen_plot, senkou_span_a_plot, senkou_span_b_plot, chikou_span_plot],
-)
+    mpf.plot(
+        df,
+        type='candle',
+        style='charles',
+        title=f'{ticker} {granularity_name} chart with Ichimoku Cloud',
+        ylabel='Price',
+        addplot=[tenkan_sen_plot, kijun_sen_plot, senkou_span_a_plot, senkou_span_b_plot, chikou_span_plot],
+    )

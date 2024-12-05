@@ -5,23 +5,24 @@ import pandas as pd
 #sys.path.append('./tests')
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.BB import BollingerBands
+from cointrader.indicators.ATR import ATR
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 #import matplotlib.pyplot as plt
 import argparse
 
+
 CLIENT_NAME = "cbadv"
 GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot Bollinger Bands indicator')
-    parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
+    parser = argparse.ArgumentParser(description='Plot ADX indicator')
+    parser.add_argument('--ticker', type=str, help='Ticker symbol (ex. BTC-USD)', default='BTC-USD')
     #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
+
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
-    #ticker = exchange.info_ticker_join("BTC", "USD")
-    ticker = args.ticker
+    ticker = exchange.info_ticker_join("BTC", "USD")
     tickers = exchange.info_ticker_names_list()
     if ticker not in tickers:
         print("Ticker not found")
@@ -58,10 +59,8 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    bb = BollingerBands(period=20, std_dev=2)
-    bb_upper_values = []
-    bb_middle_values = []
-    bb_lower_values = []
+    atr = ATR(period=14)
+    atr_values = []
 
     opens = []
     closes = []
@@ -72,17 +71,10 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = bb.update(kline)
-        if not bb.ready():
-            result['upper'] = np.nan
-            result['middle'] = np.nan
-            result['lower'] = np.nan
-        upper = result['upper']
-        middle = result['middle']
-        lower = result['lower']
-        bb_upper_values.append(upper)
-        bb_middle_values.append(middle)
-        bb_lower_values.append(lower)
+        result = atr.update(kline)
+        if result is None:
+            result = np.nan
+        atr_values.append(result)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -92,26 +84,25 @@ if __name__ == '__main__':
         dates.append(date)
         #timestamps.append(kline.ts)
 
-# Create a DataFrame for the candlestick chart
-data = {
-    'Date': dates,
-    'Open': opens,
-    'High': highs,
-    'Low': lows,
-    'Close': closes
-}
-df = pd.DataFrame(data)
-df.set_index('Date', inplace=True)
+    # Create a DataFrame for the candlestick chart
+    data = {
+        'Date': dates,
+        'Open': opens,
+        'High': highs,
+        'Low': lows,
+        'Close': closes
+    }
+    df = pd.DataFrame(data)
+    df.set_index('Date', inplace=True)
 
-bb_upper_plot = mpf.make_addplot(bb_upper_values, panel=0, color='blue', width=1.5)
-bb_middle_plot = mpf.make_addplot(bb_middle_values, panel=0, color='red', width=1.5)
-bb_lower_plot = mpf.make_addplot(bb_lower_values, panel=0, color='blue', width=1.5)
+    atr_plot = mpf.make_addplot(atr_values, panel=1, color='blue', width=1.5)
 
-mpf.plot(
-    df,
-    type='candle',
-    style='charles',
-    title=f'{ticker} {granularity_name} chart with Bollinger Bands',
-    ylabel='Price',
-    addplot=[bb_upper_plot, bb_middle_plot, bb_lower_plot],
-)
+    mpf.plot(
+        df,
+        type='candle',
+        style='charles',
+        title=f'{ticker} {granularity_name} chart with ADX',
+        ylabel='Price',
+        addplot=[atr_plot],
+        panel_ratios=(3, 1),
+    )

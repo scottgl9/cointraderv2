@@ -144,6 +144,9 @@ class CBADVTraderExchange(TraderExchangeBase):
         result = {}
         products = self._info_get_products()
         for product in products:
+            # skip if trading is disabled or status is not online
+            if product.trading_disabled: # or product.status != 'online':
+                continue
             if self.info_ticker_get_quote(product.product_id) in self._excluded_currency_list:
                 continue
             result[product.product_id] = self.info_ticker_parse(product.product_id, product)

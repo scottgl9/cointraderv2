@@ -1,4 +1,5 @@
 from cointrader.common.Indicator import Indicator
+from cointrader.common.Kline import Kline
 
 class WMA(Indicator):
     """Weighted Moving Average used as a smoother."""
@@ -7,7 +8,12 @@ class WMA(Indicator):
         self.period = period
         self.reset()
 
-    def update(self, value):
+    def update(self, kline: Kline):
+        result = self.update_with_value(kline.close)
+        self._last_kline = kline
+        return result
+
+    def update_with_value(self, value):
         self.values.append(value)
         if len(self.values) > self.period:
             self.values.pop(0)
@@ -24,6 +30,7 @@ class WMA(Indicator):
 
     def reset(self):
         self.values = []
+        self._last_kline = None
     
     def ready(self) -> bool:
         return len(self.values) == self.period

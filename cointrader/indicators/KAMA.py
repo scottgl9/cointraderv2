@@ -8,18 +8,17 @@ class KAMA(Indicator):
         self.fast_period = fast_period
         self.slow_period = slow_period
         self.values = []
-        self.timestamps = []
-        self.klines = []
         self._last_value = None
 
     def update(self, kline: Kline):
-        self.klines.append(kline)
-        self.values.append(kline.close)
-        self.timestamps.append(kline.ts)
+        result = self.update_with_value(kline.close)
+        self._last_kline = kline
+        return result
+
+    def update_with_value(self, value: float):
+        self.values.append(value)
         if len(self.values) > self.period:
             self.values.pop(0)
-            self.timestamps.pop(0)
-            self.klines.pop(0)
         
         if len(self.values) == self.period:
             change = abs(self.values[-1] - self.values[0])
@@ -32,8 +31,6 @@ class KAMA(Indicator):
             kama_value = self._last_value + sc * (self.values[-1] - self._last_value)
             self._last_value = kama_value
 
-        self._last_kline = kline
-
         return self._last_value
 
     def get_last_value(self):
@@ -44,8 +41,6 @@ class KAMA(Indicator):
     
     def reset(self):
         self.values = []
-        self.timestamps = []
-        self.klines = []
         self._last_value = None
     
     def ready(self):

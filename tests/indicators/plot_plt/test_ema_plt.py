@@ -1,21 +1,21 @@
 import sys
-import mplfinance as mpf
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 #sys.path.append('./tests')
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.SAMA import SlopeAdaptiveMovingAverage
+from cointrader.indicators.EMA import EMA
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 #import matplotlib.pyplot as plt
 import argparse
 
 CLIENT_NAME = "cbadv"
-GRANULARITY = 900
+GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot SAMA indicator')
+    parser = argparse.ArgumentParser(description='Plot EMA indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
@@ -58,6 +58,11 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
+    ema12 = EMA(period=12)
+    ema12_values = []
+    ema24 = EMA(period=24)
+    ema24_values = []
+
     opens = []
     closes = []
     highs = []
@@ -65,47 +70,28 @@ if __name__ == '__main__':
     volumes = []
     dates = []
 
-sama = SlopeAdaptiveMovingAverage()
-sama_values = []
-sama_slope_values = []
-colors = []
+    for candle in reversed(candles):
+        kline.from_dict(candle)
+        result = ema12.update(kline)
+        ema12_values.append(result)
+        result = ema24.update(kline)
+        ema24_values.append(result)
+        opens.append(kline.open)
+        closes.append(kline.close)
+        highs.append(kline.high)
+        lows.append(kline.low)
+        volumes.append(kline.volume)
+        date = pd.to_datetime(kline.ts, unit='s')
+        dates.append(date)
+        #timestamps.append(kline.ts)
 
-for candle in reversed(candles):
-    kline.from_dict(candle)
-    result = sama.update(kline)
-    sama_values.append(result['ma'])
-    sama_slope_values.append(result['slope'])
-    if result['slope'] > 0:
-        colors.append('green')
-    else:
-        colors.append('red')
-    opens.append(kline.open)
-    closes.append(kline.close)
-    highs.append(kline.high)
-    lows.append(kline.low)
-    volumes.append(kline.volume)
-    date = pd.to_datetime(kline.ts, unit='s')
-    dates.append(date)
-
-# Create a DataFrame for the candlestick chart
-data = {
-    'Date': dates,
-    'Open': opens,
-    'High': highs,
-    'Low': lows,
-    'Close': closes
-}
-df = pd.DataFrame(data)
-df.set_index('Date', inplace=True)
-
-sama_plot = mpf.make_addplot(sama_values, panel=0, color='green', width=1.5)
-sama_slope_plot = mpf.make_addplot(sama_slope_values, panel=1, width=1.5)
-
-mpf.plot(
-    df,
-    type='candle',
-    style='charles',
-    title=f'{ticker} {granularity_name} chart with SAMA',
-    ylabel='Price',
-    addplot=[sama_plot, sama_slope_plot],
-)
+    plt.figure(figsize=(14, 7))
+    fig1, = plt.plot(dates, closes, label='Close Prices', color='blue')
+    fig2, = plt.plot(dates, ema12_values, label='EMA 12', color='red')
+    fig3, = plt.plot(dates, ema24_values, label='EMA 24', color='green')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.title(f'{ticker} Close Prices and EMA')
+    plt.legend(handles=[fig1, fig2, fig3])
+    plt.grid(True)
+    plt.show()

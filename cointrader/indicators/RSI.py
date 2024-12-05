@@ -24,7 +24,12 @@ class RSI(Indicator):
         self.smoother = smoother
 
     def update(self, kline: Kline):
-        close = kline.close
+        result = self.update_with_value(kline.close)
+        self._last_kline = kline
+        return result
+
+    def update_with_value(self, value):
+        close = value
 
         if self.last_close == 0:
             self.last_close = float(close)
@@ -90,7 +95,6 @@ class RSI(Indicator):
 
         self.last_close = float(close)
 
-        self._last_kline = kline
         self._last_value = self.result
 
         return self.result

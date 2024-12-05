@@ -29,6 +29,11 @@
     "step_size": 1e-06,
     "precision": 6
   },
+  "ACS": {
+    "min_size": 1.0,
+    "step_size": 1e-07,
+    "precision": 7
+  },
   "ACX": {
     "min_size": 0.1,
     "step_size": 0.0001,
@@ -80,14 +85,24 @@
     "precision": 4
   },
   "ALGO": {
-    "min_size": 0.1,
-    "step_size": 0.0001,
-    "precision": 4
+    "min_size": 3e-05,
+    "step_size": 1e-08,
+    "precision": 8
   },
   "ALICE": {
     "min_size": 0.001,
     "step_size": 0.001,
     "precision": 3
+  },
+  "AMP": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "ANKR": {
+    "min_size": 1.6e-05,
+    "step_size": 1e-08,
+    "precision": 8
   },
   "APE": {
     "min_size": 0.01,
@@ -118,6 +133,11 @@
     "min_size": 0.1,
     "step_size": 0.0001,
     "precision": 4
+  },
+  "ASM": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
   },
   "AST": {
     "min_size": 0.1,
@@ -194,10 +214,20 @@
     "step_size": 0.0001,
     "precision": 4
   },
+  "BIGTIME": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
+  },
   "BIT": {
     "min_size": 0.01,
     "step_size": 0.0001,
     "precision": 4
+  },
+  "BLAST": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
   },
   "BLUR": {
     "min_size": 0.1,
@@ -219,6 +249,11 @@
     "step_size": 0.0001,
     "precision": 4
   },
+  "BONK": {
+    "min_size": 1.0,
+    "step_size": 1e-08,
+    "precision": 8
+  },
   "BTC": {
     "min_size": 1e-08,
     "step_size": 1e-08,
@@ -236,6 +271,11 @@
   },
   "CBETH": {
     "min_size": 1e-05,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "CELR": {
+    "min_size": 1.0,
     "step_size": 1e-05,
     "precision": 5
   },
@@ -319,6 +359,11 @@
     "step_size": 1e-06,
     "precision": 6
   },
+  "DEGEN": {
+    "min_size": 1.0,
+    "step_size": 1e-06,
+    "precision": 6
+  },
   "DEXT": {
     "min_size": 0.1,
     "step_size": 0.0001,
@@ -399,6 +444,11 @@
     "step_size": 1e-08,
     "precision": 8
   },
+  "EURC": {
+    "min_size": 1.0,
+    "step_size": 0.0001,
+    "precision": 4
+  },
   "FARM": {
     "min_size": 0.001,
     "step_size": 0.001,
@@ -424,10 +474,20 @@
     "step_size": 0.0001,
     "precision": 4
   },
+  "FLOKI": {
+    "min_size": 1.0,
+    "step_size": 1e-07,
+    "precision": 7
+  },
   "FLOW": {
     "min_size": 0.001,
     "step_size": 0.001,
     "precision": 3
+  },
+  "FLR": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
   },
   "FORT": {
     "min_size": 0.01,
@@ -448,6 +508,11 @@
     "min_size": 0.1,
     "step_size": 0.0001,
     "precision": 4
+  },
+  "G": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
   },
   "GAL": {
     "min_size": 0.001,
@@ -503,6 +568,11 @@
     "min_size": 0.01,
     "step_size": 0.001,
     "precision": 3
+  },
+  "GYEN": {
+    "min_size": 1.0,
+    "step_size": 1e-06,
+    "precision": 6
   },
   "HBAR": {
     "min_size": 0.1,
@@ -574,6 +644,16 @@
     "step_size": 0.001,
     "precision": 3
   },
+  "IOTX": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "JASMY": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
+  },
   "JTO": {
     "min_size": 0.1,
     "step_size": 0.0001,
@@ -641,8 +721,8 @@
   },
   "LRC": {
     "min_size": 1e-06,
-    "step_size": 1e-06,
-    "precision": 6
+    "step_size": 1e-08,
+    "precision": 8
   },
   "LRDS": {
     "min_size": 0.01,
@@ -684,6 +764,11 @@
     "step_size": 1e-08,
     "precision": 8
   },
+  "MDT": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
+  },
   "MEDIA": {
     "min_size": 0.001,
     "step_size": 0.001,
@@ -714,6 +799,11 @@
     "step_size": 1e-05,
     "precision": 5
   },
+  "MOBILE": {
+    "min_size": 1.0,
+    "step_size": 1e-06,
+    "precision": 6
+  },
   "MOG": {
     "min_size": 0.1,
     "step_size": 1e-05,
@@ -743,6 +833,11 @@
     "min_size": 0.001,
     "step_size": 0.001,
     "precision": 3
+  },
+  "NCT": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
   },
   "NEAR": {
     "min_size": 0.001,
@@ -804,10 +899,20 @@
     "step_size": 0.0001,
     "precision": 4
   },
+  "OXT": {
+    "min_size": 1.0,
+    "step_size": 0.0001,
+    "precision": 4
+  },
   "PAX": {
     "min_size": 0.01,
     "step_size": 0.0001,
     "precision": 4
+  },
+  "PEPE": {
+    "min_size": 1.0,
+    "step_size": 1e-08,
+    "precision": 8
   },
   "PERP": {
     "min_size": 0.001,
@@ -824,6 +929,11 @@
     "step_size": 0.01,
     "precision": 2
   },
+  "PNG": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
+  },
   "POL": {
     "min_size": 0.01,
     "step_size": 0.0001,
@@ -833,6 +943,11 @@
     "min_size": 0.01,
     "step_size": 0.0001,
     "precision": 4
+  },
+  "POND": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
   },
   "POWR": {
     "min_size": 0.1,
@@ -869,6 +984,11 @@
     "step_size": 1e-05,
     "precision": 5
   },
+  "QI": {
+    "min_size": 1.0,
+    "step_size": 1e-06,
+    "precision": 6
+  },
   "QNT": {
     "min_size": 0.0001,
     "step_size": 0.0001,
@@ -898,6 +1018,11 @@
     "min_size": 0.01,
     "step_size": 0.001,
     "precision": 3
+  },
+  "REQ": {
+    "min_size": 1.0,
+    "step_size": 0.0001,
+    "precision": 4
   },
   "RLC": {
     "min_size": 0.01,
@@ -954,6 +1079,16 @@
     "step_size": 0.001,
     "precision": 3
   },
+  "SHIB": {
+    "min_size": 1.0,
+    "step_size": 1e-08,
+    "precision": 8
+  },
+  "SHPING": {
+    "min_size": 1.0,
+    "step_size": 1e-06,
+    "precision": 6
+  },
   "SKL": {
     "min_size": 0.1,
     "step_size": 0.0001,
@@ -968,6 +1103,16 @@
     "min_size": 1e-08,
     "step_size": 1e-08,
     "precision": 8
+  },
+  "SPA": {
+    "min_size": 1.0,
+    "step_size": 1e-06,
+    "precision": 6
+  },
+  "SPELL": {
+    "min_size": 1.0,
+    "step_size": 1e-07,
+    "precision": 7
   },
   "STG": {
     "min_size": 0.1,
@@ -1009,10 +1154,25 @@
     "step_size": 0.0001,
     "precision": 4
   },
+  "SWELL": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "SWFTC": {
+    "min_size": 1.0,
+    "step_size": 1e-06,
+    "precision": 6
+  },
   "SYN": {
     "min_size": 0.01,
     "step_size": 0.001,
     "precision": 3
+  },
+  "T": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
   },
   "TIA": {
     "min_size": 0.01,
@@ -1044,6 +1204,11 @@
     "step_size": 0.0001,
     "precision": 4
   },
+  "TVK": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
+  },
   "UMA": {
     "min_size": 0.001,
     "step_size": 0.001,
@@ -1069,8 +1234,18 @@
     "step_size": 1e-05,
     "precision": 5
   },
+  "VARA": {
+    "min_size": 1.0,
+    "step_size": 1e-05,
+    "precision": 5
+  },
   "VELO": {
     "min_size": 0.1,
+    "step_size": 1e-05,
+    "precision": 5
+  },
+  "VET": {
+    "min_size": 1.0,
     "step_size": 1e-05,
     "precision": 5
   },
@@ -1078,6 +1253,11 @@
     "min_size": 0.01,
     "step_size": 0.0001,
     "precision": 4
+  },
+  "VTHO": {
+    "min_size": 1.0,
+    "step_size": 1e-06,
+    "precision": 6
   },
   "WAXL": {
     "min_size": 0.01,
@@ -1093,6 +1273,11 @@
     "min_size": 0.01,
     "step_size": 0.001,
     "precision": 3
+  },
+  "WELL": {
+    "min_size": 1.0,
+    "step_size": 1e-06,
+    "precision": 6
   },
   "WIF": {
     "min_size": 0.01,

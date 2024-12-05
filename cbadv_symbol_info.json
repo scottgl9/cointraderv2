@@ -4583,6 +4583,78 @@
     "quote_precision": 6,
     "orderTypes": null
   },
+  "MOG-USD": {
+    "base_name": "MOG",
+    "quote_name": "USD",
+    "base_min_size": 0.1,
+    "quote_min_size": 1.0,
+    "base_step_size": 0.1,
+    "quote_step_size": 1e-05,
+    "is_currency_pair": false,
+    "base_precision": 1,
+    "quote_precision": 5,
+    "orderTypes": null
+  },
+  "MOG-USDC": {
+    "base_name": "MOG",
+    "quote_name": "USDC",
+    "base_min_size": 0.1,
+    "quote_min_size": 1.0,
+    "base_step_size": 0.1,
+    "quote_step_size": 1e-05,
+    "is_currency_pair": false,
+    "base_precision": 1,
+    "quote_precision": 5,
+    "orderTypes": null
+  },
+  "MOODENG-USD": {
+    "base_name": "MOODENG",
+    "quote_name": "USD",
+    "base_min_size": 0.01,
+    "quote_min_size": 1.0,
+    "base_step_size": 0.01,
+    "quote_step_size": 0.0001,
+    "is_currency_pair": false,
+    "base_precision": 2,
+    "quote_precision": 4,
+    "orderTypes": null
+  },
+  "MOODENG-USDC": {
+    "base_name": "MOODENG",
+    "quote_name": "USDC",
+    "base_min_size": 0.01,
+    "quote_min_size": 1.0,
+    "base_step_size": 0.01,
+    "quote_step_size": 0.0001,
+    "is_currency_pair": false,
+    "base_precision": 2,
+    "quote_precision": 4,
+    "orderTypes": null
+  },
+  "MOVE-USD": {
+    "base_name": "MOVE",
+    "quote_name": "USD",
+    "base_min_size": 0.1,
+    "quote_min_size": 1.0,
+    "base_step_size": 0.1,
+    "quote_step_size": 0.0001,
+    "is_currency_pair": false,
+    "base_precision": 1,
+    "quote_precision": 4,
+    "orderTypes": null
+  },
+  "MOVE-USDC": {
+    "base_name": "MOVE",
+    "quote_name": "USDC",
+    "base_min_size": 0.1,
+    "quote_min_size": 1.0,
+    "base_step_size": 0.1,
+    "quote_step_size": 0.0001,
+    "is_currency_pair": false,
+    "base_precision": 1,
+    "quote_precision": 4,
+    "orderTypes": null
+  },
   "MPL-USD": {
     "base_name": "MPL",
     "quote_name": "USD",

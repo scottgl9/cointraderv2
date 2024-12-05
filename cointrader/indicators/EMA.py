@@ -8,17 +8,21 @@ class EMA(Indicator):
         self.multiplier = 2 / (period + 1)
         self.reset()
 
-    def update(self, kline : Kline):
+    def update(self, kline: Kline):
+        result = self.update_with_value(kline.close)
+        self._last_kline = kline
+        return result
+
+    def update_with_value(self, value: float):
         if len(self.values) == 0:
-            self.values.append(kline.close)
+            self.values.append(value)
         else:
-            ema_value = (kline.close - self.values[-1]) * self.multiplier + self.values[-1]
+            ema_value = (value - self.values[-1]) * self.multiplier + self.values[-1]
             self.values.append(ema_value)
         
         if len(self.values) > self.period:
             self.values.pop(0)
 
-        self._last_kline = kline
         self._last_value = self.values[-1]
         return self._last_value
 
