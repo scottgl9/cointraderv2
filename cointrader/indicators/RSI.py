@@ -99,12 +99,6 @@ class RSI(Indicator):
 
         return self.result
 
-    def increasing(self):
-        return self.up_values[-1] > self.up_values[0]
-
-    def decreasing(self):
-        return self.down_values[-1] > self.down_values[0]
-
     def get_last_value(self):
         return self._last_value
 

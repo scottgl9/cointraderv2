@@ -86,6 +86,8 @@ def main(args):
     kline = Kline()
     #kline.set_dict_names(ts='start')
 
+    last_prices = {}
+
     # iterate through all rows in the DataFrame
     for index, row in df.iterrows():
         symbol = row['Symbol']
@@ -102,14 +104,11 @@ def main(args):
             kline.from_dict(kline_data)
             kline.symbol = symbol
             mtrader.market_update(kline)
-
-    #last_prices = {}
-    #for symbol in symbols:
-    #    last_prices[symbol] = all_klines[symbol][-1]['close']
+            last_prices[symbol] = kline_data['close']
 
     print(account.get_account_balances())
-    #print("\nFinal Total USDT Balance:")
-    #print(account.get_total_balance("USDT", prices=last_prices))
+    print("\nFinal Total USDT Balance:")
+    print(account.get_total_balance("USDT", prices=last_prices))
 
     print("\nRemaining open positions:")
     for symbol in symbols:
@@ -138,8 +137,8 @@ if __name__ == '__main__':
     parser.add_argument('--exchange', type=str, default="cbadv", help='Account to use for simulation')
     parser.add_argument('--granularity', type=int, default=3600, help='Granularity of klines')
     parser.add_argument('--csv_path', type=str, default='data/crypto_hourly_data/cryptotoken_full_binance_1h.csv', help='Path to the CSV file')
-    parser.add_argument('--symbols', type=str, default='BTC-USDT,ETH-USDT,SOL-USDT', help='Comma separated list of symbols')
+    parser.add_argument('--symbols', type=str, default='BTC-USDT,ETH-USDT,SOL-USDT,HBAR-USDT,DOT-USDT', help='Comma separated list of symbols')
     parser.add_argument('--start_date', type=str, default='2020-08-11 06:00:00', help='Start date for klines')
-    parser.add_argument('--end_date', type=str, default='2023-10-19 23:00:00', help='End date for klines')
+    parser.add_argument('--end_date', type=str, default='2020-10-19 23:00:00', help='End date for klines')
     args = parser.parse_args()
     main(args)

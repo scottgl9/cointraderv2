@@ -7,9 +7,13 @@ class RSISignal(Signal):
         self.overbought = overbought
         self.oversold = oversold
         self.rsi = RSI(period)
+        self._values = []
 
     def update(self, kline):
-        return self.rsi.update(kline)
+        result = self.rsi.update(kline)
+        self._values.append(result)
+        if len(self._values) > self.period:
+            self._values.pop(0)
 
     def increasing(self):
         return self.rsi.increasing()
@@ -24,16 +28,20 @@ class RSISignal(Signal):
         return False
     
     def above(self):
-        return self.rsi > self.overbought
+        return self._values[-1] > self.overbought
     
     def below(self):
-        return self.rsi < self.oversold
-    
+        return self._values[-1] < self.oversold
+
     def increasing(self):
-        return self.rsi.increasing()
+        if self._values[0] < self._values[-1]:
+            return True
+        return False
     
     def decreasing(self):
-        return self.rsi.decreasing()
-    
+        if self._values[0] > self._values[-1]:
+            return True
+        return False
+
     def ready(self):
         return self.rsi.ready()
