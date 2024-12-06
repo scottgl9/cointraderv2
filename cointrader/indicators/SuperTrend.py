@@ -56,8 +56,11 @@ class SuperTrend(Indicator):
         # Otherwise, trend_up remains unchanged
         if current_close > prev_final_ub:
             self._trend_up = True
+            self._trend_down = False
         elif current_close < prev_final_lb:
             self._trend_up = False
+            self._trend_down = True
+
         # If none of the conditions met, trend_up stays as is
 
         # Now assign the supertrend value for this candle
@@ -68,7 +71,11 @@ class SuperTrend(Indicator):
         # Store values for next iteration
         self._final_ub = final_ub
         self._final_lb = final_lb
-        self._last_value = supertrend
+        self._last_value = {
+            'supertrend': supertrend,
+            'trend_up': self._trend_up,
+            'trend_down': self._trend_down
+        }
         self._last_kline = kline
 
         return self._last_value
@@ -84,7 +91,8 @@ class SuperTrend(Indicator):
         # Initialize final_ub and final_lb to None, will treat them as 0.0 when None
         self._final_ub = None
         self._final_lb = None
-        self._trend_up = True
+        self._trend_up = False
+        self._trend_down = False
         self._last_value = None
         self._last_kline = None
 

@@ -149,7 +149,7 @@ if __name__ == '__main__':
         if not st.ready():
             st_values.append(np.nan)
         else:
-            st_values.append(result)
+            st_values.append(result['supertrend'])
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
