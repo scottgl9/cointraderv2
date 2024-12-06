@@ -1,21 +1,19 @@
 import sys
-from matplotlib import pyplot as plt
+import mplfinance as mpf
 import numpy as np
 import pandas as pd
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.ATR import ATR
+from cointrader.indicators.SuperTrend import SuperTrend
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 import argparse
-from ta.volatility import AverageTrueRange
-from ta.utils import dropna
 
 CLIENT_NAME = "cbadv"
 GRANULARITY = 3600
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot ATR indicator')
+    parser = argparse.ArgumentParser(description='Plot SuperTrend indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     args = parser.parse_args()
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
@@ -56,8 +54,8 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    atr = ATR('ATR', 14)
-    atr_values = []
+    st = SuperTrend(period=10, multiplier=3)
+    st_values = []
 
     opens = []
     closes = []
@@ -68,11 +66,12 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = atr.update(kline)
-        if atr.ready():
-            atr_values.append(result)
+        result = st.update(kline)
+        print(result)
+        if not st.ready():
+            st_values.append(np.nan)
         else:
-            atr_values.append(np.nan)
+            st_values.append(result)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -83,42 +82,22 @@ if __name__ == '__main__':
 
     # Create a DataFrame for the candlestick chart
     data = {
-        'open': opens,
-        'high': highs,
-        'low': lows,
-        'close': closes,
-        'volume': volumes
+        'Date': dates,
+        'Open': opens,
+        'High': highs,
+        'Low': lows,
+        'Close': closes
     }
     df = pd.DataFrame(data)
-    df = dropna(df)
+    df.set_index('Date', inplace=True)
 
-    print(atr_values)
+    st_plot = mpf.make_addplot(st_values, panel=0, color='green', width=1.5)
 
-    atr_indicator = AverageTrueRange(high=pd.Series(highs), low=pd.Series(lows), close=pd.Series(closes), window=14, fillna=True)
-    df['atr'] = atr_indicator.average_true_range()
-
-    # Create a figure with two subplots
-    fig, (ax1, ax3, ax2) = plt.subplots(3, 1, figsize=(14, 10), sharex=True)
-
-    # Plot ATR on the first subplot
-    ax1.plot(dates, df['atr'].values, label='ATR (ta)', color='red')
-    ax1.plot(dates, atr_values, label='ATR (custom)', color='green')
-    ax1.set_title(f'ATR Indicator Comparison for {ticker}')
-    ax1.set_ylabel('ATR Value')
-    ax1.legend()
-
-    ax3.plot(dates, atr_values, label='ATR (custom)', color='blue')
-    ax3.set_title(f'Close Price for {ticker}')
-    ax3.set_xlabel('Date')
-    ax3.set_ylabel('Close Price')
-    ax3.legend()
-
-    # Plot close values on the second subplot
-    ax2.plot(dates, df['close'].values, label='Close Price', color='blue')
-    ax2.set_title(f'Close Price for {ticker}')
-    ax2.set_xlabel('Date')
-    ax2.set_ylabel('Close Price')
-    ax2.legend()
-
-    # Show the plot
-    plt.show()
+    mpf.plot(
+        df,
+        type='candle',
+        style='charles',
+        title=f'{ticker} {granularity_name} chart with SuperTrend',
+        ylabel='Price',
+        addplot=[st_plot],
+    )
