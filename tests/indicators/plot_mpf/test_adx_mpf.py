@@ -73,10 +73,10 @@ if __name__ == '__main__':
     for candle in reversed(candles):
         kline.from_dict(candle)
         result = adx.update(kline)
-        #if not adx.ready():
-        #    result = np.nan
-        print(result)
-        adx_values.append(result)
+        if not adx.ready() or result is None:
+            adx_values.append(np.nan)
+        else:
+            adx_values.append(result['adx'])
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)

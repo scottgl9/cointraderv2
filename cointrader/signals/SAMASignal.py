@@ -50,6 +50,12 @@ class SAMASignal(Signal):
         self._longsignal = result['longsignal']
         self._shortsignal = result['shortsignal']
 
+    def increasing(self):
+        return self._longsignal
+
+    def decreasing(self):
+        return self._shortsignal
+
     def buy_signal(self):
         return self._longsignal
 

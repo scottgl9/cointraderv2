@@ -20,28 +20,7 @@ class ADX(Indicator):
         Indicator.__init__(self, name=name)
         self.win = period
         self.atr = ATR(period=self.win)
-        self.adx = 0
-        self.dx_values = []
-        self.dx_age = 0
-        self._dx_sum = 0
-        # +DM values
-        self.pDM_values = []
-        self._pDM_sum = 0
-        self.pDM = 0
-        # -DM values
-        self.nDM_values = []
-        self._nDM_sum = 0
-        self.nDM = 0
-        # +DI
-        self.pDI = 0
-        # -DI
-        self.nDI = 0
-        self.dm_age = 0
-        self.prev_low = 0
-        self.prev_high = 0
-        self.result = 0
-        self._last_kline = None
-        self._last_value = None
+        self.reset()
 
     def update(self, kline: Kline):
         close = kline.close
@@ -52,7 +31,8 @@ class ADX(Indicator):
         if not self.prev_low or not self.prev_high:
             self.prev_low = low
             self.prev_high = high
-            return self.result
+            self._last_kline = kline
+            return self._last_value
 
         pDM = high - self.prev_high
         nDM = self.prev_low - low
@@ -76,7 +56,8 @@ class ADX(Indicator):
             self.nDM_values.append(self.nDM)
             self._pDM_sum += self.pDM
             self._nDM_sum += self.nDM
-            return self.result
+            self._last_kline = kline
+            return self._last_value
         else:
             if self.pDI and self.nDI:
                 prev_pdm_sum = self._pDM_sum
@@ -90,13 +71,14 @@ class ADX(Indicator):
             self.nDI = 100.0 * (self._nDM_sum / self.atr.get_last_value())
 
         if not self.pDI and not self.nDI:
-            return self.result
+            return self._last_value
 
         dx = 100.0 * abs(self.pDI - self.nDI) / abs(self.pDI + self.nDI)
         if len(self.dx_values) < self.win:
             self.dx_values.append(dx)
             self._dx_sum += dx
-            return self.result
+            self._last_kline = kline
+            return self._last_value
         else:
             if not self.adx:
                 self.adx = self._dx_sum / self.win
@@ -104,12 +86,43 @@ class ADX(Indicator):
                 prev_adx = self.adx
                 self.adx = ((prev_adx * (self.win - 1.0)) + dx) / self.win
 
-        self.result = self.adx
+        self.result = {
+            'adx': self.adx,
+            'pdm': self.pDM,
+            'ndm': self.nDM
+        }
+    
         self._last_value = self.result
+        self._last_kline = kline
+    
         return self.result
     
     def get_last_value(self):
         return self._last_value
-
+    
     def ready(self):
-        return self.atr.ready()
+        return self.atr.ready() and self._last_value is not None
+
+    def reset(self):
+        self.adx = 0
+        self.dx_values = []
+        self.dx_age = 0
+        self._dx_sum = 0
+        # +DM values
+        self.pDM_values = []
+        self._pDM_sum = 0
+        self.pDM = 0
+        # -DM values
+        self.nDM_values = []
+        self._nDM_sum = 0
+        self.nDM = 0
+        # +DI
+        self.pDI = 0
+        # -DI
+        self.nDI = 0
+        self.dm_age = 0
+        self.prev_low = 0
+        self.prev_high = 0
+        self.result = 0
+        self._last_kline = None
+        self._last_value = None
