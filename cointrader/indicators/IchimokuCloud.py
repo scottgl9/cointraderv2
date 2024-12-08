@@ -3,73 +3,65 @@ from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
 class IchimokuCloud(Indicator):
-    def __init__(self, name='ichimokucloud', short_period=9, medium_period=26, long_period=52):
+    def __init__(self, name='ichimoku_cloud', win_short=9, win_med=26, win_long=52):
         super().__init__(name)
-        self.short_period = short_period
-        self.medium_period = medium_period
-        self.long_period = long_period
-        self.reset()
+        self.win_short = win_short
+        self.win_med = win_med
+        self.win_long = win_long
+        self.highs = deque(maxlen=win_long)
+        self.lows = deque(maxlen=win_long)
+        self.closes = deque()
 
-    def reset(self):
-        self.tenkan_sen = deque(maxlen=self.short_period)
-        self.kijun_sen = deque(maxlen=self.medium_period)
-        self.senkou_span_a = []
-        self.senkou_span_b = []
-        self.chikou_span = []
-        self.klines = deque(maxlen=self.long_period)
         self._last_value = None
         self._last_kline = None
 
     def update(self, kline: Kline):
-        self.klines.append(kline)
+        # Add new data
+        self.highs.append(kline.high)
+        self.lows.append(kline.low)
+        self.closes.append(kline.close)
 
-        if len(self.klines) >= self.short_period:
-            high = max(k.high for k in self.klines[-self.short_period:])
-            low = min(k.low for k in self.klines[-self.short_period:])
-            self.tenkan_sen.append((high + low) / 2)
-        else:
-            return self._last_value
+        # We can only calculate once we have enough data:
+        if len(self.highs) < self.win_long:
+            return None
 
-        if len(self.klines) >= self.medium_period:
-            high = max(k.high for k in self.klines[-self.medium_period:])
-            low = min(k.low for k in self.klines[-self.medium_period:])
-            self.kijun_sen.append((high + low) / 2)
-        else:
-            return self._last_value
+        # Compute Tenkan-sen
+        high_9 = max(list(self.highs)[-self.win_short:])
+        low_9 = min(list(self.lows)[-self.win_short:])
+        tenkan_sen = (high_9 + low_9) / 2
 
-        if (len(self.tenkan_sen) > 2 and len(self.kijun_sen) > 2 and
-            self.tenkan_sen[-2] is not None and self.kijun_sen[-2] is not None):
-            self.senkou_span_a.append((self.tenkan_sen[-2] + self.kijun_sen[-2]) / 2)
-        else:
-            return self._last_value
+        # Compute Kijun-sen
+        high_26 = max(list(self.highs)[-self.win_med:])
+        low_26 = min(list(self.lows)[-self.win_med:])
+        kijun_sen = (high_26 + low_26) / 2
 
-        if len(self.klines) == self.long_period:
-            high = max(k.high for k in self.klines[-self.long_period:])
-            low = min(k.low for k in self.klines[-self.long_period:])
-            self.senkou_span_b.append((high + low) / 2)
-        else:
-            return self._last_value
+        # Compute Senkou Span A (Leading line)
+        senkou_span_a = (tenkan_sen + kijun_sen) / 2
 
-        self.chikou_span.append(kline.close)
+        # Compute Senkou Span B (Leading line)
+        high_52 = max(self.highs)
+        low_52 = min(self.lows)
+        senkou_span_b = (high_52 + low_52) / 2
+
+        # Compute Chikou Span (Lagging line)
+        # Chikou is the current close shifted back 26 periods (if possible)
+        chikou_span = None
+        if len(self.closes) > self.win_med:
+            chikou_span = self.closes[-self.win_med]
 
         self._last_value = {
-            'tenkan_sen': self.tenkan_sen[-1],
-            'kijun_sen': self.kijun_sen[-1],
-            'senkou_span_a': self.senkou_span_a[-1],
-            'senkou_span_b': self.senkou_span_b[-1],
-            'chikou_span': self.chikou_span[-1]
+            'tenkan_sen': tenkan_sen,
+            'kijun_sen': kijun_sen,
+            'senkou_span_a': senkou_span_a,
+            'senkou_span_b': senkou_span_b,
+            'chikou_span': chikou_span
         }
 
         self._last_kline = kline
-
         return self._last_value
 
     def get_last_value(self):
         return self._last_value
-    
-    def get_last_kline(self):
-        return self._last_kline
 
     def ready(self):
         return self._last_value is not None
-    

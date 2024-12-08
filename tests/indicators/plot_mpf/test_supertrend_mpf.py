@@ -41,44 +41,50 @@ def supertrend(df, period=10, multiplier=3.0):
     df['basic_ub'] = (df['High'] + df['Low']) / 2 + multiplier * df['ATR']
     df['basic_lb'] = (df['High'] + df['Low']) / 2 - multiplier * df['ATR']
 
-    # Final Upper and Lower Bands
-    # Initialize columns
+    # Initialize the final upper and lower band columns
     df['final_ub'] = 0.0
     df['final_lb'] = 0.0
 
-    # We need to do this iteratively because each value depends on the previous one
-    for i in range(period, len(df)):
-        if df['Close'].iloc[i] > df['final_ub'].iloc[i-1] or df['final_ub'].iloc[i-1] == 0:
-            df['final_ub'].iloc[i] = df['basic_ub'].iloc[i]
-        else:
-            df['final_ub'].iloc[i] = min(df['basic_ub'].iloc[i], df['final_ub'].iloc[i-1])
+    # Convert index to a list for indexing convenience
+    # Not strictly necessary, but can help readability
+    idx_list = df.index.to_list()
 
-        if df['Close'].iloc[i] < df['final_lb'].iloc[i-1] or df['final_lb'].iloc[i-1] == 0:
-            df['final_lb'].iloc[i] = df['basic_lb'].iloc[i]
+    # Calculate final_ub and final_lb iteratively
+    for i in range(period, len(df)):
+        current_idx = idx_list[i]
+        prev_idx = idx_list[i-1]
+
+        # final_ub calculation
+        if (df['Close'][current_idx] > df['final_ub'][prev_idx]) or (df['final_ub'][prev_idx] == 0):
+            df.at[current_idx, 'final_ub'] = df['basic_ub'][current_idx]
         else:
-            df['final_lb'].iloc[i] = max(df['basic_lb'].iloc[i], df['final_lb'].iloc[i-1])
+            df.at[current_idx, 'final_ub'] = min(df['basic_ub'][current_idx], df['final_ub'][prev_idx])
+
+        # final_lb calculation
+        if (df['Close'][current_idx] < df['final_lb'][prev_idx]) or (df['final_lb'][prev_idx] == 0):
+            df.at[current_idx, 'final_lb'] = df['basic_lb'][current_idx]
+        else:
+            df.at[current_idx, 'final_lb'] = max(df['basic_lb'][current_idx], df['final_lb'][prev_idx])
 
     # Determine the Supertrend
-    # The Supertrend is either the final lower band or the final upper band depending on the trend.
     df['Supertrend'] = np.nan
-    trend_up = True  # Initial guess. This will be established as we go along.
-    
+    trend_up = True  # Initial guess
+
     for i in range(period, len(df)):
-        # If close has crossed above the final upper band, trend is up
-        if df['Close'].iloc[i] > df['final_ub'].iloc[i-1]:
+        current_idx = idx_list[i]
+        prev_idx = idx_list[i-1]
+
+        # Check for trend change
+        if df['Close'][current_idx] > df['final_ub'][prev_idx]:
             trend_up = True
-        # If close has crossed below the final lower band, trend is down
-        elif df['Close'].iloc[i] < df['final_lb'].iloc[i-1]:
+        elif df['Close'][current_idx] < df['final_lb'][prev_idx]:
             trend_up = False
 
-        # Assign Supertrend value based on current trend direction
+        # Assign Supertrend based on trend direction
         if trend_up:
-            df['Supertrend'].iloc[i] = df['final_lb'].iloc[i]
+            df.at[current_idx, 'Supertrend'] = df['final_lb'][current_idx]
         else:
-            df['Supertrend'].iloc[i] = df['final_ub'].iloc[i]
-
-    # Clean up temporary columns if you want
-    # df.drop(['basic_ub', 'basic_lb'], axis=1, inplace=True)
+            df.at[current_idx, 'Supertrend'] = df['final_ub'][current_idx]
 
     return df
 
@@ -172,7 +178,7 @@ if __name__ == '__main__':
     df = supertrend(df, period=10, multiplier=3.0)
 
     st_plot = mpf.make_addplot(st_values, panel=0, color='green', width=1.5)
-    st_ref_plot = mpf.make_addplot(df['Supertrend'], panel=0, color='blue', width=1.5)
+    st_ref_plot = mpf.make_addplot(df['Supertrend'].values, panel=0, color='blue', width=1.5)
 
     mpf.plot(
         df,

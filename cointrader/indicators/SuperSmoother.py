@@ -1,7 +1,6 @@
-# Implements the Super Smoother Filter indicator. *NOT WORKING, FIXME*
+import math
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
-import math
 
 class SuperSmoother(Indicator):
     def __init__(self, name='super_smoother', period=12):
@@ -9,41 +8,49 @@ class SuperSmoother(Indicator):
         self.period = period
         self.reset()
 
+    def reset(self):
+        self.values = []
+        self._last_kline = None
+        self._last_value = None
+        self._last_price = None
+        # Compute coefficients using Ehlers' formula
+        self._compute_coefficients()
+
+    def _compute_coefficients(self):
+        freq = 1.414 * math.pi / self.period
+        a1 = math.exp(-freq)
+        self.c2 = 2 * a1 * math.cos(freq)
+        self.c3 = -a1 * a1
+        self.c1 = 1 - self.c2 - self.c3
+
     def update(self, kline: Kline):
         price = kline.close
 
-        if len(self.values) < 2:
-            # Initialize with the first price value
+        # Initialization phase
+        if self._last_price is None:
+            # Just store the first price, no smoothing yet
             self.values.append(price)
+            self._last_price = price
+            self._last_kline = kline
+            self._last_value = price
+            return self._last_value
+        elif len(self.values) == 1:
+            # We have only one past smoothed value (seed),
+            # The next smoothed value can be approximated:
+            s = (self.c1 * (price + self._last_price) / 2.0) + self.c2 * self.values[-1] + self.c3 * self._last_price
+            self.values.append(s)
+            self._last_value = s
         else:
-            # Apply the Super Smoother Filter formula
-            smoother_value = (
-                self.b1 * price +
-                self.b2 * self._last_price +
-                self.b3 * self._prev_last_price -
-                self.a1 * self.values[-1]
-            )
-            self.values.append(smoother_value)
+            # We have at least two previous smoothed values: s(n-1) = self.values[-1], s(n-2) = self.values[-2]
+            # Apply the formula:
+            s = (self.c1 * (price + self._last_price) / 2.0) + self.c2 * self.values[-1] + self.c3 * self.values[-2]
+            self.values.append(s)
+            self._last_value = s
 
-        # Maintain a rolling window of values
-        if len(self.values) > self.period:
-            self.values.pop(0)
-
-        # Update previous price values
-        self._prev_last_price = self._last_price
+        # Update last price and kline
         self._last_price = price
-
-        # Store the last Kline and value
         self._last_kline = kline
-        self._last_value = self.values[-1]
-
         return self._last_value
-
-    def increasing(self) -> bool:
-        return self.values[-1] > self.values[0]
-
-    def decreasing(self) -> bool:
-        return self.values[-1] < self.values[0]
 
     def get_last_value(self):
         return self._last_value
@@ -51,25 +58,16 @@ class SuperSmoother(Indicator):
     def get_last_kline(self):
         return self._last_kline
 
-    def reset(self):
-        self.values = []
-        self._last_price = 0
-        self._prev_last_price = 0
-        self._last_kline = None
-        self._last_value = None
-        self._compute_coefficients()
-
     def ready(self):
-        return len(self.values) > 1
+        # We consider it ready once we have at least two smoothed values beyond initialization
+        return len(self.values) > 2
 
-    def _compute_coefficients(self):
-        """
-        Computes the filter coefficients based on the period.
-        """
-        # Calculate the smoothing factor
-        freq = 2 * math.pi / self.period
-        alpha = (math.sin(freq) / (2 * 0.707)) / math.cos(freq)
-        self.a1 = 2 * alpha
-        self.b1 = alpha**2
-        self.b2 = 2 * self.b1
-        self.b3 = self.b1
+    def increasing(self) -> bool:
+        if not self.ready():
+            return False
+        return self.values[-1] > self.values[0]
+
+    def decreasing(self) -> bool:
+        if not self.ready():
+            return False
+        return self.values[-1] < self.values[0]
