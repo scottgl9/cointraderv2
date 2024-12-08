@@ -1,3 +1,4 @@
+from collections import deque
 from cointrader.common.Signal import Signal
 from cointrader.common.Kline import Kline
 from cointrader.indicators.SAMA import SlopeAdaptiveMovingAverage
@@ -27,7 +28,7 @@ class SAMASignal(Signal):
     def reset(self):
         # Reset the indicator and internal variables
         self.indicator.reset()
-        self._values = []
+        #self._values = deque(maxlen=self.indicator.length)
         self._cross_up = False
         self._cross_down = False
         self._last_up = False

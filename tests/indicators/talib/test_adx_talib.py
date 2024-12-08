@@ -71,7 +71,7 @@ if __name__ == '__main__':
         kline.from_dict(candle)
         result = adx.update(kline)
         if adx.ready():
-            adx_values.append(result)
+            adx_values.append(result['adx'])
         else:
             adx_values.append(np.nan)
         opens.append(kline.open)

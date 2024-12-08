@@ -1,4 +1,4 @@
-# Implements the Super Smoother Filter indicator.
+# Implements the Super Smoother Filter indicator. *NOT WORKING, FIXME*
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 import math

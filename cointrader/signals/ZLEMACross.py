@@ -1,3 +1,4 @@
+from collections import deque
 from cointrader.common.Signal import Signal
 from cointrader.common.Kline import Kline
 from cointrader.indicators.ZLEMA import ZLEMA
@@ -8,31 +9,27 @@ class ZLEMACross(Signal):
         self.short_period = short_period
         self.long_period = long_period
         self.window = max(short_period, long_period)
-        self.short_ema = ZLEMA(f"{self._name}_short", self.short_period)
-        self.long_ema = ZLEMA(f"{self._name}_long", self.long_period)
+        self.short_zlema = ZLEMA(f"{self._name}_short", self.short_period)
+        self.long_zlema = ZLEMA(f"{self._name}_long", self.long_period)
         self.reset()
 
+    def reset(self):
+        self.short_zlema.reset()
+        self.long_zlema.reset()
+        self._cross_up = False
+        self._cross_down = False
+        self._short_zlema_values = deque(maxlen=self.window)
+        self._long_zlema_values = deque(maxlen=self.window)
+
     def update(self, kline: Kline):
-        short_ema_value = self.short_ema.update(kline)
-        self._short_ema_values.append(short_ema_value)
-        long_ema_value = self.long_ema.update(kline)
-        self._long_ema_values.append(long_ema_value)
-
-        if len(self._short_ema_values) > self.short_period:
-            self._short_ema_values.pop(0)
-        
-        if len(self._long_ema_values) > self.long_period:
-            self._long_ema_values.pop(0)
-
-        if len(self._short_ema_values) > self.window:
-            self._short_ema_values.pop(0)
-
-        if len(self._long_ema_values) > self.window:
-            self._long_ema_values.pop(0)
-        
-        if short_ema_value > max(self._long_ema_values) and min(self._short_ema_values) < self._long_ema_values[-1]:
+        short_zlema_value = self.short_zlema.update(kline)
+        self._short_zlema_values.append(short_zlema_value)
+        long_zlema_value = self.long_zlema.update(kline)
+        self._long_zlema_values.append(long_zlema_value)
+       
+        if short_zlema_value > max(self._long_zlema_values) and min(self._short_zlema_values) < self._long_zlema_values[-1]:
             self._cross_up = True
-        elif short_ema_value < min(self._long_ema_values) and max(self._short_ema_values) > self._long_ema_values[-1]:
+        elif short_zlema_value < min(self._long_zlema_values) and max(self._short_zlema_values) > self._long_zlema_values[-1]:
             self._cross_down = True
 
         return
@@ -48,25 +45,17 @@ class ZLEMACross(Signal):
         return result
 
     def above(self):
-        return self.short_ema > self.long_ema
+        return self.short_zlema > self.long_zlema
 
     def below(self):
-        return self.short_ema < self.long_ema
+        return self.short_zlema < self.long_zlema
 
     def ready(self):
-        return self.short_ema.ready() and self.long_ema.ready()
+        return self.short_zlema.ready() and self.long_zlema.ready()
 
     def get_last_value(self):
         result = {
-            "short_ema": self.short_ema,
-            "long_ema": self.long_ema
+            "short_zlema": self.short_zlema,
+            "long_zlema": self.long_zlema
         }
         return result
-
-    def reset(self):
-        self.short_ema.reset()
-        self.long_ema.reset()
-        self._cross_up = False
-        self._cross_down = False
-        self._short_ema_values = []
-        self._long_ema_values = []

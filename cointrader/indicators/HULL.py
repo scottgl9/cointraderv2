@@ -1,5 +1,6 @@
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
+from cointrader.indicators.WMA import WMA
 from math import sqrt
 
 class HMA(Indicator):

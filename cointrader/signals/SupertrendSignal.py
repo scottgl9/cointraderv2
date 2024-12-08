@@ -10,6 +10,15 @@ class SupertrendSignal(Signal):
         self.supertrend = SuperTrend(period=self.period, multiplier=self.multiplier)
         self.reset()
 
+    def reset(self):
+        self.supertrend.reset()
+        self._trend_up = False
+        self._trend_down = False
+        self._last_trend_up = False
+        self._last_trend_down = False
+        self._cross_up = False
+        self._cross_down = False
+
     def update(self, kline: Kline):
         result = self.supertrend.update(kline)
         self._prev_trend_up = self._trend_up
@@ -42,15 +51,6 @@ class SupertrendSignal(Signal):
         result = self._cross_down
         self._cross_down = False
         return result
-
-    def reset(self):
-        self.supertrend.reset()
-        self._trend_up = False
-        self._trend_down = False
-        self._last_trend_up = False
-        self._last_trend_down = False
-        self._cross_up = False
-        self._cross_down = False
 
     def ready(self):
         return self.supertrend.ready()

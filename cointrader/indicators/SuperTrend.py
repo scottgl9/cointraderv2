@@ -1,3 +1,4 @@
+# This file contains the SuperTrend indicator implementation
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 from cointrader.indicators.ATR import ATR
@@ -10,6 +11,16 @@ class SuperTrend(Indicator):
         self.multiplier = multiplier
         self.atr = ATR(period=period)
         self.reset()
+
+    def reset(self):
+        self.atr.reset()
+        # Initialize final_ub and final_lb to None, will treat them as 0.0 when None
+        self._final_ub = None
+        self._final_lb = None
+        self._trend_up = False
+        self._trend_down = False
+        self._last_value = None
+        self._last_kline = None
 
     def update(self, kline: Kline):
         # Update ATR with the current candle
@@ -85,16 +96,6 @@ class SuperTrend(Indicator):
 
     def get_last_kline(self):
         return self._last_kline
-
-    def reset(self):
-        self.atr.reset()
-        # Initialize final_ub and final_lb to None, will treat them as 0.0 when None
-        self._final_ub = None
-        self._final_lb = None
-        self._trend_up = False
-        self._trend_down = False
-        self._last_value = None
-        self._last_kline = None
 
     def ready(self):
         return self.atr.ready() and self._last_value is not None

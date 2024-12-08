@@ -7,6 +7,15 @@ class ATR(Indicator):
         self.window = period
         self.reset()
 
+    def reset(self):
+        self.result = 0.0
+        self.last_close = 0.0
+        self._tr_sum = 0
+        self.count = 0
+        self.atr = 0
+        self.prior_atr = 0
+        self._last_value = None
+
     def update(self, kline: Kline):
         result = self.update_with_value(kline.close, kline.low, kline.high)
         self._last_kline = kline
@@ -38,15 +47,6 @@ class ATR(Indicator):
 
     def get_last_kline(self):
         return self._last_kline
-
-    def reset(self):
-        self.result = 0.0
-        self.last_close = 0.0
-        self._tr_sum = 0
-        self.count = 0
-        self.atr = 0
-        self.prior_atr = 0
-        self._last_value = None
 
     def ready(self) -> bool:
         return self.count >= self.window

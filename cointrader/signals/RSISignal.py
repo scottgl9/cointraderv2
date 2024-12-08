@@ -1,3 +1,4 @@
+from collections import deque
 from cointrader.common.Signal import Signal
 from cointrader.indicators.RSI import RSI
 
@@ -7,17 +8,19 @@ class RSISignal(Signal):
         self.overbought = overbought
         self.oversold = oversold
         self.rsi = RSI(period)
-        self._values = []
+        self.reset()
+
+    def reset(self):
+        self.rsi.reset()
+        self._values = deque(maxlen=self.period)
 
     def update(self, kline):
         result = self.rsi.update(kline)
         self._values.append(result)
-        if len(self._values) > self.period:
-            self._values.pop(0)
 
     def increasing(self):
         return self.rsi.increasing()
-    
+
     def decreasing(self):
         return self.rsi.decreasing()
 

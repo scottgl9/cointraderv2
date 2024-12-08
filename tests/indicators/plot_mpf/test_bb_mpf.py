@@ -73,7 +73,8 @@ if __name__ == '__main__':
     for candle in reversed(candles):
         kline.from_dict(candle)
         result = bb.update(kline)
-        if not bb.ready():
+        if not bb.ready() or result is None:
+            result = {}
             result['upper'] = np.nan
             result['middle'] = np.nan
             result['lower'] = np.nan

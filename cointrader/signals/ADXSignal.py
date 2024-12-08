@@ -1,3 +1,5 @@
+# This file is used to create a signal based on the ADX indicator
+from collections import deque
 from cointrader.common.Signal import Signal
 from cointrader.indicators.ADX import ADX
 
@@ -6,16 +8,20 @@ class ADXSignal(Signal):
         self.period = period
         self._threshold = threshold
         self.adx = ADX(period)
-        self._values = []
+        self.reset()
+
+    def reset(self):
+        self._values = deque(maxlen=self.period)
+        self._cross_up = False
+        self._cross_down = False
+        self.adx.reset()
 
     def update(self, kline):
         result = self.adx.update(kline)
         if result is None:
             return
-        self._values.append(self.adx.update(kline))
-        if len(self._values) > self.period:
-            self._values.pop(0)
-        
+        self._values.append(result)
+
         if len(self._values) == self.period:
             prev = self._values[-2]
             last = self._values[-1]

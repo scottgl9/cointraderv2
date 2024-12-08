@@ -1,3 +1,4 @@
+from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
@@ -7,7 +8,10 @@ class KAMA(Indicator):
         self.period = period
         self.fast_period = fast_period
         self.slow_period = slow_period
-        self.values = []
+        self.reset()
+
+    def reset(self):
+        self.values = deque(maxlen=self.period)
         self._last_value = None
 
     def update(self, kline: Kline):
@@ -17,8 +21,6 @@ class KAMA(Indicator):
 
     def update_with_value(self, value: float):
         self.values.append(value)
-        if len(self.values) > self.period:
-            self.values.pop(0)
         
         if len(self.values) == self.period:
             change = abs(self.values[-1] - self.values[0])
@@ -38,10 +40,6 @@ class KAMA(Indicator):
 
     def get_last_kline(self):
         return self._last_kline
-    
-    def reset(self):
-        self.values = []
-        self._last_value = None
     
     def ready(self):
         return len(self.values) == self.period

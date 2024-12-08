@@ -6,6 +6,10 @@ class OBV(Indicator):
         super().__init__(name)
         self.reset()
 
+    def reset(self):
+        self._last_value = 0
+        self._last_kline = None
+
     def update(self, kline: Kline):
         if not self.ready():
             self._last_value = 0
@@ -24,9 +28,5 @@ class OBV(Indicator):
     def get_last_kline(self):
         return self._last_kline
     
-    def reset(self):
-        self._last_value = 0
-        self._last_kline = None
-
     def ready(self):
         return self._last_kline is not None

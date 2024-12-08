@@ -1,3 +1,4 @@
+from collections import deque
 from cointrader.common.Signal import Signal
 from cointrader.common.Kline import Kline
 from cointrader.indicators.EMA import EMA
@@ -12,18 +13,20 @@ class EMACross(Signal):
         self.long_ema = EMA(f"{self._name}_long", self.long_period)
         self.reset()
 
+    def reset(self):
+        self.short_ema.reset()
+        self.long_ema.reset()
+        self._cross_up = False
+        self._cross_down = False
+        self._short_ema_values = deque(maxlen=self.window)
+        self._long_ema_values = deque(maxlen=self.window)
+
     def update(self, kline: Kline):
         short_ema_value = self.short_ema.update(kline)
         long_ema_value = self.long_ema.update(kline)
 
         self._short_ema_values.append(short_ema_value)
         self._long_ema_values.append(long_ema_value)
-
-        if len(self._short_ema_values) > self.window:
-            self._short_ema_values.pop(0)
-
-        if len(self._long_ema_values) > self.window:
-            self._long_ema_values.pop(0)
         
         if self.short_ema.ready() and self.long_ema.ready():
             if short_ema_value > max(self._long_ema_values) and min(self._short_ema_values) < self._long_ema_values[-1]:
@@ -58,11 +61,3 @@ class EMACross(Signal):
             "long_ema": self.long_ema
         }
         return result
-
-    def reset(self):
-        self.short_ema.reset()
-        self.long_ema.reset()
-        self._cross_up = False
-        self._cross_down = False
-        self._short_ema_values = []
-        self._long_ema_values = []

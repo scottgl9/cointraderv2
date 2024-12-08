@@ -1,3 +1,4 @@
+from collections import deque
 from cointrader.common.Signal import Signal
 from cointrader.common.Kline import Kline
 from cointrader.indicators.MACD import MACD
@@ -14,14 +15,17 @@ class MACDSignal(Signal):
                          signal_period=self.signal_period)
         self.reset()
 
+    def reset(self):
+        self.macd.reset()
+        self._cross_up = False
+        self._cross_down = False
+        self._macd_values = deque(maxlen=self.window)
+        self._signal_values = deque(maxlen=self.window)
+
     def update(self, kline: Kline):
         result = self.macd.update(kline)
         self._macd_values.append(result["macd"])
         self._signal_values.append(result["signal"])
-        if len(self._macd_values) > self.window:
-            self._macd_values.pop(0)
-        if len(self._signal_values) > self.window:
-            self._signal_values.pop(0)
         
         if self._macd_values[-1] > max(self._signal_values) and min(self._macd_values) < self._signal_values[-1]:
             self._cross_up = True
@@ -52,10 +56,3 @@ class MACDSignal(Signal):
         result = self._cross_down
         self._cross_down = False
         return result
-
-    def reset(self):
-        self.macd.reset()
-        self._cross_up = False
-        self._cross_down = False
-        self._macd_values = []
-        self._signal_values = []

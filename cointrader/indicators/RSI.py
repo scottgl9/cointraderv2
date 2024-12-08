@@ -23,6 +23,10 @@ class RSI(Indicator):
         self.result = 0
         self.smoother = smoother
 
+    def reset(self):
+        self.up_values = []
+        self.down_values = []
+
     def update(self, kline: Kline):
         result = self.update_with_value(kline.close)
         self._last_kline = kline
@@ -104,10 +108,6 @@ class RSI(Indicator):
 
     def get_last_kline(self):
         return self._last_kline
-
-    def reset(self):
-        self.up_values = []
-        self.down_values = []
-    
+   
     def ready(self):
         return len(self.up_values) == self.period

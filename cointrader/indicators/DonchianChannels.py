@@ -28,9 +28,6 @@ class DonchianChannels(Indicator):
                 "middle": middle_band
             }
             self._ready = True
-        else:
-            self._last_value = {"upper": None, "lower": None, "middle": None}
-            self._ready = False
 
         self._last_kline = kline
         return self._last_value

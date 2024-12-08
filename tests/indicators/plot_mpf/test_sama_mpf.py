@@ -65,27 +65,27 @@ if __name__ == '__main__':
     volumes = []
     dates = []
 
-sama = SlopeAdaptiveMovingAverage()
-sama_values = []
-sama_slope_values = []
-colors = []
+    sama = SlopeAdaptiveMovingAverage()
+    sama_values = []
+    sama_slope_values = []
+    colors = []
 
-for candle in reversed(candles):
-    kline.from_dict(candle)
-    result = sama.update(kline)
-    sama_values.append(result['ma'])
-    sama_slope_values.append(result['slope'])
-    if result['slope'] > 0:
-        colors.append('green')
-    else:
-        colors.append('red')
-    opens.append(kline.open)
-    closes.append(kline.close)
-    highs.append(kline.high)
-    lows.append(kline.low)
-    volumes.append(kline.volume)
-    date = pd.to_datetime(kline.ts, unit='s')
-    dates.append(date)
+    for candle in reversed(candles):
+        kline.from_dict(candle)
+        result = sama.update(kline)
+        sama_values.append(result['ma'])
+        sama_slope_values.append(result['slope'])
+        if result['slope'] > 0:
+            colors.append('green')
+        else:
+            colors.append('red')
+        opens.append(kline.open)
+        closes.append(kline.close)
+        highs.append(kline.high)
+        lows.append(kline.low)
+        volumes.append(kline.volume)
+        date = pd.to_datetime(kline.ts, unit='s')
+        dates.append(date)
 
     # Create a DataFrame for the candlestick chart
     data = {

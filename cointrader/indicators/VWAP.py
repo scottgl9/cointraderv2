@@ -1,4 +1,5 @@
-from .Kline import Kline
+from cointrader.common.Kline import Kline
+from cointrader.common.Indicator import Indicator
 
 class VWAP(Indicator):
     def __init__(self, name, **kwargs):
@@ -29,9 +30,6 @@ class VWAP(Indicator):
         if self.cumulative_volume > 0:
             self._last_value = self.cumulative_price_volume / self.cumulative_volume
             self._ready = True
-        else:
-            self._last_value = None
-            self._ready = False
 
         self._last_kline = kline
         return {"vwap": self._last_value}
@@ -50,3 +48,4 @@ class VWAP(Indicator):
 
     def get_last_kline(self) -> Kline:
         return self._last_kline
+    

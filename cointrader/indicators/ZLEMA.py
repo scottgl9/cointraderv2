@@ -1,3 +1,4 @@
+from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
@@ -7,6 +8,10 @@ class ZLEMA(Indicator):
         self.period = period
         self.multiplier = 2 / (period + 1)
         self.reset()
+
+    def reset(self):
+        self.values = deque(maxlen=self.period)
+        self.prices = deque(maxlen=self.period)
 
     def update(self, kline: Kline):
         result = self.update_value(kline.close)
@@ -31,10 +36,6 @@ class ZLEMA(Indicator):
             zlema_value = (lagged_price - self.values[-1]) * self.multiplier + self.values[-1]
             self.values.append(zlema_value)
 
-        # Maintain a rolling window of values based on the period
-        if len(self.values) > self.period:
-            self.values.pop(0)
-
         # Store the last Kline and value
         self._last_value = self.values[-1]
 
@@ -53,10 +54,6 @@ class ZLEMA(Indicator):
 
     def get_last_kline(self):
         return self._last_kline
-
-    def reset(self):
-        self.values = []
-        self.prices = []
 
     def ready(self):
         return len(self.values) == self.period

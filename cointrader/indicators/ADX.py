@@ -1,3 +1,4 @@
+from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 from .ATR import ATR
@@ -21,6 +22,30 @@ class ADX(Indicator):
         self.win = period
         self.atr = ATR(period=self.win)
         self.reset()
+
+    def reset(self):
+        self.adx = 0
+        self.dx_values = []
+        self.dx_age = 0
+        self._dx_sum = 0
+        # +DM values
+        self.pDM_values = []
+        self._pDM_sum = 0
+        self.pDM = 0
+        # -DM values
+        self.nDM_values = []
+        self._nDM_sum = 0
+        self.nDM = 0
+        # +DI
+        self.pDI = 0
+        # -DI
+        self.nDI = 0
+        self.dm_age = 0
+        self.prev_low = 0
+        self.prev_high = 0
+        self.result = 0
+        self._last_kline = None
+        self._last_value = None
 
     def update(self, kline: Kline):
         close = kline.close
@@ -102,27 +127,3 @@ class ADX(Indicator):
     
     def ready(self):
         return self.atr.ready() and self._last_value is not None
-
-    def reset(self):
-        self.adx = 0
-        self.dx_values = []
-        self.dx_age = 0
-        self._dx_sum = 0
-        # +DM values
-        self.pDM_values = []
-        self._pDM_sum = 0
-        self.pDM = 0
-        # -DM values
-        self.nDM_values = []
-        self._nDM_sum = 0
-        self.nDM = 0
-        # +DI
-        self.pDI = 0
-        # -DI
-        self.nDI = 0
-        self.dm_age = 0
-        self.prev_low = 0
-        self.prev_high = 0
-        self.result = 0
-        self._last_kline = None
-        self._last_value = None

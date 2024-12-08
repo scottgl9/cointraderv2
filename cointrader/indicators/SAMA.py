@@ -11,6 +11,15 @@ class SlopeAdaptiveMovingAverage(Indicator):
         self.slopeInRange = slopeInRange
         self.flat = flat
 
+        # Calculate alpha values
+        self.minAlpha = 2 / (self.minLength + 1)
+        self.majAlpha = 2 / (self.majLength + 1)
+        self.reset()
+
+    def reset(self):
+        """
+        Reset the indicator.
+        """
         # Initialize variables
         self.src_history = []      # Close price history
         self.ma_history = []       # Moving average history
@@ -20,10 +29,6 @@ class SlopeAdaptiveMovingAverage(Indicator):
         self.swing_history = []    # Swing state history
         self.ma = None             # Current moving average value
         self.swing = 0             # Current swing state
-
-        # Calculate alpha values
-        self.minAlpha = 2 / (self.minLength + 1)
-        self.majAlpha = 2 / (self.majLength + 1)
 
     def update(self, src):
         """
@@ -143,15 +148,3 @@ class SlopeAdaptiveMovingAverage(Indicator):
         """
         return len(self.src_history) >= self.length + 1
 
-    def reset(self):
-        """
-        Reset the indicator.
-        """
-        self.src_history = []
-        self.ma_history = []
-        self.slope_history = []
-        self.up_history = []
-        self.down_history = []
-        self.swing_history = []
-        self.ma = None
-        self.swing = 0

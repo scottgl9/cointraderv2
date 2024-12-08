@@ -6,15 +6,19 @@ class PSAR(Indicator):
         super().__init__(name)
         self.af = af
         self.max_af = max_af
+        self.af_increment = af
+        self.reset()
+
+    def reset(self):
+        self.af = self.af_increment
         self.ep = None
         self.psar = None
         self.trend = None
-        self.af_increment = af
         #self.klines = []
-        self.reset()
+        self._last_kline = None
 
     def update(self, kline: Kline):
-        self.klines.append(kline)
+        #self.klines.append(kline)
         if not self._last_kline:
             self.psar = kline.low
             self.ep = kline.high
@@ -55,14 +59,6 @@ class PSAR(Indicator):
 
     def get_last_kline(self):
         return self._last_kline
-
-    def reset(self):
-        self.af = self.af_increment
-        self.ep = None
-        self.psar = None
-        self.trend = None
-        #self.klines = []
-        self._last_kline = None
 
     def ready(self):
         return len(self.klines) > 1
