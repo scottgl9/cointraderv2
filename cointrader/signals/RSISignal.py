@@ -1,3 +1,4 @@
+# Signal based on RSI indicator
 from collections import deque
 from cointrader.common.Signal import Signal
 from cointrader.indicators.RSI import RSI
@@ -17,12 +18,6 @@ class RSISignal(Signal):
     def update(self, kline):
         result = self.rsi.update(kline)
         self._values.append(result)
-
-    def increasing(self):
-        return self.rsi.increasing()
-
-    def decreasing(self):
-        return self.rsi.decreasing()
 
     def cross_up(self):
         return False

@@ -1,9 +1,10 @@
 # Implements the Rate of Change (ROC) indicator
+from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
 class ROC(Indicator):
-    def __init__(self, name, period, **kwargs):
+    def __init__(self, name='roc', period=14, **kwargs):
         super().__init__(name, **kwargs)
         self.period = period
         self.reset()
@@ -13,33 +14,45 @@ class ROC(Indicator):
 
     def reset(self):
         self._last_value = None
+        self._values = deque(maxlen=self.period)
 
-    def update(self, kline: Kline) -> dict:
+    def update(self, kline: Kline) -> float:
         result = self.update_with_value(kline.close)
         self._last_kline = kline
         return result
     
     def update_with_value(self, value) -> float:
-        if self._last_value is None:
-            self._last_value = value
+        self._values.append(value)
+
+        if len(self._values) < self.period:
             return None
-        
-        prev_price = self._last_value
-        if prev_price != 0:
-            self._last_value = ((value - prev_price) / prev_price) * 100.0
+
+        prev_value = self._values[0]
+        if prev_value != 0:
+            self._last_value = ((value - prev_value) / prev_value) * 100.0
         else:
             self._last_value = None
         return self._last_value
 
-    def increasing(self) -> bool:
+    def above(self) -> bool:
         if not self.ready():
             return False
         return self._last_value > 0
 
-    def decreasing(self) -> bool:
+    def below(self) -> bool:
         if not self.ready():
             return False
         return self._last_value < 0
+
+    def increasing(self) -> bool:
+        if not self.ready():
+            return False
+        return self._values[-1] > self._values[0]
+
+    def decreasing(self) -> bool:
+        if not self.ready():
+            return False
+        return self._values[-1] < self._values[0]
 
     def get_last_value(self) -> float:
         return self._last_value
