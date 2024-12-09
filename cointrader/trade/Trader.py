@@ -6,6 +6,7 @@ from cointrader.account.Account import Account
 from .TraderConfig import TraderConfig
 from cointrader.execute.ExecuteBase import ExecuteBase
 from .TraderPosition import TraderPosition
+from cointrader.order.Orders import Orders
 import importlib
 from colorama import Fore, Back, Style
 
@@ -17,11 +18,12 @@ class Trader(object):
     _strategy = None
     _max_positions = 0
 
-    def __init__(self, account: Account, symbol: str, execute: ExecuteBase, config: TraderConfig):
+    def __init__(self, account: Account, symbol: str, execute: ExecuteBase, config: TraderConfig, orders: Orders):
         self._symbol = symbol
         self._account = account
         self._execute = execute
         self._config = config
+        self._orders = orders
         self._cur_id = 0
         self._positions = []
         self._buys = []
@@ -84,7 +86,7 @@ class Trader(object):
             if size < self._account.get_base_min_size(self._symbol):
                 print(f"Size too small: {size}")
                 return
-            position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config)
+            position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
             position.open_position(price=kline.close, stop_loss=0, size=size, timestamp=kline.ts)
             self._positions.append(position)
             self._cur_id += 1

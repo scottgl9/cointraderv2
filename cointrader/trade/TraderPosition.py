@@ -8,11 +8,11 @@ from .TraderConfig import TraderConfig
 class TraderPosition(object):
     _symbol = None
     _config = None
-    def __init__(self, symbol: str, id: int, strategy: Strategy, execute: ExecuteBase, config: TraderConfig):
+    def __init__(self, symbol: str, id: int, strategy: Strategy, execute: ExecuteBase, config: TraderConfig, orders: Orders):
         self._id = id
         self._symbol = symbol
         self._config = config
-        self._orders = Orders()
+        self._orders = orders
         self._buy_order = None
         self._sell_order = None
         self._strategy = strategy
