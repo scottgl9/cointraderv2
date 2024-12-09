@@ -39,4 +39,4 @@ class Order(OrderResult):
         """
         Check if the order has been completed
         """
-        return self.status == OrderStatus.FILLED
+        return self.filled_size == self.size and self.status == OrderStatus.FILLED

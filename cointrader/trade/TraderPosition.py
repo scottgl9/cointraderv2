@@ -12,6 +12,7 @@ class TraderPosition(object):
         self._id = id
         self._symbol = symbol
         self._config = config
+        self._orders = Orders()
         self._buy_order = None
         self._sell_order = None
         self._strategy = strategy
@@ -68,6 +69,7 @@ class TraderPosition(object):
 
         self._buy_order = Order(symbol=self._symbol)
         self._buy_order.update_order(result)
+        self._orders.add_order(self._symbol, self._buy_order)
         if self._buy_order.status == OrderStatus.FILLED:
             self._buy_amount = self._buy_order.filled_size
             self._buy_price = self._buy_order.price
