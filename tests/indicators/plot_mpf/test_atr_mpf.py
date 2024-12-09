@@ -2,23 +2,19 @@ import sys
 import mplfinance as mpf
 import numpy as np
 import pandas as pd
-#sys.path.append('./tests')
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.indicators.ATR import ATR
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
-#import matplotlib.pyplot as plt
 import argparse
 
-
 CLIENT_NAME = "cbadv"
-GRANULARITY = 3600
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plot ADX indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol (ex. BTC-USD)', default='BTC-USD')
-    #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
+    parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
 
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
@@ -28,26 +24,26 @@ if __name__ == '__main__':
         print("Ticker not found")
         sys.exit(1)
     granularities = exchange.market_get_kline_granularities()
-    if GRANULARITY not in granularities:
+    if args.granularity not in granularities:
         print("Granularity not found")
         sys.exit(1)
-    max_klines = exchange.market_get_max_kline_count(GRANULARITY)
+    max_klines = exchange.market_get_max_kline_count(args.granularity)
 
     minutes = 0
     hours = 0
 
     granularity_name = ""
 
-    if GRANULARITY == 60:
+    if args.granularity == 60:
         minutes = max_klines
         granularity_name = "1m"
-    elif GRANULARITY == 300: # 5 minutes
+    elif args.granularity == 300: # 5 minutes
         minutes = max_klines * 5
         granularity_name = "5m"
-    elif GRANULARITY == 900: # 15 minutes
+    elif args.granularity == 900: # 15 minutes
         minutes = max_klines * 15
         granularity_name = "15m"
-    elif GRANULARITY == 3600: # 1 hour
+    elif args.granularity == 3600: # 1 hour
         hours = max_klines
         granularity_name = "1h"
 
@@ -55,7 +51,7 @@ if __name__ == '__main__':
     start = int((end - timedelta(hours=hours, minutes=minutes)).timestamp())
     end = int(end.timestamp())
 
-    candles = exchange.market_get_klines_range(ticker, start, end, GRANULARITY)
+    candles = exchange.market_get_klines_range(ticker, start, end, args.granularity)
     kline = Kline()
     kline.set_dict_names(ts='start')
 
@@ -82,7 +78,6 @@ if __name__ == '__main__':
         volumes.append(kline.volume)
         date = pd.to_datetime(kline.ts, unit='s')
         dates.append(date)
-        #timestamps.append(kline.ts)
 
     # Create a DataFrame for the candlestick chart
     data = {

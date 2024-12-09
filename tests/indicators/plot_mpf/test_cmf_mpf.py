@@ -2,20 +2,23 @@ import sys
 import mplfinance as mpf
 import numpy as np
 import pandas as pd
+#sys.path.append('./tests')
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.IchimokuCloud import IchimokuCloud
+from cointrader.indicators.CMF import ChaikinMoneyFlow as CMF
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
+#import matplotlib.pyplot as plt
 import argparse
 
 CLIENT_NAME = "cbadv"
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot Ichimoku Cloud indicator')
-    parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
+    parser = argparse.ArgumentParser(description='Plot CMF indicator')
+    parser.add_argument('--ticker', type=str, help='Ticker symbol (ex. BTC-USD)', default='BTC-USD')
     parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
+
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
     ticker = args.ticker
     granularity = args.granularity
@@ -55,12 +58,8 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    ichimoku = IchimokuCloud()
-    tenkan_sen_values = []
-    kijun_sen_values = []
-    senkou_span_a_values = []
-    senkou_span_b_values = []
-    chikou_span_values = []
+    cmf = CMF(period=20)
+    cmf_values = []
 
     opens = []
     closes = []
@@ -71,20 +70,11 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = ichimoku.update(kline)
-        if ichimoku.ready():
-            tenkan_sen_values.append(result['tenkan_sen'])
-            kijun_sen_values.append(result['kijun_sen'])
-            senkou_span_a_values.append(result['senkou_span_a'])
-            senkou_span_b_values.append(result['senkou_span_b'])
-            chikou_span_values.append(result['chikou_span'])
-            print(f"Tenkan Sen: {result['tenkan_sen']}, Kijun Sen: {result['kijun_sen']}, Senkou Span A: {result['senkou_span_a']}, Senkou Span B: {result['senkou_span_b']}, Chikou Span: {result['chikou_span']}")
+        result = cmf.update(kline)
+        if not cmf.ready() or result is None:
+            cmf_values.append(np.nan)
         else:
-            tenkan_sen_values.append(np.nan)
-            kijun_sen_values.append(np.nan)
-            senkou_span_a_values.append(np.nan)
-            senkou_span_b_values.append(np.nan)
-            chikou_span_values.append(np.nan)
+            cmf_values.append(result)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -104,17 +94,14 @@ if __name__ == '__main__':
     df = pd.DataFrame(data)
     df.set_index('Date', inplace=True)
 
-    tenkan_sen_plot = mpf.make_addplot(tenkan_sen_values, panel=0, color='blue', width=1.5)
-    kijun_sen_plot = mpf.make_addplot(kijun_sen_values, panel=0, color='red', width=1.5)
-    senkou_span_a_plot = mpf.make_addplot(senkou_span_a_values, panel=0, color='green', width=1.5)
-    senkou_span_b_plot = mpf.make_addplot(senkou_span_b_values, panel=0, color='brown', width=1.5)
-    chikou_span_plot = mpf.make_addplot(chikou_span_values, panel=0, color='purple', width=1.5)
+    cmf_plot = mpf.make_addplot(cmf_values, panel=1, color='green', width=1.5)
 
     mpf.plot(
         df,
         type='candle',
         style='charles',
-        title=f'{ticker} {granularity_name} chart with Ichimoku Cloud',
+        title=f'{ticker} {granularity_name} chart with CMF',
         ylabel='Price',
-        addplot=[tenkan_sen_plot, kijun_sen_plot, senkou_span_a_plot, senkou_span_b_plot, chikou_span_plot],
+        addplot=[cmf_plot],
+        panel_ratios=(3, 1),
     )

@@ -10,14 +10,15 @@ from datetime import datetime, timedelta
 import argparse
 
 CLIENT_NAME = "cbadv"
-GRANULARITY = 3600
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plot VWAP indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
+    parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
     ticker = args.ticker
+    GRANULARITY = args.granularity
     tickers = exchange.info_ticker_names_list()
     if ticker not in tickers:
         print("Ticker not found")
