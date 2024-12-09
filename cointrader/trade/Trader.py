@@ -34,6 +34,7 @@ class Trader(object):
         self._strategy = getattr(strategy_module, self._strategy_name)(symbol=symbol)
         self._max_positions = config.max_positions()
         self._net_profit_percent = 0.0
+        self._stop_loss_percent = config.stop_loss_percent()
 
         print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
 
@@ -88,11 +89,19 @@ class Trader(object):
             self._positions.append(position)
             self._cur_id += 1
 
+        strategy_sell_signal = self._strategy.sell()
+
         # Close a position on a sell signal
-        if self._strategy.sell() and len(self._positions) > 0:
+        if len(self._positions) > 0:
             print(f'Sell signal for {self._symbol}')
             for position in self._positions:
-                if not position.closed_position():
+                sell_signal = False
+                if strategy_sell_signal:
+                    sell_signal = True
+                elif position.current_position_percent(kline.close) < -self._stop_loss_percent:
+                    sell_signal = True
+
+                if sell_signal and not position.closed_position():
                     position.close_position(price=kline.close, timestamp=kline.ts)
 
     def net_profit_percent(self) -> float:

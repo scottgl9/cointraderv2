@@ -117,11 +117,22 @@ class TraderPosition(object):
     def closed(self):
         return self._sell_order and self._sell_order.completed()
     
+    def buy_order_completed(self):
+        return self._buy_order and self._buy_order.completed()
+
+    def current_position_percent(self, price: float):
+        """
+        Calculate the current position percent
+        """
+        if not self.buy_order_completed():
+            return 0.0
+        return (price - self._buy_price) / self._buy_price * 100
+
     def profit_percent(self):
         profit = 0.0
         if not self._sell_order or not self._sell_order:
             return profit
-        if self._buy_order.completed() and self._sell_order.completed():
+        if self.buy_order_completed() and self._sell_order.completed():
             profit = (self._sell_order.filled_size * self._sell_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
 
         return round(profit, 2)
