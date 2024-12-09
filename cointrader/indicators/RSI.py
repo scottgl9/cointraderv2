@@ -79,12 +79,17 @@ class RSI(Indicator):
             if not self.rs:
                 rs1 = self._avg_up
                 rs2 = self._avg_down
-                self.rs = rs1 / rs2
+                if rs2 != 0:
+                    self.rs = rs1 / rs2
+                else:
+                    self.rs = 0
             else:
                 rs1 = ((self.period - 1) * self._prev_avg_up + u)
                 rs2 = ((self.period - 1) * self._prev_avg_down + d)
-                if rs2:
+                if rs2 != 0:
                     self.rs = rs1 / rs2
+                else:
+                    self.rs = 0
             if not rs2:
                 self.result = 100.0
             else:

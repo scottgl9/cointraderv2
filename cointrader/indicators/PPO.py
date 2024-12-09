@@ -1,5 +1,4 @@
 # This file contains the implementation of the Percentage Price Oscillator (PPO) indicator.
-from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 from cointrader.indicators.EMA import EMA
@@ -20,9 +19,9 @@ class PPO(Indicator):
         self.signal_period = signal_period
 
         # Initialize EMA instances
-        self.ema_short = EMA(self.short_period)
-        self.ema_long = EMA(self.long_period)
-        self.ema_signal = EMA(self.signal_period)
+        self.ema_short = EMA(period=self.short_period)
+        self.ema_long = EMA(period=self.long_period)
+        self.ema_signal = EMA(period=self.signal_period)
 
         # Initialize internal state
         self._last_value = None
@@ -45,11 +44,9 @@ class PPO(Indicator):
         :param kline: The new Kline data.
         :return: A dictionary with 'ppo', 'signal', and 'histogram' or None if not ready.
         """
-        close = kline.close
-
         # Update EMAs with the latest close price
-        ema_short_val = self.ema_short.update_with_value(close)
-        ema_long_val = self.ema_long.update_with_value(close)
+        ema_short_val = self.ema_short.update(kline)
+        ema_long_val = self.ema_long.update(kline)
 
         # Ensure both EMAs are ready before computing PPO
         if not (self.ema_short.ready() and self.ema_long.ready()):
@@ -59,10 +56,9 @@ class PPO(Indicator):
 
         if ema_long_val == 0:
             # Avoid division by zero
-            ppo = 0
-        else:
-            # Calculate PPO
-            ppo = ((ema_short_val - ema_long_val) / ema_long_val) * 100.0
+            return None
+        # Calculate PPO
+        ppo = ((ema_short_val - ema_long_val) / ema_long_val) * 100.0
 
         # Update the signal line EMA with the PPO value
         signal_val = self.ema_signal.update_with_value(ppo)

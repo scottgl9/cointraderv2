@@ -1,3 +1,4 @@
+# This file contains the implementation of the Donchian Channels indicator.
 from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline

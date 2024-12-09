@@ -1,5 +1,6 @@
 from collections import deque
 from cointrader.common.Indicator import Indicator
+from cointrader.common.Kline import Kline
 import math
 
 class FisherTransform(Indicator):
@@ -13,18 +14,18 @@ class FisherTransform(Indicator):
         self.fisher = 0.0
         self.signal = 0.0  # optional signal line if desired
 
-    def update(self, high: float, low: float, close: float):
+    def update(self, kline: Kline):
         """Update the Fisher Transform indicator with new price data."""
         # Add the new data points
-        self.highs.append(high)
-        self.lows.append(low)
+        self.highs.append(kline.high)
+        self.lows.append(kline.low)
 
         # Only compute if we have enough data
         if len(self.highs) < self.length:
             return None
 
         # Median price of the current candle
-        median_price = (high + low) / 2.0
+        median_price = (kline.high + kline.low) / 2.0
 
         # Normalize median price over lookback period
         min_low = min(self.lows)

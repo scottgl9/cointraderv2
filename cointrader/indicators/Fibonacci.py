@@ -29,12 +29,12 @@ class FibonacciRetracement(Indicator):
 
             # Calculate Fibonacci levels
             levels = {
-                "0%": lowest_low,
-                "23.6%": lowest_low + 0.236 * range,
-                "38.2%": lowest_low + 0.382 * range,
-                "50%": lowest_low + 0.5 * range,
-                "61.8%": lowest_low + 0.618 * range,
-                "100%": highest_high
+                "0": lowest_low,
+                "23.6": lowest_low + 0.236 * range,
+                "38.2": lowest_low + 0.382 * range,
+                "50": lowest_low + 0.5 * range,
+                "61.8": lowest_low + 0.618 * range,
+                "100": highest_high
             }
             self._last_value = levels
             self._ready = True

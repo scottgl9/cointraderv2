@@ -72,10 +72,10 @@ class HeikinAshi(Indicator):
         self.ha_low = ha_low
 
         return {
-            'HA_Open': ha_open,
-            'HA_High': ha_high,
-            'HA_Low': ha_low,
-            'HA_Close': ha_close
+            'open': ha_open,
+            'high': ha_high,
+            'low': ha_low,
+            'close': ha_close
         }
 
     def update(self, kline: Kline) -> Optional[Dict[str, float]]:

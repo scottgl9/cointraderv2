@@ -1,5 +1,4 @@
 # This file contains the implementation of the Percentage Volume Oscillator (PVO) indicator.
-from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 from cointrader.indicators.EMA import EMA
@@ -21,8 +20,8 @@ class PVO(Indicator):
     def update(self, kline: Kline):
         volume = kline.volume
         short_ema_val = self.ema_short.update_with_value(volume)
+        short_ema_val = self.ema_short.update_with_value(volume)
         long_ema_val = self.ema_long.update_with_value(volume)
-
         # We can only compute PVO once both EMAs are ready
         if not (self.ema_short.ready() and self.ema_long.ready()):
             self._last_kline = kline
@@ -38,7 +37,7 @@ class PVO(Indicator):
         pvo = ((short_ema_val - long_ema_val) / long_ema_val) * 100.0
 
         # Compute signal line if possible
-        signal_val = self.ema_signal.update(pvo) if pvo is not None else None
+        signal_val = self.ema_signal.update_with_value(pvo)
 
         if not self.ema_signal.ready():
             self._last_kline = kline
