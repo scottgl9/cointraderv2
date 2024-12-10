@@ -84,10 +84,6 @@ class TraderPosition(object):
         self.current_price = price
         self._timestamp = timestamp
 
-        # get balance of the asset
-        balance = self._account.get_asset_balance('ETH')
-        print(f"Balance: {balance}")
-
         if self._config.end_position_type() == OrderType.MARKET.name:
             result = self._execute.market_sell(self._symbol, price=price, amount=self._buy_amount)
         elif self._config.end_position_type() == OrderType.LIMIT.name:

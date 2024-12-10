@@ -80,7 +80,7 @@ class Trader(object):
 
         self._strategy.update(kline)
 
-        if self._disable_until_ts >= kline.ts:
+        if self._disable_until_ts != 0 and kline.ts >= self._disable_until_ts:
             self._disable_until_ts = 0
             self._disabled = False
 
@@ -109,12 +109,12 @@ class Trader(object):
             position.market_update(kline)
 
         # Open a position on a buy signal
-        if not self._disabled and self._strategy.buy() and len(self._positions) < self._max_positions:
+        if not self._disabled and self._strategy.buy_signal() and len(self._positions) < self._max_positions:
             size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / kline.close)
             if size < self._account.get_base_min_size(self._symbol):
                 print(f"Size too small: {size}")
                 return
-            print(f'Buy signal for {self._symbol}')
+            print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
             position.open_position(price=kline.close, stop_loss=0, size=size, timestamp=kline.ts)
             self._positions.append(position)
@@ -123,7 +123,7 @@ class Trader(object):
                 self._disabled = True
                 self._disable_until_ts = kline.ts + self._cooldown_period_seconds
 
-        strategy_sell_signal = self._strategy.sell()
+        strategy_sell_signal = self._strategy.sell_signal()
 
         # Close a position on a sell signal
         if len(self._positions) > 0:
@@ -131,11 +131,13 @@ class Trader(object):
                 sell_signal = False
                 if strategy_sell_signal:
                     sell_signal = True
+                    sell_signal_name = self._strategy.sell_signal_name()
                 elif position.current_position_percent(kline.close) < -self._stop_loss_percent:
                     sell_signal = True
+                    sell_signal_name = 'stop_loss'
 
                 if sell_signal and not position.closed_position():
-                    print(f'Sell signal for {self._symbol}')
+                    print(f'Sell signal {sell_signal_name} for {self._symbol}')
                     position.close_position(price=kline.close, timestamp=kline.ts)
 
     def net_profit_percent(self) -> float:

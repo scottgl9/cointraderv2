@@ -1,12 +1,14 @@
 from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.order.OrderResult import OrderResult
 from cointrader.account.AccountBase import AccountBase
+from cointrader.trade.TraderConfig import TraderConfig
 from .ExecuteBase import ExecuteBase
 
 class TraderExecute(ExecuteBase):
-    def __init__(self, exchange: TraderExchangeBase, account: AccountBase):
+    def __init__(self, exchange: TraderExchangeBase, account: AccountBase, config: TraderConfig):
         self._exchange = exchange
         self._account = account
+        self._config = config
 
     def account(self) -> AccountBase:
         return self._account

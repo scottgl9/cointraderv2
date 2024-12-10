@@ -10,13 +10,15 @@ from cointrader.signals.ADXSignal import ADXSignal
 class Default(Strategy):
     def __init__(self, symbol: str, name='default'):
         super().__init__(symbol=symbol, name=name)
-        self.macd = MACDSignal('macd', self._symbol, 12, 26, 9)
-        self.sama = SAMASignal('sama', self._symbol)
-        self.zlema = ZLEMACross('zlema', self._symbol, 12, 26)
-        self.rsi = RSISignal(14, 80, 30)
-        self.ema = EMACross('ema', self._symbol, 12, 26)
-        self.supertrend = SupertrendSignal('supertrend', self._symbol, period=14, multiplier=3)
-        self.adx = ADXSignal(14, 20)
+        self.macd = MACDSignal(symbol=self._symbol, short_period=12, long_period=26, signal_period=9)
+        self.sama = SAMASignal(symbol=self._symbol)
+        self.zlema = ZLEMACross(symbol=self._symbol, short_period=12, long_period=26)
+        self.rsi = RSISignal(symbol=self._symbol, period=14, overbought=80, oversold=30)
+        self.ema = EMACross(symbol=self._symbol, short_period=12, long_period=26)
+        self.supertrend = SupertrendSignal(symbol=self._symbol, period=14, multiplier=3)
+        self.adx = ADXSignal(symbol=self._symbol, period=14, threshold=20)
+        self._buy_signal_name = None
+        self._sell_signal_name = None
 
     def update(self, kline):
         self.macd.update(kline)
@@ -27,7 +29,17 @@ class Default(Strategy):
         self.supertrend.update(kline)
         self.adx.update(kline)
 
-    def buy(self):
+    def buy_signal_name(self):
+        result = self._buy_signal_name
+        self._buy_signal_name = None
+        return result
+
+    def sell_signal_name(self):
+        result = self._sell_signal_name
+        self._sell_signal_name = None
+        return result
+
+    def buy_signal(self):
         #if self.rsi.ready() and (self.rsi.decreasing() or self.rsi.above()):
         #    return False
         if self.adx.ready() and self.adx.below():#(self.adx.decreasing() or self.adx.below()):
@@ -37,33 +49,43 @@ class Default(Strategy):
         #if self.zlema.ready() and self.zlema.cross_up():
         #    return True
         #if self.sama.ready() and self.sama.buy_signal():
-        if self.supertrend.ready() and self.supertrend.decreasing():
-            return False
+        #if self.supertrend.ready() and self.supertrend.decreasing():
+        #    return False
         if self.supertrend.ready() and self.supertrend.cross_up():
+            self._buy_signal_name = self.supertrend.name()
             return True
-        if self.macd.ready() and self.macd.cross_up():
-            return True
+        #if self.macd.ready() and self.macd.cross_up():
+        #    self._buy_signal_name = self.macd.name()
+        #    return True
         if self.ema.ready() and self.ema.cross_up():
+            self._buy_signal_name = self.ema.name()
             return True
         if self.adx.ready() and self.adx.cross_up():
+            self._buy_signal_name = self.adx.name()
             return True
         return False
 
-    def sell(self):
+    def sell_signal(self):
         #if self.zlema.ready() and self.zlema.cross_down():
         #    return True
         #if self.supertrend.ready() and self.supertrend.decreasing():
         #    return True
         if self.supertrend.ready() and self.supertrend.cross_down():
+            self._sell_signal_name = self.supertrend.name()
             return True
         #if self.macd.ready() and self.macd.cross_down():
+        #    self._sell_signal_name = self.macd.name()
         #    return True
         if self.rsi.ready() and self.rsi.above():
+            self._sell_signal_name = self.rsi.name()
             return True
         if self.ema.ready() and self.ema.cross_down():
+            self._sell_signal_name = self.ema.name()
             return True
         if self.adx.ready() and self.adx.cross_down():
+            self._sell_signal_name = self.adx.name()
             return True
-        #if self.sama.ready() and self.sama.sell_signal():
-        #    return True
+        if self.sama.ready() and self.sama.sell_signal():
+            self._sell_signal_name = self.sama.name()
+            return True
         return False

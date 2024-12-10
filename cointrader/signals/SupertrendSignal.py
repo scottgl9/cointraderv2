@@ -3,7 +3,7 @@ from cointrader.common.Kline import Kline
 from cointrader.indicators.SuperTrend import SuperTrend
 
 class SupertrendSignal(Signal):
-    def __init__(self, name, symbol, period, multiplier):
+    def __init__(self, name='supertrend', symbol=None, period=14, multiplier=3):
         super().__init__(name, symbol)
         self.period = period
         self.multiplier = multiplier

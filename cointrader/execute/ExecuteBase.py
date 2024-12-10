@@ -5,6 +5,7 @@ from cointrader.account.AccountBase import AccountBase
 
 class ExecuteBase(object):
     _exchange = None
+    _config = None
 
     def __init__(self, exchange: TraderExchangeBase):
         self._exchange = exchange

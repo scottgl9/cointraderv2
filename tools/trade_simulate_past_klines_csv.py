@@ -44,8 +44,6 @@ def main(args):
 
     account.update_asset_balance("USDT", available=initial_usdt, hold=0.0)
 
-    ex = TraderExecuteSimulate(exchange=exchange, account=account)
-
     print(account.get_account_balances())
     print("Start Total USDT Balance:")
     print(account.get_total_balance("USDT"))
@@ -55,6 +53,8 @@ def main(args):
         tconfig.save_config()
 
     tconfig.set_trade_symbols(symbols)
+
+    ex = TraderExecuteSimulate(exchange=exchange, account=account, config=tconfig)
 
     mtrader = MultiTrader(account=account, execute=ex, config=tconfig, granularity=args.granularity)
 
@@ -163,6 +163,6 @@ if __name__ == '__main__':
     parser.add_argument('--csv_path', type=str, default='data/crypto_hourly_data/cryptotoken_full_binance_1h.csv', help='Path to the CSV file')
     parser.add_argument('--symbols', type=str, default='BTC-USDT,ETH-USDT,SOL-USDT,HBAR-USDT,DOT-USDT', help='Comma separated list of symbols')
     parser.add_argument('--start_date', type=str, default='2020-08-11 06:00:00', help='Start date for klines')
-    parser.add_argument('--end_date', type=str, default='2021-10-19 23:00:00', help='End date for klines')
+    parser.add_argument('--end_date', type=str, default='2023-10-19 23:00:00', help='End date for klines')
     args = parser.parse_args()
     main(args)

@@ -14,8 +14,14 @@ class Strategy:
     def update(self, kline : Kline):
         raise NotImplementedError
     
-    def buy(self):
+    def buy_signal_name(self):
+        raise NotImplementedError
+
+    def sell_signal_name(self):
+        raise NotImplementedError
+
+    def buy_signal(self):
         raise NotImplementedError
     
-    def sell(self):
+    def sell_signal(self):
         raise NotImplementedError

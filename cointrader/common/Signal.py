@@ -12,6 +12,12 @@ class Signal:
         self._name = name
         self._symbol = symbol
 
+    def name(self) -> str:
+        return self._name
+    
+    def symbol(self) -> str:
+        return self._symbol
+
     def ready(self):
         raise NotImplementedError
     

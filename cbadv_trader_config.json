@@ -1,20 +1,24 @@
 {
     "simulate": true,
+    "verbose": false,
     "max_positions": 5,
     "quote_currency": "USD",
     "max_position_quote_size": 50.0,
     "strategy": "Default",
     "trade_symbols": [
-        "BTC-USD",
-        "ETH-USD",
-        "SOL-USD"
+        "BTC-USDT",
+        "ETH-USDT",
+        "SOL-USDT",
+        "HBAR-USDT",
+        "DOT-USDT"
     ],
     "stop_loss_percent": 5.0,
     "trailing_stop_loss": false,
     "min_take_profit_percent": 5.0,
     "stop_on_loss": true,
     "max_total_loss_percent": 10.0,
-    "cooldown_period_seconds": 60,
+    "cooldown_period_seconds": 3600,
+    "disable_after_loss_seconds": 86400,
     "start_position_type": "MARKET",
     "end_position_type": "MARKET",
     "sell_all_on_stop": false

@@ -4,7 +4,7 @@ from cointrader.common.Kline import Kline
 from cointrader.indicators.EMA import EMA
 
 class EMACross(Signal):
-    def __init__(self, name, symbol, short_period, long_period):
+    def __init__(self, name='ema', symbol=None, short_period=12, long_period=24):
         super().__init__(name, symbol)
         self.short_period = short_period
         self.long_period = long_period

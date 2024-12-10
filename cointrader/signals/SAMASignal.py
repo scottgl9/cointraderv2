@@ -4,7 +4,7 @@ from cointrader.common.Kline import Kline
 from cointrader.indicators.SAMA import SlopeAdaptiveMovingAverage
 
 class SAMASignal(Signal):
-    def __init__(self, name, symbol, **kwargs):
+    def __init__(self, name='sama', symbol=None, **kwargs):
         super().__init__(name, symbol)
         # Initialize SAMAIndicator with parameters from kwargs or defaults
         self.indicator = SlopeAdaptiveMovingAverage(

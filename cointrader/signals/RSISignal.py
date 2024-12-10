@@ -4,7 +4,8 @@ from cointrader.common.Signal import Signal
 from cointrader.indicators.RSI import RSI
 
 class RSISignal(Signal):
-    def __init__(self, period=14, overbought=70, oversold=30):
+    def __init__(self, name='rsi', symbol=None, period=14, overbought=70, oversold=30):
+        super().__init__(name, symbol)
         self.period = period
         self.overbought = overbought
         self.oversold = oversold

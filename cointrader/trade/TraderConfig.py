@@ -4,6 +4,7 @@ import json
 # Example of a trade config
 DEFAULT_TRADE_CONFIG = {
     'simulate': False,
+    'verbose': False,
     'max_positions': 1,
     'quote_currency': 'USD',
     'max_position_quote_size': 25.0,
@@ -14,8 +15,8 @@ DEFAULT_TRADE_CONFIG = {
     'min_take_profit_percent': 5.0,
     'stop_on_loss': True,                 # Stop trading bot after a loss
     'max_total_loss_percent': 10.0,
-    'cooldown_period_seconds': 60,         # cooldown period after entering a position before opening another
-    'disable_after_loss_seconds': 3600,    # Disable trading for this many seconds after a loss
+    'cooldown_period_seconds': 3600,       # cooldown period after entering a position before opening another
+    'disable_after_loss_seconds': 86400,   # Disable trading for this many seconds after a loss
     'start_position_type': 'MARKET',
     'end_position_type': 'MARKET',
     'sell_all_on_stop': False
@@ -82,6 +83,9 @@ class TraderConfig(object):
 
     def simulate(self):
         return self.get('simulate')
+    
+    def verbose(self):
+        return self.get('verbose')
 
     def max_positions(self):
         return self.get('max_positions')

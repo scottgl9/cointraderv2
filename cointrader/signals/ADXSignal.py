@@ -4,7 +4,8 @@ from cointrader.common.Signal import Signal
 from cointrader.indicators.ADX import ADX
 
 class ADXSignal(Signal):
-    def __init__(self, period=14, threshold=25):
+    def __init__(self, name='adx', symbol=None, period=14, threshold=25):
+        super().__init__(name, symbol)
         self.period = period
         self._threshold = threshold
         self.adx = ADX(period)
