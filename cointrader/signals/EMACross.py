@@ -47,10 +47,16 @@ class EMACross(Signal):
         return result
 
     def above(self):
-        return self.short_ema > self.long_ema
+        return self.short_ema.get_last_value() > self.long_ema.get_last_value()
 
     def below(self):
-        return self.short_ema < self.long_ema
+        return self.short_ema.get_last_value() < self.long_ema.get_last_value()
+    
+    def increasing(self):
+        return self._short_ema_values[-1] > self._short_ema_values[0]
+
+    def decreasing(self):
+        return self._short_ema_values[-1] < self._short_ema_values[0]
 
     def ready(self):
         return self.short_ema.ready() and self.long_ema.ready()

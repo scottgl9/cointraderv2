@@ -112,6 +112,7 @@ def main(args):
             mtrader.market_update(kline)
             last_prices[symbol] = kline_data['close']
 
+            # emit daily klines
             kline_emitter.update(kline)
             if kline_emitter.ready():
                 kline = kline_emitter.emit()

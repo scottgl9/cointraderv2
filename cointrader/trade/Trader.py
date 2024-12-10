@@ -8,6 +8,8 @@ from cointrader.execute.ExecuteBase import ExecuteBase
 from .TraderPosition import TraderPosition
 from cointrader.order.Orders import Orders
 import importlib
+from cointrader.signals.EMACross import EMACross
+from cointrader.signals.SupertrendSignal import SupertrendSignal
 from colorama import Fore, Back, Style
 
 class Trader(object):
@@ -25,6 +27,7 @@ class Trader(object):
         self._config = config
         self._orders = orders
         self._granularity = granularity
+        self._disabled = False
         self._cur_id = 0
         self._positions = []
         self._buys = []
@@ -40,6 +43,8 @@ class Trader(object):
         self._positive_profit_percent = 0.0
         self._negative_profit_percent = 0.0
         self._stop_loss_percent = config.stop_loss_percent()
+        self._ema_cross = EMACross(name='ema_cross', symbol=symbol, short_period=12, long_period=26)
+        self._supertrend = SupertrendSignal(name='supertrend', symbol=symbol, period=14, multiplier=3)
 
         print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
 
@@ -61,9 +66,17 @@ class Trader(object):
 
     def market_update(self, kline: Kline):
         if kline.granularity != self._granularity:
-            print(f"Trader: {self._symbol} Invalid granularity: {kline.granularity}")
+            # handle daily klines
+            self._supertrend.update(kline)
+            if self._supertrend.cross_down():
+                self._disabled = True
+            elif self._supertrend.cross_up():
+                self._disabled = False
+                print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
             return
+
         self._strategy.update(kline)
+
         # if position has been closed, remove it from the list
         for position in self._positions:
             if position.closed():
@@ -83,17 +96,13 @@ class Trader(object):
                 continue
             position.market_update(kline)
 
-        # check if we have too many positions
-        if len(self._positions) > self._max_positions:
-            return
-
         # Open a position on a buy signal
-        if self._strategy.buy() and len(self._positions) < self._max_positions:
-            print(f'Buy signal for {self._symbol}')
+        if not self._disabled and self._strategy.buy() and len(self._positions) < self._max_positions:
             size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / kline.close)
             if size < self._account.get_base_min_size(self._symbol):
                 print(f"Size too small: {size}")
                 return
+            print(f'Buy signal for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
             position.open_position(price=kline.close, stop_loss=0, size=size, timestamp=kline.ts)
             self._positions.append(position)
@@ -103,7 +112,6 @@ class Trader(object):
 
         # Close a position on a sell signal
         if len(self._positions) > 0:
-            print(f'Sell signal for {self._symbol}')
             for position in self._positions:
                 sell_signal = False
                 if strategy_sell_signal:
@@ -112,6 +120,7 @@ class Trader(object):
                     sell_signal = True
 
                 if sell_signal and not position.closed_position():
+                    print(f'Sell signal for {self._symbol}')
                     position.close_position(price=kline.close, timestamp=kline.ts)
 
     def net_profit_percent(self) -> float:
