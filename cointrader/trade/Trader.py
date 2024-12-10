@@ -43,8 +43,11 @@ class Trader(object):
         self._positive_profit_percent = 0.0
         self._negative_profit_percent = 0.0
         self._stop_loss_percent = config.stop_loss_percent()
+        self._cooldown_period_seconds = config.cooldown_period_seconds()
+        self._disable_after_loss_seconds = config.disable_after_loss_seconds()
+        self._disable_until_ts = 0
         self._ema_cross = EMACross(name='ema_cross', symbol=symbol, short_period=12, long_period=26)
-        self._supertrend = SupertrendSignal(name='supertrend', symbol=symbol, period=14, multiplier=3)
+        self._supertrend = SupertrendSignal(name='supertrend', symbol=symbol, period=20, multiplier=3)
 
         print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
 
@@ -77,16 +80,25 @@ class Trader(object):
 
         self._strategy.update(kline)
 
+        if self._disable_until_ts >= kline.ts:
+            self._disable_until_ts = 0
+            self._disabled = False
+
         # if position has been closed, remove it from the list
         for position in self._positions:
             if position.closed():
                 profit_percent = position.profit_percent()
-                if profit_percent > 0:
+                if profit_percent >= 0:
                     self._positive_profit_percent += profit_percent
                     print(f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}{Style.RESET_ALL}")
                 else:
                     self._negative_profit_percent += profit_percent
                     print(f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}{Style.RESET_ALL}")
+                    # Disable opening new positions for a period of time after a loss
+                    if self._disable_after_loss_seconds > 0:
+                        self._disable_until_ts = kline.ts + self._disable_after_loss_seconds
+                        self._disabled = True
+
                 self._net_profit_percent += profit_percent
 
                 if self._config.simulate():
@@ -107,6 +119,9 @@ class Trader(object):
             position.open_position(price=kline.close, stop_loss=0, size=size, timestamp=kline.ts)
             self._positions.append(position)
             self._cur_id += 1
+            if self._cooldown_period_seconds > 0:
+                self._disabled = True
+                self._disable_until_ts = kline.ts + self._cooldown_period_seconds
 
         strategy_sell_signal = self._strategy.sell()
 

@@ -12,9 +12,10 @@ DEFAULT_TRADE_CONFIG = {
     'stop_loss_percent': 5.0,
     'trailing_stop_loss': False,
     'min_take_profit_percent': 5.0,
-    'stop_on_loss': True,
+    'stop_on_loss': True,                 # Stop trading bot after a loss
     'max_total_loss_percent': 10.0,
-    'cooldown_period_seconds': 60,
+    'cooldown_period_seconds': 60,         # cooldown period after entering a position before opening another
+    'disable_after_loss_seconds': 3600,    # Disable trading for this many seconds after a loss
     'start_position_type': 'MARKET',
     'end_position_type': 'MARKET',
     'sell_all_on_stop': False
@@ -147,6 +148,12 @@ class TraderConfig(object):
     
     def set_cooldown_period_seconds(self, cooldown_period_seconds: int):
         self.set('cooldown_period_seconds', cooldown_period_seconds)
+
+    def disable_after_loss_seconds(self) -> int:
+        return self.get('disable_after_loss_seconds')
+    
+    def set_disable_after_loss_seconds(self, disable_after_loss_seconds: int):
+        self.set('disable_after_loss_seconds', disable_after_loss_seconds)
 
     def start_position_type(self) -> str:
         return self.get('start_position_type')
