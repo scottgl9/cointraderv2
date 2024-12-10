@@ -11,22 +11,22 @@ from cointrader.indicators.SuperTrend import SuperTrend
 from cointrader.indicators.RSI import RSI
 from cointrader.indicators.proto.MANormalize import MANormalize
 from cointrader.indicators.ROC import ROC
+from cointrader.indicators.TRIX import TRIX
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 #import matplotlib.pyplot as plt
 import argparse
 
 CLIENT_NAME = "cbadv"
-GRANULARITY = 86400
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plot EMA indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
-    #parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
+    parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=86400)
     args = parser.parse_args()
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
-    #ticker = exchange.info_ticker_join("BTC", "USD")
     ticker = args.ticker
+    GRANULARITY = args.granularity
     tickers = exchange.info_ticker_names_list()
     if ticker not in tickers:
         print("Ticker not found")
@@ -96,8 +96,8 @@ if __name__ == '__main__':
         volumes = []
 
         count = 0
-        roc = ROC(period=20) #MANormalize(period=50)
-        roc_values = []
+        trix = TRIX(ema_period=15, signal_period=9)#ROC(period=20) #MANormalize(period=50)
+        trix_values = []
 
         for candle in reversed(candles):
             kline.from_dict(candle)
@@ -108,9 +108,9 @@ if __name__ == '__main__':
             highs.append(kline.high)
             lows.append(kline.low)
             volumes.append(kline.volume)
-            result = roc.update(kline)
+            result = trix.update(kline)
             if result is not None:
-                roc_values.append(result)
+                trix_values.append(result)
                 date = pd.to_datetime(kline.ts, unit='s')
                 dates.append(date)
             #if date not in dates:
@@ -122,23 +122,14 @@ if __name__ == '__main__':
         #weighted_highs = np.array(highs) * symbols_with_weights[ticker]
         #weighted_lows = np.array(lows) * symbols_with_weights[ticker]
         #weighted_volumes = np.array(volumes) * symbols_with_weights[ticker]
-        weighted_rocs = np.array(roc_values) * symbols_with_weights[ticker]
+        weighted_rocs = np.array(trix_values) * symbols_with_weights[ticker]
         if len(index_values) == 0:
-            print(len(weighted_rocs))
-            print(len(index_values))
             index_values = weighted_rocs #weighted_closes
         else:
-            print(len(weighted_rocs))
-            print(len(index_values))
             index_values += weighted_rocs #weighted_closes
-
-    print(len(index_values))
-    print(len(dates))
 
     dates = dates[:len(index_values)]
     btc_values = btc_values[:len(index_values)]
-    print(len(dates))
-
 
     index_ema = EMA(period=20)
     index_ema_values = []
@@ -161,8 +152,8 @@ if __name__ == '__main__':
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
 
     ax1.plot(dates, index_values, label='Index Values', color='blue')
-    ax1.plot(dates, index_ema_values, label='Index EMA 12', color='red')
-    ax1.plot(dates, index_ema_24_values, label='Index EMA 24', color='green')
+    #ax1.plot(dates, index_ema_values, label='Index EMA 12', color='red')
+    #ax1.plot(dates, index_ema_24_values, label='Index EMA 24', color='green')
     ax1.set_ylabel('Index Value')
     ax1.set_title('Top 15 Cryptocurrency Index and EMA')
     ax1.legend()

@@ -26,6 +26,7 @@ from cointrader.trade.TraderConfig import TraderConfig
 from cointrader.common.Kline import Kline
 from cointrader.config import *
 from cointrader.indicators.EMA import EMA
+from cointrader.common.KlineEmitter import KlineEmitter
 
 def main(args):
     name = args.exchange
@@ -55,7 +56,7 @@ def main(args):
 
     tconfig.set_trade_symbols(symbols)
 
-    mtrader = MultiTrader(account=account, execute=ex, config=tconfig)
+    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, granularity=args.granularity)
 
     start_ts = int(datetime.fromisoformat(args.start_date).timestamp())
     if args.end_date == 'now':
@@ -88,6 +89,9 @@ def main(args):
 
     last_prices = {}
 
+    # emitter takes in hourly klines, and emits daily klines
+    kline_emitter = KlineEmitter(src_granularity=args.granularity, dst_granularity=86400)
+
     # iterate through all rows in the DataFrame
     for index, row in df.iterrows():
         symbol = row['Symbol']
@@ -103,8 +107,17 @@ def main(args):
             #print(kline_data)
             kline.from_dict(kline_data)
             kline.symbol = symbol
+            kline.granularity = args.granularity
+
             mtrader.market_update(kline)
             last_prices[symbol] = kline_data['close']
+
+            kline_emitter.update(kline)
+            if kline_emitter.ready():
+                kline = kline_emitter.emit()
+                if kline:
+                    kline.symbol = symbol
+                    mtrader.market_update(kline)
 
     print(account.get_account_balances())
     print("\nFinal Total USDT Balance:")
@@ -119,6 +132,16 @@ def main(args):
     for symbol in symbols:
         profit = mtrader.net_profit_percent(symbol)
         print(f"{symbol} net profit: {profit:.2f}%")
+
+    print("\npositive profit on closed positions:")
+    for symbol in symbols:
+        profit = mtrader.positive_profit_percent(symbol)
+        print(f"{symbol} positive profit: {profit:.2f}%")
+
+    print("\nnegative profit on closed positions:")
+    for symbol in symbols:
+        profit = mtrader.negative_profit_percent(symbol)
+        print(f"{symbol} negative profit: {profit:.2f}%")
 
     buys = {}
     sells = {}

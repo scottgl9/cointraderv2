@@ -18,12 +18,13 @@ class Trader(object):
     _strategy = None
     _max_positions = 0
 
-    def __init__(self, account: Account, symbol: str, execute: ExecuteBase, config: TraderConfig, orders: Orders):
+    def __init__(self, account: Account, symbol: str, execute: ExecuteBase, config: TraderConfig, orders: Orders, granularity: int = 0):
         self._symbol = symbol
         self._account = account
         self._execute = execute
         self._config = config
         self._orders = orders
+        self._granularity = granularity
         self._cur_id = 0
         self._positions = []
         self._buys = []
@@ -36,6 +37,8 @@ class Trader(object):
         self._strategy = getattr(strategy_module, self._strategy_name)(symbol=symbol)
         self._max_positions = config.max_positions()
         self._net_profit_percent = 0.0
+        self._positive_profit_percent = 0.0
+        self._negative_profit_percent = 0.0
         self._stop_loss_percent = config.stop_loss_percent()
 
         print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
@@ -57,14 +60,19 @@ class Trader(object):
             self._strategy.update(kline)
 
     def market_update(self, kline: Kline):
+        if kline.granularity != self._granularity:
+            print(f"Trader: {self._symbol} Invalid granularity: {kline.granularity}")
+            return
         self._strategy.update(kline)
         # if position has been closed, remove it from the list
         for position in self._positions:
             if position.closed():
                 profit_percent = position.profit_percent()
                 if profit_percent > 0:
+                    self._positive_profit_percent += profit_percent
                     print(f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}{Style.RESET_ALL}")
                 else:
+                    self._negative_profit_percent += profit_percent
                     print(f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}{Style.RESET_ALL}")
                 self._net_profit_percent += profit_percent
 
@@ -107,7 +115,22 @@ class Trader(object):
                     position.close_position(price=kline.close, timestamp=kline.ts)
 
     def net_profit_percent(self) -> float:
+        """
+        Get the net profit percent for the symbol
+        """
         return self._net_profit_percent
+
+    def positive_profit_percent(self) -> float:
+        """
+        Get the positive profit percent for the symbol
+        """
+        return self._positive_profit_percent
+    
+    def negative_profit_percent(self) -> float:
+        """
+        Get the negative profit percent for the symbol
+        """
+        return self._negative_profit_percent
 
     def buys(self) -> list:
         return self._buys

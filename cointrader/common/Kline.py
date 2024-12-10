@@ -8,6 +8,7 @@ class Kline(object):
     high = 0
     volume = 0
     ts = 0
+    granularity = None
     # name of the symbol field in the dict
     symbol_name = 'symbol'
     open_name = 'open'
@@ -18,7 +19,7 @@ class Kline(object):
     ts_name = 'ts'
 
     def __init__(self, symbol=None, open=0, close=0, low=0, high=0,
-                 volume=0, ts=0):
+                 volume=0, ts=0, granularity=None):
         self.symbol = symbol
         self.open = open
         self.close = close
@@ -26,6 +27,7 @@ class Kline(object):
         self.high = high
         self.volume = volume
         self.ts = ts
+        self.granularity = granularity
 
     def set_dict_names(self, symbol=None, open='open', close='close', 
                        low='low', high='high', volume='volume', ts='ts'):

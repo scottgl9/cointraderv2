@@ -5,12 +5,14 @@ from cointrader.execute.ExecuteBase import ExecuteBase
 from cointrader.account.AccountBase import AccountBase
 
 class MultiTrader(object):
-    def __init__(self, account: AccountBase, execute: ExecuteBase, config: TraderConfig, orders: Orders = None):
+    def __init__(self, account: AccountBase, execute: ExecuteBase, config: TraderConfig, orders: Orders = None, granularity: int = 0):
         self._traders = {}
         self._account = account
         self._config = config
         self._execute = execute
-        if not self._orders:
+        self._granularity = granularity
+
+        if not orders:
             self._orders = Orders()
         else:
             self._orders = orders
@@ -18,7 +20,7 @@ class MultiTrader(object):
         print(f"MultiTrader: {self._symbols}")
         for symbol in self._symbols:
             if symbol not in self._traders.keys():
-                self._traders[symbol] = Trader(account=account, symbol=symbol, execute=self._execute, config=self._config, orders=self._orders)
+                self._traders[symbol] = Trader(account=account, symbol=symbol, execute=self._execute, config=self._config, orders=self._orders, granularity=self._granularity)
 
     def market_update(self, kline):
         if kline.symbol not in self._traders.keys():
@@ -32,7 +34,17 @@ class MultiTrader(object):
         if symbol not in self._traders.keys():
             return 0.0
         return self._traders[symbol].net_profit_percent()
+
+    def positive_profit_percent(self, symbol: str):
+        if symbol not in self._traders.keys():
+            return 0.0
+        return self._traders[symbol].positive_profit_percent()
     
+    def negative_profit_percent(self, symbol: str):
+        if symbol not in self._traders.keys():
+            return 0.0
+        return self._traders[symbol].negative_profit_percent()
+
     def position_count(self, symbol: str):
         if symbol not in self._traders.keys():
             return 0
