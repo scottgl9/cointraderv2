@@ -129,9 +129,11 @@ class Trader(object):
         if len(self._positions) > 0:
             for position in self._positions:
                 sell_signal = False
+                sell_signal_name = None
                 if strategy_sell_signal:
                     sell_signal = True
                     sell_signal_name = self._strategy.sell_signal_name()
+                    print(f'Sell signal {sell_signal_name} for {self._symbol}')
                 elif position.current_position_percent(kline.close) < -self._stop_loss_percent:
                     sell_signal = True
                     sell_signal_name = 'stop_loss'

@@ -4,7 +4,7 @@ from cointrader.common.Kline import Kline
 from cointrader.indicators.STOCH import StochasticOscillator
 
 class StochasticSignal(Signal):
-    def __init__(self, name, symbol, k_period=14, d_period=3, overbought=80, oversold=20):
+    def __init__(self, name='stochastic', symbol=None, k_period=14, d_period=3, overbought=80, oversold=20):
         super().__init__(name, symbol)
         self.k_period = k_period
         self.d_period = d_period

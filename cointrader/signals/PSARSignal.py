@@ -3,7 +3,7 @@ from cointrader.common.Kline import Kline
 from cointrader.indicators.PSAR import PSAR  # Assuming PSAR is implemented as discussed
 
 class PSARSignal(Signal):
-    def __init__(self, name, symbol, af=0.02, max_af=0.2):
+    def __init__(self, name='psar', symbol=None, af=0.02, max_af=0.2):
         super().__init__(name, symbol)
         self.af = af
         self.max_af = max_af

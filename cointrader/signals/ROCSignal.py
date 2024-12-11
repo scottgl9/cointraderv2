@@ -4,7 +4,7 @@ from cointrader.common.Signal import Signal
 from cointrader.indicators.ROC import ROC
 
 class ROCSignal(Signal):
-    def __init__(self, name, symbol, period=14):
+    def __init__(self, name='roc', symbol=None, period=14):
         super().__init__(name, symbol)
         self.period = period
         self.roc = ROC(period)

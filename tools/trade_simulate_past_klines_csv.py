@@ -54,6 +54,11 @@ def main(args):
 
     tconfig.set_trade_symbols(symbols)
 
+    if tconfig.strategy() != args.strategy:
+        tconfig.set_strategy(args.strategy)
+
+    print(f"Using strategy: {tconfig.strategy()}")
+
     ex = TraderExecuteSimulate(exchange=exchange, account=account, config=tconfig)
 
     mtrader = MultiTrader(account=account, execute=ex, config=tconfig, granularity=args.granularity)
@@ -134,15 +139,25 @@ def main(args):
         profit = mtrader.net_profit_percent(symbol)
         print(f"{symbol} net profit: {profit:.2f}%")
 
+    total_positive_profit = 0
+
     print("\npositive profit on closed positions:")
     for symbol in symbols:
         profit = mtrader.positive_profit_percent(symbol)
+        total_positive_profit += profit
         print(f"{symbol} positive profit: {profit:.2f}%")
+
+    total_negative_profit = 0
 
     print("\nnegative profit on closed positions:")
     for symbol in symbols:
         profit = mtrader.negative_profit_percent(symbol)
+        total_negative_profit += profit
         print(f"{symbol} negative profit: {profit:.2f}%")
+
+    print(f"\nTotal positive profit: {total_positive_profit:.2f}%")
+    print(f"Total negative profit: {total_negative_profit:.2f}%")
+    print(f"Total net profit: {total_positive_profit + total_negative_profit:.2f}%")
 
     buys = {}
     sells = {}
@@ -162,6 +177,7 @@ if __name__ == '__main__':
     parser.add_argument('--granularity', type=int, default=3600, help='Granularity of klines')
     parser.add_argument('--csv_path', type=str, default='data/crypto_hourly_data/cryptotoken_full_binance_1h.csv', help='Path to the CSV file')
     parser.add_argument('--symbols', type=str, default='BTC-USDT,ETH-USDT,SOL-USDT,HBAR-USDT,DOT-USDT', help='Comma separated list of symbols')
+    parser.add_argument('--strategy', type=str, default='Default', help='Strategy to use for simulation')
     parser.add_argument('--start_date', type=str, default='2020-08-11 06:00:00', help='Start date for klines')
     parser.add_argument('--end_date', type=str, default='2023-10-19 23:00:00', help='End date for klines')
     args = parser.parse_args()

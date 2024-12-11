@@ -4,7 +4,7 @@ from cointrader.common.Kline import Kline
 from cointrader.indicators.RVI import RelativeVigorIndex
 
 class RVISignal(Signal):
-    def __init__(self, name, symbol, period=10, signal_period=4, overbought=70, oversold=30):
+    def __init__(self, name='rvi', symbol=None, period=10, signal_period=4, overbought=70, oversold=30):
         """
         Initialize the RVI Signal.
         

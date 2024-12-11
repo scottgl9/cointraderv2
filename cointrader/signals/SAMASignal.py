@@ -15,13 +15,6 @@ class SAMASignal(Signal):
             slopeInRange=kwargs.get('slopeInRange', 25),
             flat=kwargs.get('flat', 17)
         )
-        # Cross detection
-        self._last_up = False
-        self._last_down = False
-
-        # Buy/Sell signals
-        self._longsignal = False
-        self._shortsignal = False
 
         self.reset()
 
@@ -31,8 +24,6 @@ class SAMASignal(Signal):
         #self._values = deque(maxlen=self.indicator.length)
         self._cross_up = False
         self._cross_down = False
-        self._last_up = False
-        self._last_down = False
         self._longsignal = False
         self._shortsignal = False
 
@@ -51,17 +42,26 @@ class SAMASignal(Signal):
         self._longsignal = result['longsignal']
         self._shortsignal = result['shortsignal']
 
+        if self._longsignal:
+            self._cross_down = True
+        elif self._shortsignal:
+            self._cross_up = True
+
     def increasing(self):
         return self._longsignal
 
     def decreasing(self):
         return self._shortsignal
 
-    def buy_signal(self):
-        return self._longsignal
+    def cross_up(self):
+        result = self._cross_up
+        self._cross_up = False
+        return result
 
-    def sell_signal(self):
-        return self._shortsignal
+    def cross_down(self):
+        result = self._cross_down
+        self._cross_down = False
+        return result
     
     def ready(self):
         return self.indicator.ready()

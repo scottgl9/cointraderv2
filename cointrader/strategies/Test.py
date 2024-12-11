@@ -7,8 +7,8 @@ from cointrader.signals.EMACross import EMACross
 from cointrader.signals.SupertrendSignal import SupertrendSignal
 from cointrader.signals.ADXSignal import ADXSignal
 
-class Default(Strategy):
-    def __init__(self, symbol: str, name='default'):
+class Test(Strategy):
+    def __init__(self, symbol: str, name='test'):
         super().__init__(symbol=symbol, name=name)
         self.macd = MACDSignal(symbol=self._symbol, short_period=12, long_period=26, signal_period=9)
         self.sama = SAMASignal(symbol=self._symbol)
@@ -30,62 +30,84 @@ class Default(Strategy):
         self.adx.update(kline)
 
     def buy_signal_name(self):
+        """
+        Returns the name of the signal that triggered the buy signal.
+        """
         result = self._buy_signal_name
-        self._buy_signal_name = None
         return result
 
     def sell_signal_name(self):
+        """
+        Returns the name of the signal that triggered the sell signal.
+        """
         result = self._sell_signal_name
-        self._sell_signal_name = None
         return result
 
     def buy_signal(self):
-        #if self.rsi.ready() and (self.rsi.decreasing() or self.rsi.above()):
-        #    return False
-        if self.adx.ready() and self.adx.below():#(self.adx.decreasing() or self.adx.below()):
-            return False
-        if self.rsi.ready() and not self.rsi.below():# and self.rsi.decreasing()):
-            return False
+        disable_buy = False
+        buy = False
+        if self.adx.ready() and self.adx.below():
+            disable_buy = True
+        if self.rsi.ready() and not self.rsi.below():
+            disable_buy = True
         #if self.zlema.ready() and self.zlema.cross_up():
         #    return True
-        #if self.sama.ready() and self.sama.buy_signal():
-        #if self.supertrend.ready() and self.supertrend.decreasing():
-        #    return False
+        if self.supertrend.ready() and self.supertrend.decreasing():
+            disable_buy = True
         if self.supertrend.ready() and self.supertrend.cross_up():
             self._buy_signal_name = self.supertrend.name()
-            return True
-        #if self.macd.ready() and self.macd.cross_up():
-        #    self._buy_signal_name = self.macd.name()
-        #    return True
+            buy = True
+        if self.macd.ready() and self.macd.cross_up():
+            self._buy_signal_name = self.macd.name()
+            buy = True
         if self.ema.ready() and self.ema.cross_up():
             self._buy_signal_name = self.ema.name()
-            return True
+            buy = True
         if self.adx.ready() and self.adx.cross_up():
             self._buy_signal_name = self.adx.name()
-            return True
+            buy = True
+        if self.sama.ready() and self.sama.cross_up():
+            self._buy_signal_name = self.sama.name()
+            buy = True
+
+        if not disable_buy:
+            return buy
         return False
 
     def sell_signal(self):
+        disable_sell = False
+        sell = False
         #if self.zlema.ready() and self.zlema.cross_down():
         #    return True
         #if self.supertrend.ready() and self.supertrend.decreasing():
         #    return True
+        #if self.supertrend.ready() and self.supertrend.increasing():
+        #    disable_sell = True
         if self.supertrend.ready() and self.supertrend.cross_down():
-            self._sell_signal_name = self.supertrend.name()
-            return True
+            if not sell:
+                self._sell_signal_name = self.supertrend.name()
+                sell = True
         #if self.macd.ready() and self.macd.cross_down():
         #    self._sell_signal_name = self.macd.name()
-        #    return True
+        #    sell = True
         if self.rsi.ready() and self.rsi.above():
-            self._sell_signal_name = self.rsi.name()
-            return True
+            if not sell:
+                self._sell_signal_name = self.rsi.name()
+                sell = True
         if self.ema.ready() and self.ema.cross_down():
-            self._sell_signal_name = self.ema.name()
-            return True
+            if not sell:
+                self._sell_signal_name = self.ema.name()
+                #print(type(self.ema))
+                sell = True
         if self.adx.ready() and self.adx.cross_down():
-            self._sell_signal_name = self.adx.name()
-            return True
+            if not sell:
+                self._sell_signal_name = self.adx.name()
+                sell = True
         if self.sama.ready() and self.sama.cross_down():
-            self._sell_signal_name = self.sama.name()
-            return True
+            if not sell:
+                self._sell_signal_name = self.sama.name()
+                sell = True
+
+        if not disable_sell:
+            return sell
         return False
