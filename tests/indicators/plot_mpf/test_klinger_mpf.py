@@ -1,3 +1,5 @@
+# Plots the Klinger Oscillator using mplfinance plot() function
+
 import sys
 import mplfinance as mpf
 import numpy as np
@@ -5,6 +7,7 @@ import pandas as pd
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.indicators.ATR import ATR
+from cointrader.indicators.Klinger import Klinger
 from cointrader.common.Kline import Kline
 from datetime import datetime, timedelta
 import argparse
@@ -12,7 +15,7 @@ import argparse
 CLIENT_NAME = "cbadv"
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot ADX indicator')
+    parser = argparse.ArgumentParser(description='Plot Klinger Oscillator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol (ex. BTC-USD)', default='BTC-USD')
     parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
@@ -55,8 +58,9 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    atr = ATR(period=14)
-    atr_values = []
+    klinger = Klinger()
+    kvo_values = []
+    signal_values = []
 
     opens = []
     closes = []
@@ -67,10 +71,13 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = atr.update(kline)
+        result = klinger.update(kline)
         if result is None:
-            result = np.nan
-        atr_values.append(result)
+            kvo_values.append(np.nan)
+            signal_values.append(np.nan)
+        else:
+            kvo_values.append(result['kvo'])
+            signal_values.append(result['signal'])
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -90,14 +97,15 @@ if __name__ == '__main__':
     df = pd.DataFrame(data)
     df.set_index('Date', inplace=True)
 
-    atr_plot = mpf.make_addplot(atr_values, panel=1, color='blue', width=1.5)
+    kvo_plot = mpf.make_addplot(kvo_values, panel=1, color='blue', width=1.5)
+    signal_plot = mpf.make_addplot(signal_values, panel=1, color='red', width=1.5)
 
     mpf.plot(
         df,
         type='candle',
         style='charles',
-        title=f'{ticker} {granularity_name} chart with ADX',
+        title=f'{ticker} {granularity_name} chart with Klinger Oscillator',
         ylabel='Price',
-        addplot=[atr_plot],
+        addplot=[kvo_plot, signal_plot],
         panel_ratios=(3, 1),
     )
