@@ -67,25 +67,11 @@ class Trader(object):
         for kline in klines:
             self._strategy.update(kline)
 
-    def market_update(self, kline: Kline):
-        if kline.granularity != self._granularity:
-            # handle daily klines
-            self._supertrend.update(kline)
-            if self._supertrend.cross_down():
-                self._disabled = True
-            elif self._supertrend.cross_up():
-                self._disabled = False
-                print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
-            return
-
-        self._strategy.update(kline)
-
-        if self._disable_until_ts != 0 and kline.ts >= self._disable_until_ts:
-            self._disable_until_ts = 0
-            self._disabled = False
-
+    def market_update(self, kline: Kline, current_price: float):
         # if position has been closed, remove it from the list
         for position in self._positions:
+            position.market_update(current_price)
+
             if position.closed():
                 profit_percent = position.profit_percent()
                 if profit_percent >= 0:
@@ -106,7 +92,22 @@ class Trader(object):
                     self._sells.append(position.sell_info())
                 self._positions.remove(position)
                 continue
-            position.market_update(kline)
+
+        if kline.granularity != self._granularity:
+            # handle daily klines
+            self._supertrend.update(kline)
+            if self._supertrend.cross_down():
+                self._disabled = True
+            elif self._supertrend.cross_up():
+                self._disabled = False
+                print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
+            return
+
+        self._strategy.update(kline)
+
+        if self._disable_until_ts != 0 and kline.ts >= self._disable_until_ts:
+            self._disable_until_ts = 0
+            self._disabled = False
 
         # Open a position on a buy signal
         if not self._disabled and self._strategy.buy_signal() and len(self._positions) < self._max_positions:

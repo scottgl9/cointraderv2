@@ -18,6 +18,9 @@ class TraderExecuteSimulate(ExecuteBase):
         return self._account
 
     def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
+        """
+        Simulate placing a market buy order
+        """
         if self._config.verbose():
             print(f'market_buy: {symbol}, {price}, {amount}')
         result = OrderResult(symbol)
@@ -54,6 +57,9 @@ class TraderExecuteSimulate(ExecuteBase):
         return result
 
     def market_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
+        """
+        Simulate placing a market sell order
+        """
         if self._config.verbose():
             print(f'market_sell: {symbol}, {price}, {amount}')
         result = OrderResult(symbol)
@@ -90,30 +96,69 @@ class TraderExecuteSimulate(ExecuteBase):
         return result
     
     def limit_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
+        """
+        Simulate placing a limit buy order
+        """
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
         result.side = OrderSide.BUY
         result.type = OrderType.LIMIT
         result.price = price
-        result.size = amount
+        result.size = self._account.round_base(symbol, amount)
         result.filled_size = 0.0
+
+        # simulate account update
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+
+        # Update base hold amount
+        base_balance, base_hold = self._account.get_asset_balance(base)
+        new_base_hold = base_hold + amount
+        self._account.update_asset_balance(base, base_balance, new_base_hold)
+
+        # Update quote hold amount
+        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+        new_quote_hold = quote_hold - self._account.round_quote(symbol, price * amount)
+        self._account.update_asset_balance(quote, quote_balance, new_quote_hold)
+
         self._orders[result.id] = result
         return result
 
     def limit_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
+        """
+        Simulate placing a limit sell order
+        """
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
         result.side = OrderSide.SELL
         result.type = OrderType.LIMIT
         result.price = price
-        result.size = amount
+        result.size = self._account.round_base(symbol, amount)
         result.filled_size = 0.0
+
+        # simulate account update
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+
+        # Update base hold amount
+        base_balance, base_hold = self._account.get_asset_balance(base)
+        new_base_hold = base_hold - amount
+        self._account.update_asset_balance(base, base_balance, new_base_hold)
+
+        # Update quote hold amount
+        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+        new_quote_hold = quote_hold + self._account.round_quote(symbol, price * amount)
+        self._account.update_asset_balance(quote, quote_balance, new_quote_hold)
+
         self._orders[result.id] = result
         return result
 
     def stop_loss_buy(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
+        """
+        Simulate a stop loss buy order
+        """
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
@@ -121,12 +166,30 @@ class TraderExecuteSimulate(ExecuteBase):
         result.type = OrderType.STOP_LOSS_LIMIT
         result.price = price
         result.limit_price = stop_price
-        result.size = amount
+        result.size = self._account.round_base(symbol, amount)
         result.filled_size = 0.0
+
+        # simulate account update
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+
+        # Update base hold amount
+        base_balance, base_hold = self._account.get_asset_balance(base)
+        new_base_hold = base_hold + amount
+        self._account.update_asset_balance(base, base_balance, new_base_hold)
+
+        # Update quote hold amount
+        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+        new_quote_hold = quote_hold - self._account.round_quote(symbol, price * amount)
+        self._account.update_asset_balance(quote, quote_balance, new_quote_hold)
+
         self._orders[result.id] = result
         return result
-    
+
     def stop_loss_sell(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
+        """
+        Simulate placing a stop loss sell order
+        """
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
@@ -134,15 +197,127 @@ class TraderExecuteSimulate(ExecuteBase):
         result.type = OrderType.STOP_LOSS_LIMIT
         result.price = price
         result.limit_price = stop_price
-        result.size = amount
+        result.size = self._account.round_base(symbol, amount)
         result.filled_size = 0.0
+
+        # simulate account update
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+
+        # Update base hold amount
+        base_balance, base_hold = self._account.get_asset_balance(base)
+        new_base_hold = base_hold - amount
+        self._account.update_asset_balance(base, base_balance, new_base_hold)
+
+        # Update quote hold amount
+        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+        new_quote_hold = quote_hold + self._account.round_quote(symbol, price * amount)
+        self._account.update_asset_balance(quote, quote_balance, new_quote_hold)
+
         self._orders[result.id] = result
         return result
 
     def status(self, symbol: str, order_id: str, price: float) -> OrderResult:
-        if order_id in self._orders:
-            return self._orders[order_id]
+        """
+        Simulate getting the status of an order
+        """
+        for order in self._orders:
+            if order.id != order_id:
+                continue
+
+            bought = False
+            sold = False
+            if order.type == OrderType.MARKET:
+                return self._orders[order]
+            elif order.type == OrderType.LIMIT:
+                if order.side == OrderSide.SELL and price >= order.price:
+                    order.status = OrderStatus.FILLED
+                    order.filled_size = order.size
+                    sold  = True
+                elif order.side == OrderSide.BUY and price <= order.price:
+                    order.status = OrderStatus.FILLED
+                    order.filled_size = order.size
+                    bought = True
+            elif order.type == OrderType.STOP_LOSS_LIMIT:
+                if order.side == OrderSide.SELL and price <= order.limit_price:
+                    order.status = OrderStatus.FILLED
+                    order.filled_size = order.size
+                    sold = True
+                elif order.side == OrderSide.BUY and price >= order.limit_price:
+                    order.status = OrderStatus.FILLED
+                    order.filled_size = order.size
+                    bought = True
+            
+            # if the buy was executed, then update the account, transfer base hold to balance
+            # if the sell was executed, then update the account, transfer quote hold to balance
+            if bought:
+                base = self._exchange.info_ticker_get_base(symbol)
+                base_balance, base_hold = self._account.get_asset_balance(base)
+                new_base_hold = base_hold - order.size
+                new_base_balance = base_balance + order.size
+                self._account.update_asset_balance(base, new_base_balance, new_base_hold)
+            if sold:
+                quote = self._exchange.info_ticker_get_quote(symbol)
+                quote_balance, quote_hold = self._account.get_asset_balance(quote)
+                amount = self._account.round_quote(symbol, price * order.size)
+                new_quote_hold = quote_hold - amount
+                new_quote_balance = quote_balance + amount
+                self._account.update_asset_balance(quote, new_quote_balance, new_quote_hold)
+
+            return order
         return None
 
     def cancel(self, symbol: str, order_id: str, price: float) -> OrderResult:
-        raise NotImplementedError
+        """
+        Simulate cancelling an order
+        """
+        for order in self._orders:
+            if order.id != order_id:
+                continue
+            if order.type == OrderType.MARKET:
+                continue
+
+            bought = False
+            sold = False
+
+            if order.type == OrderType.LIMIT:
+                if order.side == OrderSide.SELL:
+                    # check if the sell order has already executed
+                    if price < order.price:
+                        order.status = OrderStatus.CANCELLED
+                    else:
+                        order.status = OrderStatus.FILLED
+                        order.filled_size = order.size
+                    sold = True
+                elif order.side == OrderSide.BUY:
+                    # check if the buy order has already executed
+                    if price > order.price:
+                        order.status = OrderStatus.CANCELLED
+                    else:
+                        order.status = OrderStatus.FILLED
+                        order.filled_size = order.size
+                    bought = True
+            elif order.type == OrderType.STOP_LOSS_LIMIT:
+                if order.side == OrderSide.SELL:
+                    # check if the sell order has already executed
+                    if price > order.limit_price:
+                        order.status = OrderStatus.CANCELLED
+                    else:
+                        order.status = OrderStatus.FILLED
+                        order.filled_size = order.size
+                    sold = True
+                elif order.side == OrderSide.BUY:
+                    # check if the buy order has already executed
+                    if price < order.limit_price:
+                        order.status = OrderStatus.CANCELLED
+                    else:
+                        order.status = OrderStatus.FILLED
+                        order.filled_size = order.size
+                    sold = True
+                
+                # if the cancelled buy was executed, then update the account, transfer base hold to balance
+                # if the cancelled sell was executed, then update the account, transfer quote hold to balance
+                # *TODO* implement account balance transfers
+
+                return order
+        return None

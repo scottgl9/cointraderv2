@@ -15,6 +15,7 @@ class TraderPosition(object):
         self._orders = orders
         self._buy_order = None
         self._sell_order = None
+        self._stop_loss_order = None
         self._strategy = strategy
         self._execute = execute
         self._account = execute.account()
@@ -29,7 +30,9 @@ class TraderPosition(object):
         self._sell_price = 0.0
         self._buy_price_ts = 0
         self._sell_price_ts = 0
-        self._stop_loss = 0
+        self._stop_loss_price = 0.0
+        self._stop_loss_limit_price = 0.0
+        self._stop_loss_ts = 0
         self._timestamp = 0
         self._buy_amount = 0.0
 
@@ -76,8 +79,49 @@ class TraderPosition(object):
             self._buy_price_ts = timestamp #self._buy_order.filled_ts
             self._opened_position_completed = True
 
-    def get_position(self) -> Order:
+    def create_stop_loss_position(self, stop_price: float, limit_price: float, timestamp: int):
+        """
+        Create a stop loss order
+        """
+        if not self.opened():
+            return
+        self._stop_loss_price = stop_price
+        self._stop_loss_limit_price = limit_price
+        self._stop_loss_ts = timestamp
+
+        result = self._execute.stop_loss_sell(self._symbol, price=limit_price, stop_price=stop_price, amount=self._buy_amount)
+
+        self._stop_loss_order = Order(symbol=self._symbol)
+        self._stop_loss_order.update_order(result)
+        self._orders.add_order(self._symbol, self._stop_loss_order)
+
+    def get_buy_position(self) -> Order:
+        """
+        Get the buy order information
+        """
+        if not self.opened():
+            return None
+
         return self._buy_order
+
+    def get_stop_loss_position(self) -> Order:
+        """
+        Get the stop loss order information
+        """
+        if not self._stop_loss_order:
+            return None
+        
+        result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
+        self._stop_loss_order.update_order(result)
+
+        return self._stop_loss_order
+
+    def cancel_stop_loss_position(self):
+        if not self._stop_loss_order:
+            return
+
+        result = self._execute.cancel(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
+        self._stop_loss_order.update_order(result)
 
     def close_position(self, price: float, timestamp: int):
         self._closed_position = True
@@ -99,8 +143,8 @@ class TraderPosition(object):
             self._sell_price_ts = timestamp #self._sell_order.filled_ts
             self._closed_position_completed = True
 
-    def market_update(self, kline: Kline):
-        self._current_price = kline.close
+    def market_update(self, current_price: float):
+        self._current_price = current_price
 
         if self._buy_order and not self._buy_order.completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, price=self._current_price)
@@ -112,7 +156,10 @@ class TraderPosition(object):
     
     def closed(self):
         return self._sell_order and self._sell_order.completed()
-    
+
+    def opened(self):
+        return not self.closed() and self.buy_order_completed()
+
     def buy_order_completed(self):
         return self._buy_order and self._buy_order.completed()
 

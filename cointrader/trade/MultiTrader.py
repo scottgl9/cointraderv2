@@ -3,6 +3,7 @@ from .TraderConfig import TraderConfig
 from cointrader.order.Orders import Orders
 from cointrader.execute.ExecuteBase import ExecuteBase
 from cointrader.account.AccountBase import AccountBase
+from cointrader.common.Kline import Kline
 
 class MultiTrader(object):
     def __init__(self, account: AccountBase, execute: ExecuteBase, config: TraderConfig, orders: Orders = None, granularity: int = 0):
@@ -22,13 +23,13 @@ class MultiTrader(object):
             if symbol not in self._traders.keys():
                 self._traders[symbol] = Trader(account=account, symbol=symbol, execute=self._execute, config=self._config, orders=self._orders, granularity=self._granularity)
 
-    def market_update(self, kline):
+    def market_update(self, kline: Kline, current_price: float):
         if kline.symbol not in self._traders.keys():
             print(f"Symbol {kline.symbol} not found in traders")
             return
-        
+
         trader = self._traders[kline.symbol]
-        trader.market_update(kline)
+        trader.market_update(kline, current_price=current_price)
 
     def net_profit_percent(self, symbol: str):
         if symbol not in self._traders.keys():

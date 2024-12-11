@@ -1,11 +1,5 @@
 from cointrader.common.Strategy import Strategy
-from cointrader.signals.MACDSignal import MACDSignal
-from cointrader.signals.RSISignal import RSISignal
-from cointrader.signals.SAMASignal import SAMASignal
-from cointrader.signals.ZLEMACross import ZLEMACross
 from cointrader.signals.EMACross import EMACross
-from cointrader.signals.SupertrendSignal import SupertrendSignal
-from cointrader.signals.ADXSignal import ADXSignal
 
 class EMACross(Strategy):
     def __init__(self, symbol: str, name='ema_cross'):
