@@ -33,6 +33,15 @@ class SqueezeMomentum(Indicator):
 
         self._last_value = None
 
+    def reset(self):
+        self.highs.clear()
+        self.lows.clear()
+        self.closes.clear()
+        self.typical_prices.clear()
+        self.atr.reset()
+        self.val_deque.clear()
+        self._last_value = None
+
     def update(self, kline: Kline):
         # Update ATR with the current kline
         self.atr.update(kline)
