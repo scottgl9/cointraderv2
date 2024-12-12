@@ -93,15 +93,15 @@ class Trader(object):
                 self._positions.remove(position)
                 continue
 
-        if kline.granularity != self._granularity:
-            # handle daily klines
-            self._supertrend.update(kline)
-            if self._supertrend.cross_down():
-                self._disabled = True
-            elif self._supertrend.cross_up():
-                self._disabled = False
-                print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
-            return
+        #if kline.granularity != self._granularity:
+        #    # handle daily klines
+        #    self._supertrend.update(kline)
+        #    if self._supertrend.cross_down():
+        #        self._disabled = True
+        #    elif self._supertrend.cross_up():
+        #        self._disabled = False
+        #        print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
+        #    return
 
         self._strategy.update(kline)
 

@@ -40,82 +40,114 @@ class Default(Strategy):
 
     def buy_signal_name(self):
         result = self._buy_signal_name
-        self._buy_signal_name = None
+        #self._buy_signal_name = None
         return result
 
     def sell_signal_name(self):
         result = self._sell_signal_name
-        self._sell_signal_name = None
+        #self._sell_signal_name = None
         return result
 
     def buy_signal(self):
-        #if self.rsi.ready() and (self.rsi.decreasing() or self.rsi.above()):
-        #    return False
-        if self.adx.ready() and self.adx.below():#(self.adx.decreasing() or self.adx.below()):
-            return False
-        if self.rsi.ready() and not self.rsi.below() and not self.rsi.decreasing():
-            return False
-        #if self.zlema.ready() and self.zlema.cross_up():
-        #    return True
-        #if self.sama.ready() and self.sama.buy_signal():
-        if self.supertrend.ready() and self.supertrend.decreasing():
-            return False
-        if self.supertrend.ready() and self.supertrend.cross_up():
-            self._buy_signal_name = self.supertrend.name()
-            return True
-        if self.squeeze.ready() and self.squeeze.cross_up():
-            self._buy_signal_name = self.squeeze.name()
-            return True
-        if self.macd.ready() and self.macd.cross_up():
-            self._buy_signal_name = self.macd.name()
-            return True
-        if self.ema.ready() and self.ema.cross_up():
-            self._buy_signal_name = self.ema.name()
-            return True
-        if self.adx.ready() and self.adx.cross_up():
-            self._buy_signal_name = self.adx.name()
-            return True
-        if self.sama.ready() and self.sama.cross_up():
-            self._buy_signal_name = self.sama.name()
-            return True
-        if self.roc.ready() and self.roc.cross_up():
-            self._buy_signal_name = self.roc.name()
-            return True
-        if self.psar.ready() and self.psar.cross_up():
-            self._buy_signal_name = self.psar.name()
-            return True
+        # Buying: Momentum + trend confirmation
+        if self.macd.ready() and self.rsi.ready() and self.supertrend.ready():
+            if self.macd.cross_up() and self.rsi.below() and self.supertrend.cross_up():
+                self._buy_signal_name = 'macd_rsi_supertrend'
+                return True
+        
+        if self.ema.ready() and self.adx.ready():
+            if self.ema.cross_up() and self.adx.above():
+                self._buy_signal_name = 'ema_adx'
+                return True
+            
+        if self.squeeze.ready() and self.psar.ready():
+            if self.squeeze.cross_up() and self.psar.cross_up():
+                self._buy_signal_name = 'squeeze_psar'
+                return True
+        
+        # #if self.rsi.ready() and (self.rsi.decreasing() or self.rsi.above()):
+        # #    return False
+        # if self.adx.ready() and self.adx.below():#(self.adx.decreasing() or self.adx.below()):
+        #     return False
+        # if self.rsi.ready() and not self.rsi.below() and not self.rsi.decreasing():
+        #     return False
+        # #if self.zlema.ready() and self.zlema.cross_up():
+        # #    return True
+        # #if self.sama.ready() and self.sama.buy_signal():
+        # if self.supertrend.ready() and self.supertrend.decreasing():
+        #     return False
+        # if self.supertrend.ready() and self.supertrend.cross_up():
+        #     self._buy_signal_name = self.supertrend.name()
+        #     return True
+        # if self.squeeze.ready() and self.squeeze.cross_up():
+        #     self._buy_signal_name = self.squeeze.name()
+        #     return True
+        # if self.macd.ready() and self.macd.cross_up():
+        #     self._buy_signal_name = self.macd.name()
+        #     return True
+        # if self.ema.ready() and self.ema.cross_up():
+        #     self._buy_signal_name = self.ema.name()
+        #     return True
+        # if self.adx.ready() and self.adx.cross_up():
+        #     self._buy_signal_name = self.adx.name()
+        #     return True
+        # if self.sama.ready() and self.sama.cross_up():
+        #     self._buy_signal_name = self.sama.name()
+        #     return True
+        # if self.roc.ready() and self.roc.cross_up():
+        #     self._buy_signal_name = self.roc.name()
+        #     return True
+        # if self.psar.ready() and self.psar.cross_up():
+        #     self._buy_signal_name = self.psar.name()
+        #     return True
         return False
 
     def sell_signal(self):
+        # Selling: Momentum + trend confirmation
+        if self.macd.ready() and self.rsi.ready() and self.supertrend.ready():
+            if self.macd.cross_down() and self.rsi.above() and self.supertrend.cross_down():
+                self._sell_signal_name = 'macd_rsi_supertrend'
+                return True
+            
+        if self.ema.ready() and self.adx.ready():
+            if self.ema.cross_down() and self.adx.below():
+                self._sell_signal_name = 'ema_adx'
+                return True
+            
+        if self.squeeze.ready() and self.psar.ready():
+            if self.squeeze.cross_down() and self.psar.cross_down():
+                self._sell_signal_name = 'squeeze_psar'
+                return True
+
         #if self.zlema.ready() and self.zlema.cross_down():
         #    return True
         #if self.supertrend.ready() and self.supertrend.decreasing():
         #    return True
-        if self.supertrend.ready() and self.supertrend.cross_down():
-            self._sell_signal_name = self.supertrend.name()
-            return True
-        if self.macd.ready() and self.macd.cross_down():
-            self._sell_signal_name = self.macd.name()
-            return True
-        if self.rsi.ready() and self.rsi.above():
-            self._sell_signal_name = self.rsi.name()
-            return True
-        if self.ema.ready() and self.ema.cross_down():
-            self._sell_signal_name = self.ema.name()
-            return True
-        if self.adx.ready() and self.adx.cross_down():
-            self._sell_signal_name = self.adx.name()
-            return True
-        if self.sama.ready() and self.sama.cross_down():
-            self._sell_signal_name = self.sama.name()
-            return True
-        if self.squeeze.ready() and self.squeeze.cross_down():
-            self._sell_signal_name = self.squeeze.name()
-            return True
-        if self.roc.ready() and self.roc.cross_down():
-            self._sell_signal_name = self.roc.name()
-            return True
-        if self.psar.ready() and self.psar.cross_down():
-            self._sell_signal_name = self.psar.name()
-            return True
+        # if self.supertrend.ready() and self.supertrend.cross_down():
+        #     self._sell_signal_name = self.supertrend.name()
+        #     return True
+        # if self.macd.ready() and self.macd.cross_down():
+        #     self._sell_signal_name = self.macd.name()
+        #     return True
+        # if self.rsi.ready() and self.rsi.above():
+        #     self._sell_signal_name = self.rsi.name()
+        #     return True
+        # if self.ema.ready() and self.ema.cross_down():
+        #     self._sell_signal_name = self.ema.name()
+        #     return True
+        # if self.adx.ready() and self.adx.cross_down():
+        #     self._sell_signal_name = self.adx.name()
+        #     return True
+        # if self.sama.ready() and self.sama.cross_down():
+        #     self._sell_signal_name = self.sama.name()
+        #     return True
+        # if self.squeeze.ready() and self.squeeze.cross_down():
+        #     self._sell_signal_name = self.squeeze.name()
+        #     return True
+        # if self.roc.ready() and self.roc.cross_down():
+        #     self._sell_signal_name = self.roc.name()
+        #     return True
+        # if self.psar.ready() and self.psar.cross_down():
+        #     self._sell_signal_name = self.psar.name()
+        #     return True
         return False

@@ -165,10 +165,11 @@ def main(args):
     #print("\nBuys and Sells:")
     for symbol in symbols:
         buys[symbol] = mtrader.buys(symbol)
+        print(f"{symbol} buy count: {len(buys[symbol])}")
         #print(f"{symbol} buys: {buys}")
         sells[symbol] = mtrader.sells(symbol)
         #print(f"{symbol} sells: {sells}")
-
+        print(f"{symbol} sell count: {len(sells[symbol])}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trade simulation with past klines.')

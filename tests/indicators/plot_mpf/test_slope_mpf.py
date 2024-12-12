@@ -8,6 +8,7 @@ import argparse
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.indicators.RSI import RSI
+from cointrader.indicators.ZLEMA import ZLEMA
 from cointrader.indicators.SLOPE import SlopeIndicator
 from cointrader.common.Kline import Kline
 
@@ -64,7 +65,11 @@ if __name__ == '__main__':
     kline.set_dict_names(ts='start')
 
     slope = SlopeIndicator()
+    zlema12 = ZLEMA(period=12)
+    zlema24 = ZLEMA(period=24)
     slope_values = []
+    slope_zlema12_values = []
+    slope_zlema24_values = []
 
     opens = []
     closes = []
@@ -78,8 +83,13 @@ if __name__ == '__main__':
         result = slope.update(kline)
         if slope.ready() and result is not None:
             slope_values.append(result)
+            slope_zlema12_values.append(zlema12.update_with_value(slope.get_last_value()))
+            slope_zlema24_values.append(zlema24.update_with_value(slope.get_last_value()))
         else:
             slope_values.append(np.nan)
+            slope_zlema12_values.append(np.nan)
+            slope_zlema24_values.append(np.nan)
+
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -99,7 +109,11 @@ if __name__ == '__main__':
     df = pd.DataFrame(data)
     df.set_index('Date', inplace=True)
 
+    print(slope_values)
+
     slope_plot = mpf.make_addplot(slope_values, panel=1, color='blue', width=1.5, ylabel='Slope')
+    slope_zlema12 = mpf.make_addplot(slope_zlema12_values, panel=1, color='red', width=1.5, ylabel='Slope')
+    slope_zlema24 = mpf.make_addplot(slope_zlema24_values, panel=1, color='green', width=1.5, ylabel='Slope')
 
     mpf.plot(
         df,
@@ -107,5 +121,5 @@ if __name__ == '__main__':
         style='charles',
         title=f'{ticker} {granularity_name} chart with Slope',
         ylabel='Price',
-        addplot=[slope_plot],
+        addplot=[slope_plot, slope_zlema12, slope_zlema24],
     )
