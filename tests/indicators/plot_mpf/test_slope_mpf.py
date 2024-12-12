@@ -2,38 +2,41 @@ import sys
 import mplfinance as mpf
 import numpy as np
 import pandas as pd
-#sys.path.append('./tests')
+from datetime import datetime, timedelta
+import argparse
+
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
-from cointrader.indicators.SAMA import SlopeAdaptiveMovingAverage
+from cointrader.indicators.RSI import RSI
+from cointrader.indicators.SLOPE import SlopeIndicator
 from cointrader.common.Kline import Kline
-from datetime import datetime, timedelta
-#import matplotlib.pyplot as plt
-import argparse
 
 CLIENT_NAME = "cbadv"
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot SAMA indicator')
+    parser = argparse.ArgumentParser(description='Plot Slope indicator')
     parser.add_argument('--ticker', type=str, help='Ticker symbol', default='BTC-USD')
     parser.add_argument('--granularity', type=int, help='Granularity in seconds', default=3600)
     args = parser.parse_args()
+    
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
     ticker = args.ticker
     granularity = args.granularity
+    
     tickers = exchange.info_ticker_names_list()
     if ticker not in tickers:
         print("Ticker not found")
         sys.exit(1)
+    
     granularities = exchange.market_get_kline_granularities()
     if granularity not in granularities:
         print("Granularity not found")
         sys.exit(1)
+    
     max_klines = exchange.market_get_max_kline_count(granularity)
 
     minutes = 0
     hours = 0
-
     granularity_name = ""
 
     if granularity == 60:
@@ -48,6 +51,9 @@ if __name__ == '__main__':
     elif granularity == 3600: # 1 hour
         hours = max_klines
         granularity_name = "1h"
+    else:
+        print("Unsupported granularity")
+        sys.exit(1)
 
     end = datetime.now()
     start = int((end - timedelta(hours=hours, minutes=minutes)).timestamp())
@@ -57,6 +63,9 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
+    slope = SlopeIndicator()
+    slope_values = []
+
     opens = []
     closes = []
     highs = []
@@ -64,24 +73,13 @@ if __name__ == '__main__':
     volumes = []
     dates = []
 
-    sama = SlopeAdaptiveMovingAverage()
-    sama_values = []
-    sama_slope_values = []
-    colors = []
-
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = sama.update(kline)
-        if result is None:
-            sama_values.append(np.nan)
-            sama_slope_values.append(np.nan)
+        result = slope.update(kline)
+        if slope.ready() and result is not None:
+            slope_values.append(result)
         else:
-            sama_values.append(result['ma'])
-            sama_slope_values.append(result['slope'])
-            if result['slope'] > 0:
-                colors.append('green')
-            else:
-                colors.append('red')
+            slope_values.append(np.nan)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -101,14 +99,13 @@ if __name__ == '__main__':
     df = pd.DataFrame(data)
     df.set_index('Date', inplace=True)
 
-    sama_plot = mpf.make_addplot(sama_values, panel=0, color='green', width=1.5)
-    sama_slope_plot = mpf.make_addplot(sama_slope_values, panel=1, width=1.5)
+    slope_plot = mpf.make_addplot(slope_values, panel=1, color='blue', width=1.5, ylabel='Slope')
 
     mpf.plot(
         df,
         type='candle',
         style='charles',
-        title=f'{ticker} {granularity_name} chart with SAMA',
+        title=f'{ticker} {granularity_name} chart with Slope',
         ylabel='Price',
-        addplot=[sama_plot, sama_slope_plot],
+        addplot=[slope_plot],
     )

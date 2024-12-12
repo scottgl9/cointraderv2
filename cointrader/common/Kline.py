@@ -70,6 +70,9 @@ class Kline(object):
         return self.__dict__() == other.__dict__()
 
     def reset(self):
+        """
+        Resets the Kline object
+        """
         self.symbol = None
         self.open = 0
         self.close = 0
@@ -79,6 +82,9 @@ class Kline(object):
         self.ts = 0
 
     def copy(self):
+        """
+        Returns a copy of the Kline object
+        """
         kline = Kline()
         kline.symbol_name = self.symbol_name
         kline.open_name = self.open_name

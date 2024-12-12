@@ -3,7 +3,8 @@ from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
 class SlopeIndicator(Indicator):
-    def __init__(self, slopePeriod=34, slopeInRange=25):
+    def __init__(self, name='slope', slopePeriod=34, slopeInRange=25):
+        Indicator.__init__(self, name)
         self.slopePeriod = slopePeriod
         self.slopeInRange = slopeInRange
         self.src_history = []
@@ -21,7 +22,7 @@ class SlopeIndicator(Indicator):
 
         # Calculate slope
         slope = self.calculate_slope()
-        return {"slope": slope}
+        return slope
 
     def calculate_slope(self):
         if len(self.src_history) < self.slopePeriod:
