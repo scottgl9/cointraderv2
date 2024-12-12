@@ -14,11 +14,11 @@ class ZLEMA(Indicator):
         self.prices = deque(maxlen=self.period)
 
     def update(self, kline: Kline):
-        result = self.update_value(kline.close)
+        result = self.update_with_value(kline.close)
         self._last_kline = kline
         return result
 
-    def update_value(self, value: float):
+    def update_with_value(self, value: float):
         if len(self.values) == 0:
             # Initialize the ZLEMA with the first price
             self.values.append(value)

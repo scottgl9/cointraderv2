@@ -47,12 +47,12 @@ class ROC(Indicator):
     def increasing(self) -> bool:
         if not self.ready():
             return False
-        return self._values[-1] > self._values[0]
+        return self._values[-1] > self._values[-2]
 
     def decreasing(self) -> bool:
         if not self.ready():
             return False
-        return self._values[-1] < self._values[0]
+        return self._values[-1] < self._values[-2]
 
     def get_last_value(self) -> float:
         return self._last_value

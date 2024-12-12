@@ -5,7 +5,7 @@ from cointrader.indicators.SqueezeMomentum import SqueezeMomentum
 import numpy as np
 
 class SqueezeMomentumSignal(Signal):
-    def __init__(self, name, symbol, length=20, multBB=2.0, multKC=1.5):
+    def __init__(self, name='squeeze', symbol=None, length=20, multBB=2.0, multKC=1.5):
         super().__init__(name, symbol)
         self.length = length
         self.multBB = multBB

@@ -27,18 +27,26 @@ class RSISignal(Signal):
         return False
     
     def above(self):
+        if not self.ready():
+            return False
         return self._values[-1] > self.overbought
     
     def below(self):
+        if not self.ready():
+            return False
         return self._values[-1] < self.oversold
 
     def increasing(self):
-        if self._values[0] < self._values[-1]:
+        if not self.ready():
+            return False
+        if self._values[-2] < self._values[-1]:
             return True
         return False
     
     def decreasing(self):
-        if self._values[0] > self._values[-1]:
+        if not self.ready():
+            return False
+        if self._values[-2] > self._values[-1]:
             return True
         return False
 

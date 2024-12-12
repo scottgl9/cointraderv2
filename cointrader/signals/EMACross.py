@@ -29,11 +29,10 @@ class EMACross(Signal):
         self._long_ema_values.append(long_ema_value)
         
         if self.short_ema.ready() and self.long_ema.ready():
-            if short_ema_value > max(self._long_ema_values) and min(self._short_ema_values) < self._long_ema_values[-1]:
+            if self._short_ema_values[-1] > self._long_ema_values[-1] and self._short_ema_values[-2] <= self._long_ema_values[-2]:
                 self._cross_up = True
-            elif short_ema_value < min(self._long_ema_values) and max(self._short_ema_values) > self._long_ema_values[-1]:
+            elif self._short_ema_values[-1] < self._long_ema_values[-1] and self._short_ema_values[-2] >= self._long_ema_values[-2]:
                 self._cross_down = True
-
         return
 
     def cross_up(self):
@@ -53,10 +52,10 @@ class EMACross(Signal):
         return self.short_ema.get_last_value() < self.long_ema.get_last_value()
     
     def increasing(self):
-        return self._short_ema_values[-1] > self._short_ema_values[0]
+        return self._short_ema_values[-1] > self._short_ema_values[-2]
 
     def decreasing(self):
-        return self._short_ema_values[-1] < self._short_ema_values[0]
+        return self._short_ema_values[-1] < self._short_ema_values[-2]
 
     def ready(self):
         return self.short_ema.ready() and self.long_ema.ready()

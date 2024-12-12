@@ -27,10 +27,11 @@ class MACDSignal(Signal):
         self._macd_values.append(result["macd"])
         self._signal_values.append(result["signal"])
         
-        if self._macd_values[-1] > max(self._signal_values) and min(self._macd_values) < self._signal_values[-1]:
-            self._cross_up = True
-        elif self._macd_values[-1] < min(self._signal_values) and max(self._macd_values) > self._signal_values[-1]:
-            self._cross_down = True
+        if self.macd.ready():
+            if self._macd_values[-1] > self._signal_values[-1] and self._macd_values[-2] <= self._signal_values[-2]:
+                self._cross_up = True
+            elif self._macd_values[-1] < self._signal_values[-1] and self._macd_values[-2] >= self._signal_values[-2]:
+                self._cross_down = True
 
     def ready(self):
         return self.macd.ready()

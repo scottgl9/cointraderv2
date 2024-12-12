@@ -1,4 +1,5 @@
 import math
+from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
@@ -14,14 +15,17 @@ class SlopeAdaptiveMovingAverage(Indicator):
         self.minAlpha = 2 / (self.minLength + 1)
         self.majAlpha = 2 / (self.majLength + 1)
 
+        self.src_history = deque(maxlen=self.length + 1)
+        self.ma_history = deque(maxlen=5)
+
         self.reset()
 
     def reset(self):
-        self.src_history = []
+        self.src_history.clear()
         self.ma = None
         self.swing = 0
-        self.ma_history = []
-        self.slope_history = []
+        self.ma_history.clear()
+        #self.slope_history = []
 
     def update(self, kline: Kline):
         src = kline.close
@@ -32,8 +36,8 @@ class SlopeAdaptiveMovingAverage(Indicator):
             return None  # Not ready
 
         # Calculate highest high and lowest low
-        hh = max(self.src_history[-(self.length + 1):])
-        ll = min(self.src_history[-(self.length + 1):])
+        hh = max(list(self.src_history)) #max(self.src_history[-(self.length + 1):])
+        ll = min(list(self.src_history))#min(self.src_history[-(self.length + 1):])
 
         # Calculate the multiplier
         mult = abs(2 * src - ll - hh) / (hh - ll) if hh != ll else 0
@@ -50,7 +54,7 @@ class SlopeAdaptiveMovingAverage(Indicator):
 
         # Calculate the slope
         slope = self.calculate_slope()
-        self.slope_history.append(slope)
+        #self.slope_history.append(slope)
 
         # Determine trend directions
         up = slope >= self.flat
@@ -74,15 +78,15 @@ class SlopeAdaptiveMovingAverage(Indicator):
         }
 
     def calculate_slope(self):
-        if len(self.ma_history) < self.slopePeriod:
+        if len(self.ma_history) < 5: #self.slopePeriod:
             return 0  # Not enough data
 
         # Get historical data for slope calculation
         ma = self.ma_history[-1]
         ma_2 = self.ma_history[-3]  # Value from two periods ago
 
-        highestHigh = max(self.src_history[-self.slopePeriod:])
-        lowestLow = min(self.src_history[-self.slopePeriod:])
+        highestHigh = max(list(self.src_history)[-self.slopePeriod:])
+        lowestLow = min(list(self.src_history)[-self.slopePeriod:])
 
         # Avoid division by zero
         if highestHigh == lowestLow:

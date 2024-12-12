@@ -44,12 +44,12 @@ class ADXSignal(Signal):
     def increasing(self):
         if len(self._values) < self.period:
             return False
-        return self._values[-1]['adx'] > self._values[0]['adx']
+        return self._values[-1]['adx'] > self._values[-2]['adx']
 
     def decreasing(self):
         if len(self._values) < self.period:
             return False
-        return self._values[-1]['adx'] < self._values[0]['adx']
+        return self._values[-1]['adx'] < self._values[-2]['adx']
 
     def above(self):
         return self.adx.get_last_value()['adx'] >= self._threshold

@@ -18,6 +18,8 @@ class ROCSignal(Signal):
 
     def update(self, kline):
         result = self.roc.update(kline)
+        if result is None:
+            return
         self._values.append(result)
         if len(self._values) == self.period:
             if self._values[0] < 0 and self._values[-1] > 0:

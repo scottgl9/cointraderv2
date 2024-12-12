@@ -1,3 +1,4 @@
+# This file contains the MarketProfileSignal class, which is a Signal that uses Market Profile analysis to generate buy/sell signals. *TODO* not working
 from cointrader.common.Signal import Signal
 from cointrader.common.Kline import Kline
 from cointrader.indicators.MarketProfile import MarketProfile

@@ -27,11 +27,11 @@ class ZLEMACross(Signal):
         long_zlema_value = self.long_zlema.update(kline)
         self._long_zlema_values.append(long_zlema_value)
        
-        if short_zlema_value > max(self._long_zlema_values) and min(self._short_zlema_values) < self._long_zlema_values[-1]:
-            self._cross_up = True
-        elif short_zlema_value < min(self._long_zlema_values) and max(self._short_zlema_values) > self._long_zlema_values[-1]:
-            self._cross_down = True
-
+        if self.short_zlema.ready() and self.long_zlema.ready():
+            if self._short_zlema_values[-1] > self._long_zlema_values[-1] and self._short_zlema_values[-2] <= self._long_zlema_values[-2]:
+                self._cross_up = True
+            elif self._short_zlema_values[-1] < self._long_zlema_values[-1] and self._short_zlema_values[-2] >= self._long_zlema_values[-2]:
+                self._cross_down = True
         return
 
     def cross_up(self):

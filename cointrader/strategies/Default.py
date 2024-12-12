@@ -5,7 +5,10 @@ from cointrader.signals.SAMASignal import SAMASignal
 from cointrader.signals.ZLEMACross import ZLEMACross
 from cointrader.signals.EMACross import EMACross
 from cointrader.signals.SupertrendSignal import SupertrendSignal
+from cointrader.signals.SqueezeMomentumSignal import SqueezeMomentumSignal
 from cointrader.signals.ADXSignal import ADXSignal
+from cointrader.signals.ROCSignal import ROCSignal
+from cointrader.signals.PSARSignal import PSARSignal
 
 class Default(Strategy):
     def __init__(self, symbol: str, name='default'):
@@ -17,6 +20,9 @@ class Default(Strategy):
         self.ema = EMACross(symbol=self._symbol, short_period=12, long_period=26)
         self.supertrend = SupertrendSignal(symbol=self._symbol, period=14, multiplier=3)
         self.adx = ADXSignal(symbol=self._symbol, period=14, threshold=20)
+        self.squeeze = SqueezeMomentumSignal(symbol=self._symbol, length=20, multBB=2.0, multKC=1.5)
+        self.roc = ROCSignal(symbol=self._symbol, period=14)
+        self.psar = PSARSignal(symbol=self._symbol, af=0.02, max_af=0.2)
         self._buy_signal_name = None
         self._sell_signal_name = None
 
@@ -28,6 +34,9 @@ class Default(Strategy):
         self.ema.update(kline)
         self.supertrend.update(kline)
         self.adx.update(kline)
+        self.roc.update(kline)
+        self.squeeze.update(kline)
+        self.psar.update(kline)
 
     def buy_signal_name(self):
         result = self._buy_signal_name
@@ -44,24 +53,36 @@ class Default(Strategy):
         #    return False
         if self.adx.ready() and self.adx.below():#(self.adx.decreasing() or self.adx.below()):
             return False
-        if self.rsi.ready() and not self.rsi.below():# and self.rsi.decreasing()):
+        if self.rsi.ready() and not self.rsi.below() and not self.rsi.decreasing():
             return False
         #if self.zlema.ready() and self.zlema.cross_up():
         #    return True
         #if self.sama.ready() and self.sama.buy_signal():
-        #if self.supertrend.ready() and self.supertrend.decreasing():
-        #    return False
+        if self.supertrend.ready() and self.supertrend.decreasing():
+            return False
         if self.supertrend.ready() and self.supertrend.cross_up():
             self._buy_signal_name = self.supertrend.name()
             return True
-        #if self.macd.ready() and self.macd.cross_up():
-        #    self._buy_signal_name = self.macd.name()
-        #    return True
+        if self.squeeze.ready() and self.squeeze.cross_up():
+            self._buy_signal_name = self.squeeze.name()
+            return True
+        if self.macd.ready() and self.macd.cross_up():
+            self._buy_signal_name = self.macd.name()
+            return True
         if self.ema.ready() and self.ema.cross_up():
             self._buy_signal_name = self.ema.name()
             return True
         if self.adx.ready() and self.adx.cross_up():
             self._buy_signal_name = self.adx.name()
+            return True
+        if self.sama.ready() and self.sama.cross_up():
+            self._buy_signal_name = self.sama.name()
+            return True
+        if self.roc.ready() and self.roc.cross_up():
+            self._buy_signal_name = self.roc.name()
+            return True
+        if self.psar.ready() and self.psar.cross_up():
+            self._buy_signal_name = self.psar.name()
             return True
         return False
 
@@ -73,9 +94,9 @@ class Default(Strategy):
         if self.supertrend.ready() and self.supertrend.cross_down():
             self._sell_signal_name = self.supertrend.name()
             return True
-        #if self.macd.ready() and self.macd.cross_down():
-        #    self._sell_signal_name = self.macd.name()
-        #    return True
+        if self.macd.ready() and self.macd.cross_down():
+            self._sell_signal_name = self.macd.name()
+            return True
         if self.rsi.ready() and self.rsi.above():
             self._sell_signal_name = self.rsi.name()
             return True
@@ -87,5 +108,14 @@ class Default(Strategy):
             return True
         if self.sama.ready() and self.sama.cross_down():
             self._sell_signal_name = self.sama.name()
+            return True
+        if self.squeeze.ready() and self.squeeze.cross_down():
+            self._sell_signal_name = self.squeeze.name()
+            return True
+        if self.roc.ready() and self.roc.cross_down():
+            self._sell_signal_name = self.roc.name()
+            return True
+        if self.psar.ready() and self.psar.cross_down():
+            self._sell_signal_name = self.psar.name()
             return True
         return False
