@@ -318,6 +318,37 @@ class TraderExecuteSimulate(ExecuteBase):
                 # if the cancelled buy was executed, then update the account, transfer base hold to balance
                 # if the cancelled sell was executed, then update the account, transfer quote hold to balance
                 # *TODO* implement account balance transfers
+                if order.status == OrderStatus.CANCELLED:
+                    amount = order.size
+                    
+                    if bought:
+                        # simulate account update
+                        base = self._exchange.info_ticker_get_base(symbol)
+                        quote = self._exchange.info_ticker_get_quote(symbol)
+                
+                        # Update base hold amount
+                        base_balance, base_hold = self._account.get_asset_balance(base)
+                        new_base_hold = base_hold - amount
+                        self._account.update_asset_balance(base, base_balance, new_base_hold)
+                
+                        # Update quote hold amount
+                        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+                        new_quote_hold = quote_hold + self._account.round_quote(symbol, price * amount)
+                        self._account.update_asset_balance(quote, quote_balance, new_quote_hold)
+                    if sold:
+                         # simulate account update
+                        base = self._exchange.info_ticker_get_base(symbol)
+                        quote = self._exchange.info_ticker_get_quote(symbol)
+                
+                        # Update base hold amount
+                        base_balance, base_hold = self._account.get_asset_balance(base)
+                        new_base_hold = base_hold + amount
+                        self._account.update_asset_balance(base, base_balance, new_base_hold)
+                
+                        # Update quote hold amount
+                        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+                        new_quote_hold = quote_hold - self._account.round_quote(symbol, price * amount)
+                        self._account.update_asset_balance(quote, quote_balance, new_quote_hold)
 
                 return order
         return None
