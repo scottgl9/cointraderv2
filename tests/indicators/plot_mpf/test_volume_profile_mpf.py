@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Not working *FIXME*
 import sys
 import mplfinance as mpf

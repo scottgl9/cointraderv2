@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Plots the Klinger Oscillator using mplfinance plot() function
 
 import sys
