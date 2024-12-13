@@ -55,7 +55,7 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    vwap = VWAP()
+    vwap = VWAP(period=20)
     vwap_values = []
 
     opens = []

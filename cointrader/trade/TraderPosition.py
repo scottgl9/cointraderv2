@@ -7,7 +7,11 @@ from .TraderConfig import TraderConfig
 
 class TraderPosition(object):
     _symbol = None
-    _config = None
+    _config: TraderConfig = None
+    _buy_order: Order = None
+    _sell_order: Order = None
+    _stop_loss_order: Order = None
+
     def __init__(self, symbol: str, id: int, strategy: Strategy, execute: ExecuteBase, config: TraderConfig, orders: Orders):
         self._id = id
         self._symbol = symbol
@@ -50,7 +54,44 @@ class TraderPosition(object):
     
     def closed_position_completed(self):
         return self._closed_position_completed
+
+    def closed(self):
+        if self.sell_order_completed():
+            return True
+        if self.stop_loss_is_completed():
+            return True
+        return False
+
+    def opened(self):
+        return not self.closed() and self.buy_order_completed()
+
+    def stop_loss_is_set(self):
+        return self._stop_loss_order is not None
     
+    def stop_loss_price(self):
+        return self._stop_loss_price
+
+    def stop_loss_is_completed(self):
+        """
+        Check if the stop loss order has been filled
+        """
+        return self._stop_loss_order and self._stop_loss_order.completed()
+
+    def buy_order_completed(self):
+        """
+        Check if the buy order has been filled
+        """
+        return self._buy_order and self._buy_order.completed()
+    
+    def sell_order_completed(self):
+        """
+        Check if the sell order has been filled
+        """
+        return self._sell_order and self._sell_order.completed()
+
+    def buy_price(self):
+        return self._buy_price
+
     def buy_info(self):
         return {'price': self._buy_price, 'ts': self._buy_price_ts}
 
@@ -144,24 +185,22 @@ class TraderPosition(object):
             self._closed_position_completed = True
 
     def market_update(self, current_price: float):
+        """
+        Update the position with order status and the current market price
+        """
         self._current_price = current_price
 
-        if self._buy_order and not self._buy_order.completed():
+        if self._buy_order and not self.buy_order_completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, price=self._current_price)
             self._buy_order.update_order(result)
 
         if self._sell_order and not self._sell_order.completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, price=self._current_price)
             self._sell_order.update_order(result)
-    
-    def closed(self):
-        return self._sell_order and self._sell_order.completed()
 
-    def opened(self):
-        return not self.closed() and self.buy_order_completed()
-
-    def buy_order_completed(self):
-        return self._buy_order and self._buy_order.completed()
+        if self._stop_loss_order and not self.stop_loss_is_completed():
+            result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
+            self._stop_loss_order.update_order(result)
 
     def current_position_percent(self, price: float):
         """
@@ -173,9 +212,13 @@ class TraderPosition(object):
 
     def profit_percent(self):
         profit = 0.0
-        if not self._sell_order or not self._sell_order:
+
+        if not self.buy_order_completed():
             return profit
-        if self.buy_order_completed() and self._sell_order.completed():
+
+        if self._sell_order and self._sell_order.completed():
             profit = (self._sell_order.filled_size * self._sell_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
+        elif self._stop_loss_order and self._stop_loss_order.completed():
+            profit = (self._stop_loss_order.filled_size * self._stop_loss_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
 
         return round(profit, 2)

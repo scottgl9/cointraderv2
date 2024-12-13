@@ -229,7 +229,7 @@ class TraderExecuteSimulate(ExecuteBase):
             sold = False
             if order.type == OrderType.MARKET:
                 return self._orders[order]
-            elif order.type == OrderType.LIMIT:
+            elif order.type == OrderType.LIMIT and order.status == OrderStatus.PLACED:
                 if order.side == OrderSide.SELL and price >= order.price:
                     order.status = OrderStatus.FILLED
                     order.filled_size = order.size
@@ -238,7 +238,7 @@ class TraderExecuteSimulate(ExecuteBase):
                     order.status = OrderStatus.FILLED
                     order.filled_size = order.size
                     bought = True
-            elif order.type == OrderType.STOP_LOSS_LIMIT:
+            elif order.type == OrderType.STOP_LOSS_LIMIT and order.status == OrderStatus.PLACED:
                 if order.side == OrderSide.SELL and price <= order.limit_price:
                     order.status = OrderStatus.FILLED
                     order.filled_size = order.size
@@ -247,7 +247,7 @@ class TraderExecuteSimulate(ExecuteBase):
                     order.status = OrderStatus.FILLED
                     order.filled_size = order.size
                     bought = True
-            
+
             # if the buy was executed, then update the account, transfer base hold to balance
             # if the sell was executed, then update the account, transfer quote hold to balance
             if bought:
@@ -277,51 +277,35 @@ class TraderExecuteSimulate(ExecuteBase):
             if order.type == OrderType.MARKET:
                 continue
 
-            bought = False
-            sold = False
+            cancel_buy = False
+            cancel_sell = False
 
-            if order.type == OrderType.LIMIT:
+            if order.type == OrderType.LIMIT and order.status == OrderStatus.PLACED:
                 if order.side == OrderSide.SELL:
-                    # check if the sell order has already executed
                     if price < order.price:
                         order.status = OrderStatus.CANCELLED
-                    else:
-                        order.status = OrderStatus.FILLED
-                        order.filled_size = order.size
-                    sold = True
+                        cancel_sell = True
                 elif order.side == OrderSide.BUY:
-                    # check if the buy order has already executed
                     if price > order.price:
                         order.status = OrderStatus.CANCELLED
-                    else:
-                        order.status = OrderStatus.FILLED
-                        order.filled_size = order.size
-                    bought = True
-            elif order.type == OrderType.STOP_LOSS_LIMIT:
+                        cancel_buy = True
+            elif order.type == OrderType.STOP_LOSS_LIMIT and order.status == OrderStatus.PLACED:
                 if order.side == OrderSide.SELL:
-                    # check if the sell order has already executed
                     if price > order.limit_price:
                         order.status = OrderStatus.CANCELLED
-                    else:
-                        order.status = OrderStatus.FILLED
-                        order.filled_size = order.size
-                    sold = True
+                        cancel_sell = True
                 elif order.side == OrderSide.BUY:
-                    # check if the buy order has already executed
                     if price < order.limit_price:
                         order.status = OrderStatus.CANCELLED
-                    else:
-                        order.status = OrderStatus.FILLED
-                        order.filled_size = order.size
-                    sold = True
-                
+                        cancel_buy = True
+
                 # if the cancelled buy was executed, then update the account, transfer base hold to balance
                 # if the cancelled sell was executed, then update the account, transfer quote hold to balance
                 # *TODO* implement account balance transfers
                 if order.status == OrderStatus.CANCELLED:
                     amount = order.size
                     
-                    if bought:
+                    if cancel_buy:
                         # simulate account update
                         base = self._exchange.info_ticker_get_base(symbol)
                         quote = self._exchange.info_ticker_get_quote(symbol)
@@ -335,7 +319,7 @@ class TraderExecuteSimulate(ExecuteBase):
                         quote_balance, quote_hold = self._account.get_asset_balance(quote)
                         new_quote_hold = quote_hold + self._account.round_quote(symbol, price * amount)
                         self._account.update_asset_balance(quote, quote_balance, new_quote_hold)
-                    if sold:
+                    if cancel_sell:
                          # simulate account update
                         base = self._exchange.info_ticker_get_base(symbol)
                         quote = self._exchange.info_ticker_get_quote(symbol)

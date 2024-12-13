@@ -9,6 +9,7 @@ from cointrader.signals.SqueezeMomentumSignal import SqueezeMomentumSignal
 from cointrader.signals.ADXSignal import ADXSignal
 from cointrader.signals.ROCSignal import ROCSignal
 from cointrader.signals.PSARSignal import PSARSignal
+from cointrader.signals.VWAPSignal import VWAPSignal
 
 class Default(Strategy):
     def __init__(self, symbol: str, name='default'):
@@ -23,6 +24,7 @@ class Default(Strategy):
         self.squeeze = SqueezeMomentumSignal(symbol=self._symbol, length=20, multBB=2.0, multKC=1.5)
         self.roc = ROCSignal(symbol=self._symbol, period=14)
         self.psar = PSARSignal(symbol=self._symbol, af=0.02, max_af=0.2)
+        self.vwap = VWAPSignal(symbol=self._symbol, period=14)
         self._buy_signal_name = None
         self._sell_signal_name = None
 
@@ -49,12 +51,14 @@ class Default(Strategy):
         return result
 
     def buy_signal(self):
+        if self.vwap.ready() and self.vwap.below():
+            return False
         # Buying: Momentum + trend confirmation
         if self.macd.ready() and self.rsi.ready() and self.supertrend.ready():
             if self.macd.cross_up() and self.rsi.below() and self.supertrend.cross_up():
                 self._buy_signal_name = 'macd_rsi_supertrend'
                 return True
-        
+
         if self.ema.ready() and self.adx.ready():
             if self.ema.cross_up() and self.adx.above():
                 self._buy_signal_name = 'ema_adx'
@@ -103,6 +107,8 @@ class Default(Strategy):
         return False
 
     def sell_signal(self):
+        if self.vwap.ready() and self.vwap.above():
+            return False
         # Selling: Momentum + trend confirmation
         if self.macd.ready() and self.rsi.ready() and self.supertrend.ready():
             if self.macd.cross_down() and self.rsi.above() and self.supertrend.cross_down():

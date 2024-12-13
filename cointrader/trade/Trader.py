@@ -7,15 +7,17 @@ from .TraderConfig import TraderConfig
 from cointrader.execute.ExecuteBase import ExecuteBase
 from .TraderPosition import TraderPosition
 from cointrader.order.Orders import Orders
+from cointrader.order.OrderStatus import OrderStatus
 import importlib
 from cointrader.signals.EMACross import EMACross
 from cointrader.signals.SupertrendSignal import SupertrendSignal
+from cointrader.signals.VWAPSignal import VWAPSignal
 from colorama import Fore, Back, Style
 
 class Trader(object):
     _symbol = None
     _account = None
-    _positions = []
+    _positions: list[TraderPosition] = []
     _strategy_name = None
     _strategy = None
     _max_positions = 0
@@ -48,6 +50,7 @@ class Trader(object):
         self._disable_until_ts = 0
         self._ema_cross = EMACross(name='ema_cross', symbol=symbol, short_period=12, long_period=26)
         self._supertrend = SupertrendSignal(name='supertrend', symbol=symbol, period=20, multiplier=3)
+        self._vwap = VWAPSignal(name='vwap', symbol=symbol, period=14)
 
         print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
 
@@ -72,6 +75,14 @@ class Trader(object):
         for position in self._positions:
             position.market_update(current_price)
 
+            if position.opened() and self._config.trailing_stop_loss():
+                percent = self._config.stop_loss_percent()
+                stop_price = (percent / 100.0) * position.buy_price()
+                # handle setting and updating stop loss orders if enabled
+                if not position.stop_loss_is_set():
+                    position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_price, timestamp=kline.ts)
+
+            # handle closed position when sell order or stop loss has been filled
             if position.closed():
                 profit_percent = position.profit_percent()
                 if profit_percent >= 0:
@@ -93,18 +104,22 @@ class Trader(object):
                 self._positions.remove(position)
                 continue
 
-        #if kline.granularity != self._granularity:
+        # if kline.granularity != self._granularity:
         #    # handle daily klines
         #    self._supertrend.update(kline)
-        #    if self._supertrend.cross_down():
+        #    self._vwap.update(kline)
+        #    if self._supertrend.decreasing() and self._vwap.below():
         #        self._disabled = True
-        #    elif self._supertrend.cross_up():
+        #        self._disable_until_ts = 0
+        #    elif self._supertrend.increasing() and self._vwap.above():
         #        self._disabled = False
-        #        print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
+        #        self._disable_until_ts = 0
+        #        #print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
         #    return
 
         self._strategy.update(kline)
 
+        # Disable opening new positions for a period of time after a loss
         if self._disable_until_ts != 0 and kline.ts >= self._disable_until_ts:
             self._disable_until_ts = 0
             self._disabled = False
@@ -123,6 +138,14 @@ class Trader(object):
             if self._cooldown_period_seconds > 0:
                 self._disabled = True
                 self._disable_until_ts = kline.ts + self._cooldown_period_seconds
+
+            # if we have a market order filled immediately set the stop loss
+            if position.opened() and self._config.trailing_stop_loss():
+                percent = self._config.stop_loss_percent()
+                stop_price = (percent / 100.0) * position.buy_price()
+                # handle setting and updating stop loss orders if enabled
+                if not position.stop_loss_is_set():
+                    position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_price, timestamp=kline.ts)
 
         strategy_sell_signal = self._strategy.sell_signal()
 
