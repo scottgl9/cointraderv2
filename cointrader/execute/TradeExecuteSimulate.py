@@ -22,8 +22,6 @@ class TraderExecuteSimulate(ExecuteBase):
         """
         Simulate placing a market buy order
         """
-        if self._config.verbose():
-            print(f'market_buy: {symbol}, {price}, {amount}')
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.FILLED
@@ -32,6 +30,9 @@ class TraderExecuteSimulate(ExecuteBase):
         result.price = price
         result.size = self._account.round_base(symbol, amount)
         result.filled_size = result.size
+
+        if self._config.verbose():
+            print(f'market_buy: {symbol}, {price}, {result.size}')
 
         if amount < self._account.get_base_min_size(symbol):
             raise ValueError(f'{symbol} Amount is less than the minimum size of {self._account.get_base_min_size(symbol)}')
@@ -61,8 +62,6 @@ class TraderExecuteSimulate(ExecuteBase):
         """
         Simulate placing a market sell order
         """
-        if self._config.verbose():
-            print(f'market_sell: {symbol}, {price}, {amount}')
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.FILLED
@@ -71,6 +70,9 @@ class TraderExecuteSimulate(ExecuteBase):
         result.price = price
         result.size = self._account.round_base(symbol, amount)
         result.filled_size = result.size
+
+        if self._config.verbose():
+            print(f'market_sell: {symbol}, {price}, {result.size}')
 
         if amount < self._account.get_base_min_size(symbol):
             raise ValueError(f'{symbol} Amount is less than the minimum size of {self._account.get_base_min_size(symbol)}')
@@ -219,7 +221,7 @@ class TraderExecuteSimulate(ExecuteBase):
         result.side = OrderSide.BUY
         result.type = OrderType.LIMIT
         result.limit_price = limit_price
-        result.size = self._account.round_base(symbol, amount)
+        result.size = self._account.round_base(symbol, result.size)
         result.filled_size = 0.0
 
         # simulate account update
@@ -242,7 +244,7 @@ class TraderExecuteSimulate(ExecuteBase):
         result.filled_size = 0.0
 
         # simulate account update
-        self._limit_sell_placed(symbol, limit_price, amount)
+        self._limit_sell_placed(symbol, limit_price, result.size)
 
         self._orders[result.id] = result
         return result
@@ -258,11 +260,14 @@ class TraderExecuteSimulate(ExecuteBase):
         result.type = OrderType.STOP_LOSS_LIMIT
         result.limit_price = limit_price
         result.stop_price = stop_price
-        result.size = self._account.round_base(symbol, amount)
+        result.size = amount #self._account.round_base(symbol, amount)
         result.filled_size = 0.0
 
+        if self._config.verbose():
+            print(f'stop_loss_limit_buy: {symbol}, {limit_price}, {result.size}')
+
         # simulate account update
-        self._limit_buy_placed(symbol, limit_price, amount)
+        self._limit_buy_placed(symbol, limit_price, result.size)
 
         self._orders[result.id] = result
         return result
@@ -278,8 +283,11 @@ class TraderExecuteSimulate(ExecuteBase):
         result.type = OrderType.STOP_LOSS_LIMIT
         result.limit_price = limit_price
         result.stop_price = stop_price
-        result.size = self._account.round_base(symbol, amount)
+        result.size = amount #self._account.round_base(symbol, result.size)
         result.filled_size = 0.0
+
+        if self._config.verbose():
+            print(f'stop_loss_limit_sell: {symbol}, {limit_price}, {amount}, {result.size}')
 
         # simulate account update
         self._limit_sell_placed(symbol, limit_price, amount)
@@ -333,6 +341,10 @@ class TraderExecuteSimulate(ExecuteBase):
         Simulate cancelling an order
         """
         order = self._orders[order_id]
+
+        if self._config.verbose():
+            print(f'cancel: {symbol}, {order_id}, {price}')
+
         if order.type == OrderType.MARKET or order.status == OrderStatus.CANCELLED or order.status == OrderStatus.FILLED:
             return order
 

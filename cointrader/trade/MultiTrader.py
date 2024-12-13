@@ -7,7 +7,7 @@ from cointrader.common.Kline import Kline
 
 class MultiTrader(object):
     def __init__(self, account: AccountBase, execute: ExecuteBase, config: TraderConfig, orders: Orders = None, granularity: int = 0):
-        self._traders = {}
+        self._traders: dict[str, Trader] = {}
         self._account = account
         self._config = config
         self._execute = execute

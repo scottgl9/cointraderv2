@@ -163,6 +163,7 @@ class TraderPosition(object):
         if not self._stop_loss_order:
             return
 
+        print(f"Canceling stop loss order for {self._symbol} {self._current_price}")
         result = self._execute.cancel(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
         self._stop_loss_order.update_order(result)
 
@@ -199,6 +200,10 @@ class TraderPosition(object):
         """
         Update the position with order status and the current market price
         """
+        #if self._config.verbose():
+        #    print(f"Updating position for {self._symbol} current price: {current_price}")
+        if current_price == 0.0:
+            print(f"Invalid price {current_price}")
         self._current_price = current_price
 
         if self._buy_order and not self.buy_order_completed():

@@ -73,7 +73,8 @@ class Trader(object):
     def market_update(self, kline: Kline, current_price: float):
         # if position has been closed, remove it from the list
         for position in self._positions:
-            position.market_update(current_price)
+            if kline.granularity == self._granularity:
+                position.market_update(current_price)
 
             if position.opened() and self._config.trailing_stop_loss():
                 percent = self._config.stop_loss_percent()
