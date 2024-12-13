@@ -59,6 +59,7 @@ class TraderPosition(object):
         if self.sell_order_completed():
             return True
         if self.stop_loss_is_completed():
+            print(f"stop loss order completed for {self._symbol}: current: {self._current_price} stop loss: {self._stop_loss_price}")
             return True
         return False
 
@@ -126,6 +127,7 @@ class TraderPosition(object):
         """
         if not self.opened():
             return
+        #print(f"Creating stop loss order for {self._symbol} stop price: {stop_price} limit price: {limit_price}")
         self._stop_loss_price = stop_price
         self._stop_loss_limit_price = limit_price
         self._stop_loss_ts = timestamp
@@ -147,7 +149,7 @@ class TraderPosition(object):
 
     def get_stop_loss_position(self) -> Order:
         """
-        Get the stop loss order information
+        Get the stop loss order information from exchange (real or simulated)
         """
         if not self._stop_loss_order:
             return None
@@ -199,6 +201,7 @@ class TraderPosition(object):
             self._sell_order.update_order(result)
 
         if self._stop_loss_order and not self.stop_loss_is_completed():
+            #print(f"stop loss order: {self._stop_loss_order}")
             result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
             self._stop_loss_order.update_order(result)
 
@@ -217,8 +220,10 @@ class TraderPosition(object):
             return profit
 
         if self._sell_order and self._sell_order.completed():
+            #print(f"sell order filled size: {self._sell_order.filled_size} sell order price: {self._sell_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")
             profit = (self._sell_order.filled_size * self._sell_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
         elif self._stop_loss_order and self._stop_loss_order.completed():
+            #print(f"stop loss order filled size: {self._stop_loss_order.filled_size} stop loss order price: {self._stop_loss_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")
             profit = (self._stop_loss_order.filled_size * self._stop_loss_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
 
         return round(profit, 2)

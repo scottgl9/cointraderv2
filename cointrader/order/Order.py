@@ -3,10 +3,13 @@ from enum import Enum
 from .OrderResult import OrderResult
 from .OrderSide import OrderSide
 from .OrderType import OrderType
+from .OrderLimitType import OrderLimitType
+from .OrderStopDirection import OrderStopDirection
 from .OrderStatus import OrderStatus
 
 class Order(OrderResult):
     def __init__(self, symbol: str):
+        super().__init__(symbol)
         self.symbol = symbol
         self._last_order_result = None
 
@@ -15,20 +18,35 @@ class Order(OrderResult):
         Update the order with the result of the last order status
         """
         self._last_order_result = result
-        self.id = result.id
-        self.symbol = result.symbol
-        self.type = result.type
-        self.limit_type = result.limit_type
-        self.side = result.side
-        self.price = result.price
-        self.limit_price = result.limit_price
-        self.stop_price = result.stop_price
-        self.stop_direction = result.stop_direction
-        self.size = result.size
-        self.filled_size = result.filled_size
-        self.fee = result.fee
-        self.placed_ts = result.placed_ts
-        self.filled_ts = result.filled_ts
+        if not self.id:
+            self.id = result.id
+        if not self.symbol:
+            self.symbol = result.symbol
+        if self.type == OrderType.UNKNOWN:
+            self.type = result.type
+        if self.limit_type == OrderLimitType.UNKNOWN:
+            self.limit_type = result.limit_type
+        if self.side == OrderSide.UNKNOWN:
+            self.side = result.side
+        if self.price == 0.0 or (result.price != 0.0 and self.price != result.price):
+            self.price = result.price
+        if self.limit_price == 0.0:
+            self.limit_price = result.limit_price
+        if self.stop_price == 0.0:
+            self.stop_price = result.stop_price
+        if self.stop_direction == OrderStopDirection.UNKNOWN:
+            self.stop_direction = result.stop_direction
+        if self.size == 0.0:
+            self.size = result.size
+        if self.filled_size == 0.0:
+            self.filled_size = result.filled_size
+        if self.fee == 0.0:
+            self.fee = result.fee
+        if self.placed_ts == 0:
+            self.placed_ts = result.placed_ts
+        if self.filled_ts == 0:
+            self.filled_ts = result.filled_ts
+
         self.msg = result.msg
         self.post_only = result.post_only
         self.status = result.status
