@@ -118,12 +118,12 @@ def main(args):
             last_prices[symbol] = kline_data['close']
 
             # emit daily klines
-            kline_emitter.update(kline)
-            if kline_emitter.ready():
-                kline = kline_emitter.emit()
-                if kline:
-                    kline.symbol = symbol
-                    mtrader.market_update(kline=kline, current_price=kline.close)
+            #kline_emitter.update(kline)
+            #if kline_emitter.ready():
+            #    kline = kline_emitter.emit()
+            #    if kline:
+            #        kline.symbol = symbol
+            #        mtrader.market_update(kline=kline, current_price=kline.close)
 
     print(account.get_account_balances())
     print("\nFinal Total USDT Balance:")

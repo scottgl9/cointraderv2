@@ -134,7 +134,7 @@ class Trader(object):
                 return
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
-            position.open_position(price=kline.close, stop_loss=0, size=size, timestamp=kline.ts)
+            position.open_position(price=kline.close, stop_loss=0, size=size, timestamp=kline.ts, current_price=current_price)
             self._positions.append(position)
             self._cur_id += 1
             if self._cooldown_period_seconds > 0:
@@ -160,13 +160,13 @@ class Trader(object):
                 if strategy_sell_signal:
                     sell_signal = True
                     sell_signal_name = self._strategy.sell_signal_name()
-                elif position.current_position_percent(kline.close) < -self._stop_loss_percent:
-                    sell_signal = True
-                    sell_signal_name = 'stop_loss'
+                #elif position.current_position_percent(kline.close) < -self._stop_loss_percent:
+                #    sell_signal = True
+                #    sell_signal_name = 'stop_loss'
 
                 if sell_signal and not position.closed_position():
-                    if position.stop_loss_is_set():
-                        position.cancel_stop_loss_position()
+                    #if position.stop_loss_is_set():
+                    #    position.cancel_stop_loss_position()
                     #print(f'Sell signal {sell_signal_name} for {self._symbol}')
                     position.close_position(price=kline.close, timestamp=kline.ts)
 

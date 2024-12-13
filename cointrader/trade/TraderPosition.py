@@ -59,7 +59,6 @@ class TraderPosition(object):
         if self.sell_order_completed():
             return True
         if self.stop_loss_is_completed():
-            print(f"stop loss order completed for {self._symbol}: current: {self._current_price} stop loss: {self._stop_loss_price}")
             return True
         return False
 
@@ -99,7 +98,8 @@ class TraderPosition(object):
     def sell_info(self):
         return {'price': self._sell_price, 'ts': self._sell_price_ts}
 
-    def open_position(self, price: float, stop_loss: float, size: float, timestamp: int):
+    def open_position(self, price: float, stop_loss: float, size: float, timestamp: int, current_price: float):
+        self._current_price = current_price
         self._opened_position = True
         self._entry_price = price
         self._stop_loss = stop_loss
@@ -163,7 +163,7 @@ class TraderPosition(object):
         if not self._stop_loss_order:
             return
 
-        print(f"Canceling stop loss order for {self._symbol} {self._current_price}")
+        print(f" stop loss order for {self._symbol} {self._current_price}")
         result = self._execute.cancel(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
         self._stop_loss_order.update_order(result)
 
@@ -202,8 +202,6 @@ class TraderPosition(object):
         """
         #if self._config.verbose():
         #    print(f"Updating position for {self._symbol} current price: {current_price}")
-        if current_price == 0.0:
-            print(f"Invalid price {current_price}")
         self._current_price = current_price
 
         if self._buy_order and not self.buy_order_completed():
