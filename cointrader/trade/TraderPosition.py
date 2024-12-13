@@ -109,8 +109,8 @@ class TraderPosition(object):
             result = self._execute.market_buy(symbol=self._symbol, price=price, amount=size)
         elif self._config.start_position_type() == OrderType.LIMIT.name:
             result = self._execute.limit_buy(symbol=self._symbol, price=price, amount=size)
-        elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
-            result = self._execute.stop_loss_buy(symbol=self._symbol, price=price, stop_price=stop_loss, amount=size)
+        #elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
+        #    result = self._execute.stop_loss_limit_buy(symbol=self._symbol, limit_price=price, stop_price=stop_loss, amount=size)
 
         self._buy_order = Order(symbol=self._symbol)
         self._buy_order.update_order(result)
@@ -132,7 +132,7 @@ class TraderPosition(object):
         self._stop_loss_limit_price = limit_price
         self._stop_loss_ts = timestamp
 
-        result = self._execute.stop_loss_sell(self._symbol, price=limit_price, stop_price=stop_price, amount=self._buy_amount)
+        result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=limit_price, stop_price=stop_price, amount=self._buy_amount)
 
         self._stop_loss_order = Order(symbol=self._symbol)
         self._stop_loss_order.update_order(result)
@@ -171,12 +171,21 @@ class TraderPosition(object):
         self.current_price = price
         self._timestamp = timestamp
 
+        # check if we have an open stop loss order, if so we need to cancel it
+        if self._stop_loss_order:
+            if not self.stop_loss_is_completed():
+                self.cancel_stop_loss_position()
+            else:
+                # stop loss order already filled, so position is closed
+                self._closed_position_completed = True
+                return
+
         if self._config.end_position_type() == OrderType.MARKET.name:
             result = self._execute.market_sell(self._symbol, price=price, amount=self._buy_amount)
         elif self._config.end_position_type() == OrderType.LIMIT.name:
             result = self._execute.limit_sell(self._symbol, price=price, amount=self._buy_amount)
-        elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
-            result = self._execute.stop_loss_sell(self._symbol, price=price, stop_price=self._stop_loss, amount=self._buy_amount)
+        #elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
+        #    result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=price, stop_price=self._stop_loss, amount=self._buy_amount)
 
         self._sell_order = Order(symbol=self._symbol)
         self._sell_order.update_order(result)

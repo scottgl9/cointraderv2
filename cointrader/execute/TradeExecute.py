@@ -14,22 +14,22 @@ class TraderExecute(ExecuteBase):
         return self._account
 
     def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
-        return self._exchange.trade_buy_market(symbol, amount)
+        return self._exchange.trade_buy_market(ticker=symbol, amount=amount)
     
     def market_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
-        return self._exchange.trade_sell_market(symbol, amount)
+        return self._exchange.trade_sell_market(ticker=symbol, amount=amount)
     
-    def limit_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
-        return self._exchange.trade_buy_limit(symbol, price, amount)
+    def limit_buy(self, symbol: str, limit_price: float, amount: float) -> OrderResult:
+        return self._exchange.trade_buy_limit(ticker=symbol, amount=amount, price=limit_price)
+
+    def limit_sell(self, symbol: str, limit_price: float, amount: float) -> OrderResult:
+        return self._exchange.trade_sell_limit(ticker=symbol, amount=amount, price=limit_price)
+
+    def stop_loss_limit_buy(self, symbol: str, limit_price: float, stop_price: float, amount: float) -> OrderResult:
+        return self._exchange.trade_buy_stop_limit(ticker=symbol, amount=amount, price=limit_price, stop_price=stop_price)
     
-    def limit_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
-        return self._exchange.trade_sell_limit(symbol, price, amount)
-    
-    def stop_loss_buy(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
-        return self._exchange.trade_buy_stop_limit(symbol, price, stop_price, amount)
-    
-    def stop_loss_sell(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
-        return self._exchange.trade_sell_stop_limit(symbol, price, stop_price, amount)
+    def stop_loss_limit_sell(self, symbol: str, limit_price: float, stop_price: float, amount: float) -> OrderResult:
+        return self._exchange.trade_sell_stop_limit(ticker=symbol, amount=amount, price=limit_price, stop_price=stop_price)
 
     def status(self, symbol: str, order_id: str, price: float = 0) -> OrderResult:
         return self._exchange.trade_get_order(symbol, order_id)

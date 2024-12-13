@@ -19,16 +19,16 @@ class ExecuteBase(object):
     def market_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
         raise NotImplementedError
     
-    def limit_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def limit_buy(self, symbol: str, limit_price: float, amount: float) -> OrderResult:
         raise NotImplementedError
     
-    def limit_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def limit_sell(self, symbol: str, limit_price: float, amount: float) -> OrderResult:
         raise NotImplementedError
     
-    def stop_loss_buy(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
+    def stop_loss_limit_buy(self, symbol: str, limit_price: float, stop_price: float, amount: float) -> OrderResult:
         raise NotImplementedError
     
-    def stop_loss_sell(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
+    def stop_loss_limit_sell(self, symbol: str, limit_price: float, stop_price: float, amount: float) -> OrderResult:
         raise NotImplementedError
     
     def status(self, symbol: str, order_id: str, price: float) -> OrderResult:

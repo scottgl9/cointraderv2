@@ -96,7 +96,120 @@ class TraderExecuteSimulate(ExecuteBase):
         self._orders[result.id] = result
         return result
     
-    def limit_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
+    # Simulate account for limit buy order placed
+    def _limit_buy_placed(self, symbol: str, price: float, amount: float):
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+        quote_amount = self._account.round_quote(symbol, price * amount)
+        new_quote_balance = quote_balance - quote_amount
+        new_quote_hold = quote_hold + quote_amount
+        self._account.update_asset_balance(quote, new_quote_balance, new_quote_hold)
+
+        if new_quote_balance < 0:
+            if self._config.verbose():
+                print(f'quote_balance: {quote_balance}, new_quote_balance: {new_quote_balance}')
+            raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
+
+    # Simulate account for limit sell order placed
+    def _limit_sell_placed(self, symbol: str, price: float, amount: float):
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+        base_balance, base_hold = self._account.get_asset_balance(base)
+        new_base_balance = base_balance - amount
+        new_base_hold = base_hold + amount
+        self._account.update_asset_balance(base, new_base_balance, new_base_hold)
+
+        if new_base_balance < 0:
+            if self._config.verbose():
+                print(f'base_balance: {base_balance}, new_base_balance: {new_base_balance}')
+            raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
+    
+    def _limit_buy_filled(self, symbol: str, price: float, amount: float):
+        """
+        Simulate account for limit buy order filled
+        """
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+
+        # Quote hold amount removed
+        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+        quote_amount = self._account.round_quote(symbol, price * amount)
+        new_quote_hold = quote_hold - quote_amount
+        self._account.update_asset_balance(quote, quote_balance, new_quote_hold)
+
+        if new_quote_hold < 0:
+            if self._config.verbose():
+                print(f'quote_balance: {quote_balance}, quote_balance_hold: {quote_hold}, new_quote_hold: {new_quote_hold}')
+            raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
+
+        # Base balance added
+        base_balance, base_hold = self._account.get_asset_balance(base)
+        new_base_balance = base_balance + amount
+        self._account.update_asset_balance(base, new_base_balance, base_hold)
+
+    def _limit_sell_filled(self, symbol: str, price: float, amount: float):
+        """
+        Simulate account for limit sell order filled
+        """
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+
+        # Base hold amount removed
+        base_balance, base_hold = self._account.get_asset_balance(base)
+        new_base_hold = base_hold - amount
+        self._account.update_asset_balance(base, base_balance, new_base_hold)
+
+        if new_base_hold < 0:
+            if self._config.verbose():
+                print(f'base_balance: {base_balance}, base_hold: {base_hold}, new_base_hold: {new_base_hold}')
+            raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
+
+        # Quote balance added
+        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+        quote_amount = self._account.round_quote(symbol, price * amount)
+        new_quote_balance = quote_balance + quote_amount
+        self._account.update_asset_balance(quote, new_quote_balance, quote_hold)
+
+    def _limit_buy_cancelled(self, symbol: str, price: float, amount: float):
+        """
+        Simulate account for limit buy order cancelled
+        """
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+
+        # Quote hold amount removed
+        quote_balance, quote_hold = self._account.get_asset_balance(quote)
+        quote_amount = self._account.round_quote(symbol, price * amount)
+        new_quote_hold = quote_hold - quote_amount
+        new_quote_balance = quote_balance + quote_amount
+        self._account.update_asset_balance(quote, new_quote_balance, new_quote_hold)
+
+        if new_quote_hold < 0:
+            if self._config.verbose():
+                print(f'quote_balance: {quote_balance}, quote_balance_hold: {quote_hold}, new_quote_hold: {new_quote_hold}')
+            raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
+
+    def _limit_sell_cancelled(self, symbol: str, price: float, amount: float):
+        """
+        Simulate account for limit sell order cancelled
+        """
+        base = self._exchange.info_ticker_get_base(symbol)
+        quote = self._exchange.info_ticker_get_quote(symbol)
+
+        # Base hold amount removed
+        base_balance, base_hold = self._account.get_asset_balance(base)
+        new_base_hold = base_hold - amount
+        new_base_balance = base_balance + amount
+        self._account.update_asset_balance(base, new_base_balance, new_base_hold)
+
+        if new_base_hold < 0:
+            if self._config.verbose():
+                print(f'base_balance: {base_balance}, base_hold: {base_hold}, new_base_hold: {new_base_hold}')
+            raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
+
+
+    def limit_buy(self, symbol: str, limit_price: float, amount: float) -> OrderResult:
         """
         Simulate placing a limit buy order
         """
@@ -105,32 +218,17 @@ class TraderExecuteSimulate(ExecuteBase):
         result.status = OrderStatus.PLACED
         result.side = OrderSide.BUY
         result.type = OrderType.LIMIT
-        result.price = price
+        result.limit_price = limit_price
         result.size = self._account.round_base(symbol, amount)
         result.filled_size = 0.0
 
         # simulate account update
-        # simulating a stop loss limit buy, so we need to do the following:
-        # Calculate the quote balance to remove, and move that amount over to quote hold
-        base = self._exchange.info_ticker_get_base(symbol)
-        quote = self._exchange.info_ticker_get_quote(symbol)
-
-        # Update quote hold amount
-        quote_balance, quote_hold = self._account.get_asset_balance(quote)
-        quote_amount = self._account.round_quote(symbol, price * amount)
-        new_quote_balance = quote_balance - quote_amount
-        new_quote_hold = quote_hold + quote_amount
-        self._account.update_asset_balance(quote, new_quote_balance, new_quote_hold)
-
-        if new_quote_balance < 0:
-            if self._config.verbose():
-                print(f'quote_balance: {quote_balance}, quote_balance_hold: {quote_hold}, new_quote_hold: {new_quote_balance}')
-            raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
+        self._limit_buy_placed(symbol, limit_price, amount)
 
         self._orders[result.id] = result
         return result
 
-    def limit_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def limit_sell(self, symbol: str, limit_price: float, amount: float) -> OrderResult:
         """
         Simulate placing a limit sell order
         """
@@ -139,31 +237,17 @@ class TraderExecuteSimulate(ExecuteBase):
         result.status = OrderStatus.PLACED
         result.side = OrderSide.SELL
         result.type = OrderType.LIMIT
-        result.price = price
+        result.limit_price = limit_price
         result.size = self._account.round_base(symbol, amount)
         result.filled_size = 0.0
 
         # simulate account update
-        # simulating a stop loss limit buy, so we need to do the following:
-        # Calculate the quote balance to remove, and move that amount over to quote hold
-        base = self._exchange.info_ticker_get_base(symbol)
-        quote = self._exchange.info_ticker_get_quote(symbol)
-
-        # Update base hold amount
-        base_balance, base_hold = self._account.get_asset_balance(base)
-        new_base_balance = base_balance - amount
-        new_base_hold = base_hold + amount
-        self._account.update_asset_balance(base, new_base_balance, new_base_hold)
-
-        if new_base_balance < 0:
-            if self._config.verbose():
-                print(f'base_hold: {base_balance}, new_base_hold: {new_base_balance}')
-            raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
+        self._limit_sell_placed(symbol, limit_price, amount)
 
         self._orders[result.id] = result
         return result
 
-    def stop_loss_buy(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
+    def stop_loss_limit_buy(self, symbol: str, limit_price: float, stop_price: float, amount: float) -> OrderResult:
         """
         Simulate a stop loss buy order
         """
@@ -172,33 +256,18 @@ class TraderExecuteSimulate(ExecuteBase):
         result.status = OrderStatus.PLACED
         result.side = OrderSide.BUY
         result.type = OrderType.STOP_LOSS_LIMIT
-        result.price = price
-        result.limit_price = stop_price
+        result.limit_price = limit_price
+        result.stop_price = stop_price
         result.size = self._account.round_base(symbol, amount)
         result.filled_size = 0.0
 
         # simulate account update
-        # simulating a stop loss limit buy, so we need to do the following:
-        # Calculate the quote balance to remove, and move that amount over to quote hold
-        base = self._exchange.info_ticker_get_base(symbol)
-        quote = self._exchange.info_ticker_get_quote(symbol)
-
-        # Update quote hold amount
-        quote_balance, quote_hold = self._account.get_asset_balance(quote)
-        quote_amount = self._account.round_quote(symbol, price * amount)
-        new_quote_balance = quote_balance - quote_amount
-        new_quote_hold = quote_hold + quote_amount
-        self._account.update_asset_balance(quote, new_quote_balance, new_quote_hold)
-
-        if new_quote_balance < 0:
-            if self._config.verbose():
-                print(f'quote_balance: {quote_balance}, quote_balance_hold: {quote_hold}, new_quote_hold: {new_quote_balance}')
-            raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
+        self._limit_buy_placed(symbol, limit_price, amount)
 
         self._orders[result.id] = result
         return result
 
-    def stop_loss_sell(self, symbol: str, price: float, stop_price: float, amount: float) -> OrderResult:
+    def stop_loss_limit_sell(self, symbol: str, limit_price: float, stop_price: float, amount: float) -> OrderResult:
         """
         Simulate placing a stop loss sell order
         """
@@ -207,27 +276,13 @@ class TraderExecuteSimulate(ExecuteBase):
         result.status = OrderStatus.PLACED
         result.side = OrderSide.SELL
         result.type = OrderType.STOP_LOSS_LIMIT
-        result.price = price
-        result.limit_price = stop_price
+        result.limit_price = limit_price
+        result.stop_price = stop_price
         result.size = self._account.round_base(symbol, amount)
         result.filled_size = 0.0
 
         # simulate account update
-        # simulating a stop loss limit buy, so we need to do the following:
-        # Calculate the base balance to remove, and move that amount over to base hold
-        base = self._exchange.info_ticker_get_base(symbol)
-        quote = self._exchange.info_ticker_get_quote(symbol)
-
-        # Update base hold amount
-        base_balance, base_hold = self._account.get_asset_balance(base)
-        new_base_balance = base_balance - amount
-        new_base_hold = base_hold + amount
-        self._account.update_asset_balance(base, new_base_balance, new_base_hold)
-
-        if new_base_balance < 0:
-            if self._config.verbose():
-                print(f'base_hold: {base_balance}, new_base_hold: {new_base_balance}')
-            raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
+        self._limit_sell_placed(symbol, limit_price, amount)
 
         self._orders[result.id] = result
         return result
@@ -240,51 +295,37 @@ class TraderExecuteSimulate(ExecuteBase):
 
         bought = False
         sold = False
-        if order.type == OrderType.MARKET:
+        if order.type == OrderType.MARKET or order.status == OrderStatus.FILLED:
             return order
         elif order.type == OrderType.LIMIT and order.status == OrderStatus.PLACED:
             if order.side == OrderSide.SELL and price >= order.price:
                 order.status = OrderStatus.FILLED
+                order.price = order.limit_price
                 order.filled_size = order.size
                 sold  = True
             elif order.side == OrderSide.BUY and price <= order.price:
                 order.status = OrderStatus.FILLED
+                order.price = order.limit_price
                 order.filled_size = order.size
                 bought = True
         elif order.type == OrderType.STOP_LOSS_LIMIT and order.status == OrderStatus.PLACED:
             if order.side == OrderSide.SELL and price <= order.limit_price:
                 order.status = OrderStatus.FILLED
+                order.price = order.limit_price
                 order.filled_size = order.size
                 sold = True
             elif order.side == OrderSide.BUY and price >= order.limit_price:
                 order.status = OrderStatus.FILLED
+                order.price = order.limit_price
                 order.filled_size = order.size
                 bought = True
 
         # if the buy was executed, then update the account, transfer base hold to balance
         # if the sell was executed, then update the account, transfer quote hold to balance
         if bought:
-            base = self._exchange.info_ticker_get_base(symbol)
-            base_balance, base_hold = self._account.get_asset_balance(base)
-            new_base_hold = base_hold - order.size
-            new_base_balance = base_balance + order.size
-            self._account.update_asset_balance(base, new_base_balance, new_base_hold)
-            if new_base_hold < 0:
-                if self._config.verbose():
-                    print(f'base_hold: {base_hold}, new_base_hold: {new_base_hold}')
-                raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
+            self._limit_buy_filled(symbol, order.limit_price, order.size)
         if sold:
-            quote = self._exchange.info_ticker_get_quote(symbol)
-            quote_balance, quote_hold = self._account.get_asset_balance(quote)
-            amount = self._account.round_quote(symbol, price * order.size)
-            new_quote_hold = quote_hold - amount
-            new_quote_balance = quote_balance + amount
-            self._account.update_asset_balance(quote, new_quote_balance, new_quote_hold)
-            if new_quote_hold < 0:
-                if self._config.verbose():
-                    print(f'quote_balance: {quote_balance}, quote_hold: {quote_hold}, new_quote_hold: {new_quote_hold}')
-                raise ValueError(f'{symbol} Insufficient balance for {quote} to sell {symbol}.')
-
+            self._limit_sell_filled(symbol, order.limit_price, order.size)
         return order
 
     def cancel(self, symbol: str, order_id: str, price: float) -> OrderResult:
@@ -292,7 +333,7 @@ class TraderExecuteSimulate(ExecuteBase):
         Simulate cancelling an order
         """
         order = self._orders[order_id]
-        if order.type == OrderType.MARKET or order.status == OrderStatus.CANCELLED:
+        if order.type == OrderType.MARKET or order.status == OrderStatus.CANCELLED or order.status == OrderStatus.FILLED:
             return order
 
         cancel_buy = False
@@ -300,11 +341,11 @@ class TraderExecuteSimulate(ExecuteBase):
 
         if order.type == OrderType.LIMIT and order.status == OrderStatus.PLACED:
             if order.side == OrderSide.SELL:
-                if price < order.price:
+                if price < order.limit_price:
                     order.status = OrderStatus.CANCELLED
                     cancel_sell = True
             elif order.side == OrderSide.BUY:
-                if price > order.price:
+                if price > order.limit_price:
                     order.status = OrderStatus.CANCELLED
                     cancel_buy = True
         elif order.type == OrderType.STOP_LOSS_LIMIT and order.status == OrderStatus.PLACED:
@@ -319,41 +360,13 @@ class TraderExecuteSimulate(ExecuteBase):
 
         # if the cancelled buy was executed, then update the account, transfer quote hold to quote balance
         # if the cancelled sell was executed, then update the account, transfer base hold to base balance
-        if order.status == OrderStatus.CANCELLED:
-            amount = order.size
-            
+        if order.status == OrderStatus.CANCELLED:           
             if cancel_buy:
                 # simulate account update
-                base = self._exchange.info_ticker_get_base(symbol)
-                quote = self._exchange.info_ticker_get_quote(symbol)
-        
-                # Update quote hold amount
-                quote_balance, quote_hold = self._account.get_asset_balance(quote)
-                quote_amount = self._account.round_quote(symbol, price * amount)
-                new_quote_balance = quote_balance + quote_amount
-                new_quote_hold = quote_hold - quote_amount
-                self._account.update_asset_balance(quote, new_quote_balance, new_quote_hold)
-
-                if new_quote_hold < 0:
-                    if self._config.verbose():
-                        print(f'quote_hold: {quote_hold}, new_quote_hold: {new_quote_hold}')
-                    raise ValueError(f'{symbol} Insufficient balance for {base} to cancel buy {amount}.')
+                self._limit_buy_cancelled(symbol, order.limit_price, order.size)
 
             if cancel_sell:
-                    # simulate account update
-                base = self._exchange.info_ticker_get_base(symbol)
-                quote = self._exchange.info_ticker_get_quote(symbol)
-        
-                # Update base hold amount
-                base_balance, base_hold = self._account.get_asset_balance(base)
-                base_amount = amount
-                new_base_balance = base_balance + base_amount
-                new_base_hold = base_hold - base_amount
-                self._account.update_asset_balance(base, new_base_balance, new_base_hold)
-
-                if new_base_hold < 0:
-                    if self._config.verbose():
-                        print(f'quote_balance: {quote_balance}, base_hold: {base_hold}, new_base_hold: {new_base_hold}')
-                    raise ValueError(f'{symbol} Insufficient balance for {quote} to cancel sell {base}.')
+                # simulate account update
+                self._limit_sell_cancelled(symbol, order.limit_price, order.size)
 
         return order
