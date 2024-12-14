@@ -11,6 +11,7 @@ class TraderPosition(object):
     _buy_order: Order = None
     _sell_order: Order = None
     _stop_loss_order: Order = None
+    _last_stop_loss_order: Order = None
 
     def __init__(self, symbol: str, id: int, strategy: Strategy, execute: ExecuteBase, config: TraderConfig, orders: Orders):
         self._id = id
@@ -19,6 +20,7 @@ class TraderPosition(object):
         self._orders = orders
         self._buy_order = None
         self._sell_order = None
+        self._last_stop_loss_order = None
         self._stop_loss_order = None
         self._strategy = strategy
         self._execute = execute
@@ -70,6 +72,9 @@ class TraderPosition(object):
     
     def stop_loss_price(self):
         return self._stop_loss_price
+    
+    def stop_loss_limit_price(self):
+        return self._stop_loss_limit_price
 
     def stop_loss_is_completed(self):
         """
@@ -163,9 +168,11 @@ class TraderPosition(object):
         if not self._stop_loss_order:
             return
 
-        print(f" stop loss order for {self._symbol} {self._current_price}")
+        #print(f" stop loss order for {self._symbol} {self._current_price}")
         result = self._execute.cancel(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
-        self._stop_loss_order.update_order(result)
+        self._last_stop_loss_order = Order(symbol=self._symbol)
+        self._last_stop_loss_order.update_order(result)
+        self._stop_loss_order = None
 
     def close_position(self, price: float, timestamp: int):
         self._closed_position = True
@@ -175,7 +182,14 @@ class TraderPosition(object):
         # check if we have an open stop loss order, if so we need to cancel it
         if self._stop_loss_order:
             if not self.stop_loss_is_completed():
-                self.cancel_stop_loss_position()
+                # check if the stop loss order is filled
+                self.get_stop_loss_position()
+                if self.stop_loss_is_completed():
+                    # stop loss order already filled, so position is closed
+                    self._closed_position_completed = True
+                    return
+                else:
+                    self.cancel_stop_loss_position()
             else:
                 # stop loss order already filled, so position is closed
                 self._closed_position_completed = True

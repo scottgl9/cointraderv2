@@ -13,6 +13,7 @@ from cointrader.signals.EMACross import EMACross
 from cointrader.signals.SupertrendSignal import SupertrendSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
 from colorama import Fore, Back, Style
+import time
 
 class Trader(object):
     _symbol = None
@@ -78,11 +79,25 @@ class Trader(object):
 
             if position.opened() and self._config.trailing_stop_loss():
                 percent = self._config.stop_loss_percent()
-                stop_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
+                # set the stop 0.1% above the limit price
+                stop_price = self._account.round_quote(self._symbol, (1 - ((percent - 0.1) / 100.0)) * position.buy_price())
+                limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
                 # handle setting and updating stop loss orders if enabled
                 if not position.stop_loss_is_set():
                     #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
-                    position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_price, timestamp=kline.ts)
+                    position.create_stop_loss_position(stop_price=stop_price, limit_price=limit_price, timestamp=kline.ts)
+                else:
+                    # update the stop loss order so it trails the position, if the price has moved up 1%
+                    stop_loss_limit_price = position.stop_loss_limit_price()
+                    if (current_price - stop_loss_limit_price) / stop_loss_limit_price > 0.01:
+                        position.cancel_stop_loss_position()
+                        if not self._config.simulate():
+                            # wait for the order to be cancelled
+                            time.sleep(1)
+                        new_stop_price = self._account.round_quote(self._symbol, (1 - ((percent - 0.1) / 100.0)) * current_price)
+                        new_stop_limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * current_price)
+                        #print(f"{self._symbol} Updating stop loss: {stop_loss_limit_price} -> {new_stop_limit_price}")
+                        position.create_stop_loss_position(stop_price=new_stop_price, limit_price=new_stop_limit_price, timestamp=kline.ts)
 
             # handle closed position when sell order or stop loss has been filled
             if position.closed():
