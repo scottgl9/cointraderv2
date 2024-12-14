@@ -89,7 +89,7 @@ class Trader(object):
                 else:
                     # update the stop loss order so it trails the position, if the price has moved up 1%
                     stop_loss_limit_price = position.stop_loss_limit_price()
-                    if (current_price - stop_loss_limit_price) / stop_loss_limit_price > 0.01:
+                    if ((current_price - stop_loss_limit_price) / stop_loss_limit_price) * 100.0 > percent + 1.0:
                         position.cancel_stop_loss_position()
                         if not self._config.simulate():
                             # wait for the order to be cancelled
@@ -173,8 +173,10 @@ class Trader(object):
                 sell_signal = False
                 sell_signal_name = None
                 if strategy_sell_signal:
-                    sell_signal = True
-                    sell_signal_name = self._strategy.sell_signal_name()
+                    # Only sell if we have met the minimum take profit percent
+                    if self._config.min_take_profit_percent() <= position.current_position_percent(current_price):
+                        sell_signal = True
+                        sell_signal_name = self._strategy.sell_signal_name()
                 #elif position.current_position_percent(kline.close) < -self._stop_loss_percent:
                 #    sell_signal = True
                 #    sell_signal_name = 'stop_loss'

@@ -14,7 +14,7 @@
     ],
     "stop_loss_percent": 5.0,
     "trailing_stop_loss": true,
-    "min_take_profit_percent": 5.0,
+    "min_take_profit_percent": 0.5,
     "stop_on_loss": true,
     "max_total_loss_percent": 10.0,
     "cooldown_period_seconds": 3600,
