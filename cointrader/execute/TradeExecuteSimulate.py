@@ -18,7 +18,7 @@ class TraderExecuteSimulate(ExecuteBase):
     def account(self) -> AccountBase:
         return self._account
 
-    def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def market_buy(self, symbol: str, amount: float, current_price: float, current_ts: int) -> OrderResult:
         """
         Simulate placing a market buy order
         """
@@ -27,12 +27,13 @@ class TraderExecuteSimulate(ExecuteBase):
         result.status = OrderStatus.FILLED
         result.side = OrderSide.BUY
         result.type = OrderType.MARKET
-        result.price = price
+        result.price = current_price
         result.size = self._account.round_base(symbol, amount)
         result.filled_size = result.size
+        result.filled_ts = current_ts
 
         if self._config.verbose():
-            print(f'market_buy: {symbol}, {price}, {result.size}')
+            print(f'market_buy: {symbol}, {current_price}, {result.size}')
 
         if amount < self._account.get_base_min_size(symbol):
             raise ValueError(f'{symbol} Amount is less than the minimum size of {self._account.get_base_min_size(symbol)}')
@@ -48,7 +49,7 @@ class TraderExecuteSimulate(ExecuteBase):
         
         # Update quote balance
         quote_balance, quote_balance_hold = self._account.get_asset_balance(quote)
-        new_quote_balance = quote_balance - self._account.round_quote(symbol, price * amount)
+        new_quote_balance = quote_balance - self._account.round_quote(symbol, current_price * amount)
         if new_quote_balance < 0:
             if self._config.verbose():
                 print(f'quote_balance: {quote_balance}, quote_balance_hold: {quote_balance_hold}, new_quote_balance: {new_quote_balance}')
@@ -58,7 +59,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._orders[result.id] = result
         return result
 
-    def market_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def market_sell(self, symbol: str, amount: float, current_price: float, current_ts: int) -> OrderResult:
         """
         Simulate placing a market sell order
         """
@@ -67,12 +68,13 @@ class TraderExecuteSimulate(ExecuteBase):
         result.status = OrderStatus.FILLED
         result.side = OrderSide.SELL
         result.type = OrderType.MARKET
-        result.price = price
+        result.price = current_price
         result.size = self._account.round_base(symbol, amount)
         result.filled_size = result.size
+        result.filled_ts = current_ts
 
         if self._config.verbose():
-            print(f'market_sell: {symbol}, {price}, {result.size}')
+            print(f'market_sell: {symbol}, {current_price}, {result.size}')
 
         if amount < self._account.get_base_min_size(symbol):
             raise ValueError(f'{symbol} Amount is less than the minimum size of {self._account.get_base_min_size(symbol)}')
@@ -92,7 +94,7 @@ class TraderExecuteSimulate(ExecuteBase):
 
         # Update quote balance
         quote_balance, quote_balance_hold = self._account.get_asset_balance(quote)
-        new_quote_balance = quote_balance + self._account.round_quote(symbol, price * amount)
+        new_quote_balance = quote_balance + self._account.round_quote(symbol, current_price * amount)
         self._account.update_asset_balance(quote, new_quote_balance, quote_balance_hold)
 
         self._orders[result.id] = result
@@ -295,7 +297,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._orders[result.id] = result
         return result
 
-    def status(self, symbol: str, order_id: str, price: float) -> OrderResult:
+    def status(self, symbol: str, order_id: str, current_price: float, current_ts: int) -> OrderResult:
         """
         Simulate getting the status of an order
         """
@@ -306,26 +308,30 @@ class TraderExecuteSimulate(ExecuteBase):
         if order.type == OrderType.MARKET or order.status == OrderStatus.FILLED:
             return order
         elif order.type == OrderType.LIMIT and order.status == OrderStatus.PLACED:
-            if order.side == OrderSide.SELL and price >= order.price:
+            if order.side == OrderSide.SELL and current_price >= order.price:
                 order.status = OrderStatus.FILLED
                 order.price = order.limit_price
                 order.filled_size = order.size
+                order.filled_ts = current_ts
                 sold  = True
-            elif order.side == OrderSide.BUY and price <= order.price:
+            elif order.side == OrderSide.BUY and current_price <= order.price:
                 order.status = OrderStatus.FILLED
                 order.price = order.limit_price
                 order.filled_size = order.size
+                order.filled_ts = current_ts
                 bought = True
         elif order.type == OrderType.STOP_LOSS_LIMIT and order.status == OrderStatus.PLACED:
-            if order.side == OrderSide.SELL and price <= order.limit_price:
+            if order.side == OrderSide.SELL and current_price <= order.limit_price:
                 order.status = OrderStatus.FILLED
                 order.price = order.limit_price
                 order.filled_size = order.size
+                order.filled_ts = current_ts
                 sold = True
-            elif order.side == OrderSide.BUY and price >= order.limit_price:
+            elif order.side == OrderSide.BUY and current_price >= order.limit_price:
                 order.status = OrderStatus.FILLED
                 order.price = order.limit_price
                 order.filled_size = order.size
+                order.filled_ts = current_ts
                 bought = True
 
         # if the buy was executed, then update the account, transfer base hold to balance
@@ -336,14 +342,14 @@ class TraderExecuteSimulate(ExecuteBase):
             self._limit_sell_filled(symbol, order.limit_price, order.size)
         return order
 
-    def cancel(self, symbol: str, order_id: str, price: float) -> OrderResult:
+    def cancel(self, symbol: str, order_id: str, current_price: float, current_ts: int) -> OrderResult:
         """
         Simulate cancelling an order
         """
         order = self._orders[order_id]
 
         if self._config.verbose():
-            print(f'cancel: {symbol}, {order_id}, {price}')
+            print(f'cancel: {symbol}, {order_id}, {current_price}')
 
         if order.type == OrderType.MARKET or order.status == OrderStatus.CANCELLED or order.status == OrderStatus.FILLED:
             return order
@@ -353,20 +359,20 @@ class TraderExecuteSimulate(ExecuteBase):
 
         if order.type == OrderType.LIMIT and order.status == OrderStatus.PLACED:
             if order.side == OrderSide.SELL:
-                if price < order.limit_price:
+                if current_price < order.limit_price:
                     order.status = OrderStatus.CANCELLED
                     cancel_sell = True
             elif order.side == OrderSide.BUY:
-                if price > order.limit_price:
+                if current_price > order.limit_price:
                     order.status = OrderStatus.CANCELLED
                     cancel_buy = True
         elif order.type == OrderType.STOP_LOSS_LIMIT and order.status == OrderStatus.PLACED:
             if order.side == OrderSide.SELL:
-                if price > order.limit_price:
+                if current_price > order.limit_price:
                     order.status = OrderStatus.CANCELLED
                     cancel_sell = True
             elif order.side == OrderSide.BUY:
-                if price < order.limit_price:
+                if current_price < order.limit_price:
                     order.status = OrderStatus.CANCELLED
                     cancel_buy = True
 

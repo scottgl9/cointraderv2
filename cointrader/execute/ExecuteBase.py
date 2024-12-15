@@ -13,12 +13,12 @@ class ExecuteBase(object):
     def account(self) -> AccountBase:
         raise NotImplementedError
 
-    def market_buy(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def market_buy(self, symbol: str, amount: float, current_price: float, current_ts: int) -> OrderResult:
         raise NotImplementedError
     
-    def market_sell(self, symbol: str, price: float, amount: float) -> OrderResult:
+    def market_sell(self, symbol: str, amount: float, current_price: float, current_ts: int) -> OrderResult:
         raise NotImplementedError
-    
+
     def limit_buy(self, symbol: str, limit_price: float, amount: float) -> OrderResult:
         raise NotImplementedError
     
@@ -31,13 +31,13 @@ class ExecuteBase(object):
     def stop_loss_limit_sell(self, symbol: str, limit_price: float, stop_price: float, amount: float) -> OrderResult:
         raise NotImplementedError
     
-    def status(self, symbol: str, order_id: str, price: float) -> OrderResult:
+    def status(self, symbol: str, order_id: str, current_price: float, current_ts: int) -> OrderResult:
         """
         Get order status
         """
         raise NotImplementedError
     
-    def cancel(self, symbol: str, order_id: str, price: float) -> OrderResult:
+    def cancel(self, symbol: str, order_id: str, current_price: float, current_ts: int) -> OrderResult:
         """
         Cancel an order
         """

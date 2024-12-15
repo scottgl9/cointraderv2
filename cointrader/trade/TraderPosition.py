@@ -33,10 +33,9 @@ class TraderPosition(object):
         self._stop_loss_set = False
         self._entry_price = 0
         self._current_price = 0
+        self._current_ts = 0
         self._buy_price = 0.0
         self._sell_price = 0.0
-        self._buy_price_ts = 0
-        self._sell_price_ts = 0
         self._stop_loss_price = 0.0
         self._stop_loss_limit_price = 0.0
         self._stop_loss_ts = 0
@@ -128,14 +127,18 @@ class TraderPosition(object):
         return {'price': self.sell_price(), 'ts': self.sell_ts()}
 
     def open_position(self, price: float, stop_loss: float, size: float, timestamp: int, current_price: float):
+        """
+        Open a position with a buy order
+        """
         self._current_price = current_price
+        self._current_ts = timestamp
         self._opened_position = True
         self._entry_price = price
         self._stop_loss = stop_loss
         self._timestamp = timestamp
 
         if self._config.start_position_type() == OrderType.MARKET.name:
-            result = self._execute.market_buy(symbol=self._symbol, price=price, amount=size)
+            result = self._execute.market_buy(symbol=self._symbol, amount=size, current_price=self._current_price, current_ts=self._current_ts)
         elif self._config.start_position_type() == OrderType.LIMIT.name:
             result = self._execute.limit_buy(symbol=self._symbol, limit_price=price, amount=size)
         elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
@@ -188,25 +191,31 @@ class TraderPosition(object):
         if not self._stop_loss_order:
             return None
         
-        result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
+        result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=self._current_price, current_ts=self._current_ts)
         self._stop_loss_order.update_order(result)
 
         return self._stop_loss_order
 
     def cancel_stop_loss_position(self):
+        """
+        Cancel the stop loss order
+        """
         if not self._stop_loss_order:
             return
 
         #print(f" stop loss order for {self._symbol} {self._current_price}")
-        result = self._execute.cancel(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
+        result = self._execute.cancel(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=self._current_price, current_ts=self._current_ts)
         self._last_stop_loss_order = Order(symbol=self._symbol)
         self._last_stop_loss_order.update_order(result)
         self._stop_loss_order = None
 
     def close_position(self, price: float, timestamp: int):
+        """
+        Close the position with a sell order
+        """
         self._closed_position = True
-        self.current_price = price
-        self._timestamp = timestamp
+        self._current_price = price
+        self._current_ts = timestamp
 
         # check if we have an open stop loss order, if so we need to cancel it
         if self._stop_loss_order:
@@ -227,7 +236,7 @@ class TraderPosition(object):
                 return
 
         if self._config.end_position_type() == OrderType.MARKET.name:
-            result = self._execute.market_sell(self._symbol, price=price, amount=self._buy_amount)
+            result = self._execute.market_sell(self._symbol, amount=self._buy_amount, current_price=price, current_ts=self._current_ts)
         elif self._config.end_position_type() == OrderType.LIMIT.name:
             result = self._execute.limit_sell(self._symbol, price=price, amount=self._buy_amount)
         #elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
@@ -253,50 +262,46 @@ class TraderPosition(object):
         #if self._config.verbose():
         #    print(f"Updating position for {self._symbol} current price: {current_price}")
         self._current_price = current_price
+        self._current_ts = current_ts
 
         if self._buy_order and not self.buy_order_completed():
-            result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, price=self._current_price)
+            result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
             prev_status = self._buy_order.status
             self._buy_order.update_order(result)
             if self._buy_order.status == OrderStatus.FILLED and prev_status != OrderStatus.FILLED:
                 self._buy_price = self._buy_order.price
-                if self._config.simulate():
-                    self._buy_order.filled_ts = current_ts
-                self._buy_price_ts = self._buy_order.filled_ts
                 self._opened_position_completed = True
 
         if self._sell_order and not self._sell_order.completed():
-            result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, price=self._current_price)
+            result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
             prev_status = self._buy_order.status
             self._sell_order.update_order(result)
             if self._sell_order.status == OrderStatus.FILLED and prev_status != OrderStatus.FILLED:
                 self._sell_price = self._sell_order.price
-                if self._config.simulate():
-                    self._sell_order.filled_ts = current_ts
-                self._sell_price_ts = self._sell_order.filled_ts
                 self._closed_position_completed = True
 
         if self._stop_loss_order and not self.stop_loss_is_completed():
             #print(f"stop loss order: {self._stop_loss_order}")
-            result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, price=self._current_price)
+            result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=current_price, current_ts=current_ts)
             self._stop_loss_order.update_order(result)
             prev_status = self._buy_order.status
             if self._stop_loss_order.status == OrderStatus.FILLED and prev_status != OrderStatus.FILLED:
                 self._stop_loss_price = self._stop_loss_order.price
-                if self._config.simulate():
-                    self._stop_loss_order.filled_ts = current_ts
                 self._stop_loss_ts = self._stop_loss_order.filled_ts
                 self._closed_position_completed = True
 
     def current_position_percent(self, price: float):
         """
-        Calculate the current position percent
+        Calculate the current position percent for an open position
         """
         if not self.buy_order_completed():
             return 0.0
         return (price - self._buy_price) / self._buy_price * 100
 
     def profit_percent(self):
+        """
+        Calculate the profit percent for a closed position
+        """
         profit = 0.0
 
         if not self.buy_order_completed():
