@@ -114,7 +114,7 @@ def main(args):
             kline.symbol = symbol
             kline.granularity = args.granularity
 
-            mtrader.market_update(kline=kline, current_price=kline.close)
+            mtrader.market_update(kline=kline, current_price=kline.close, current_ts=kline.ts)
             last_prices[symbol] = kline_data['close']
 
             # emit daily klines

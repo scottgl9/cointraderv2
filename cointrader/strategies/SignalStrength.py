@@ -7,6 +7,7 @@ from cointrader.signals.RSISignal import RSISignal
 from cointrader.signals.SAMASignal import SAMASignal
 from cointrader.signals.ZLEMACross import ZLEMACross
 from cointrader.signals.EMACross import EMACross
+from cointrader.signals.SMACross import SMACross
 from cointrader.signals.SupertrendSignal import SupertrendSignal
 from cointrader.signals.SqueezeMomentumSignal import SqueezeMomentumSignal
 from cointrader.signals.ADXSignal import ADXSignal
@@ -27,6 +28,7 @@ class SignalStrength(Strategy):
         self.signals['zlema'] = ZLEMACross(symbol=self._symbol, short_period=12, long_period=26)
         self.signals['rsi'] = RSISignal(symbol=self._symbol, period=14, overbought=70, oversold=30)
         self.signals['ema'] = EMACross(symbol=self._symbol, short_period=12, long_period=26)
+        self.signals['sma'] = SMACross(symbol=self._symbol, short_period=50, long_period=100)
         self.signals['supertrend'] = SupertrendSignal(symbol=self._symbol, period=14, multiplier=3)
         self.signals['adx'] = ADXSignal(symbol=self._symbol, period=14, threshold=20)
         self.signals['squeeze'] = SqueezeMomentumSignal(symbol=self._symbol, length=20, multBB=2.0, multKC=1.5)
@@ -36,7 +38,7 @@ class SignalStrength(Strategy):
 
         self.signal_states: dict[str, OrderSide] = {}
         for name in self.signals.keys():
-            self.signal_states[name] = OrderSide.UNKNOWN
+            self.signal_states[name] = OrderSide.NONE
 
     def update(self, kline):
         for signal in self.signals.values():
@@ -65,12 +67,20 @@ class SignalStrength(Strategy):
                 self.signal_states['rsi'] = OrderSide.SELL
             elif self.signals['rsi'].below():
                 self.signal_states['rsi'] = OrderSide.BUY
+            else:
+                self.signal_states['rsi'] = OrderSide.NONE
 
         if self.signals['ema'].ready():
             if self.signals['ema'].cross_up():
                 self.signal_states['ema'] = OrderSide.BUY
             elif self.signals['ema'].cross_down():
                 self.signal_states['ema'] = OrderSide.SELL
+
+        if self.signals['sma'].ready():
+            if self.signals['sma'].cross_up():
+                self.signal_states['sma'] = OrderSide.BUY
+            elif self.signals['sma'].cross_down():
+                self.signal_states['sma'] = OrderSide.SELL
 
         if self.signals['supertrend'].ready():
             if self.signals['supertrend'].cross_up():
@@ -80,9 +90,12 @@ class SignalStrength(Strategy):
 
         if self.signals['adx'].ready():
             if self.signals['adx'].above():
-                self.signal_states['adx'] = OrderSide.BUY
+                if self.signals['adx'].cross_up():
+                    self.signal_states['adx'] = OrderSide.BUY
+                elif self.signals['adx'].cross_down():
+                    self.signal_states['adx'] = OrderSide.SELL
             elif self.signals['adx'].below():
-                self.signal_states['adx'] = OrderSide.SELL
+                self.signal_states['adx'] = OrderSide.NONE
 
         if self.signals['squeeze'].ready():
             if self.signals['squeeze'].cross_up():

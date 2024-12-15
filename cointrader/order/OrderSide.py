@@ -3,5 +3,6 @@ from enum import Enum
 
 class OrderSide(Enum):
     UNKNOWN = 0
-    BUY = 1
-    SELL = 2
+    NONE = 1
+    BUY = 2
+    SELL = 3

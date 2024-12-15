@@ -23,13 +23,13 @@ class MultiTrader(object):
             if symbol not in self._traders.keys():
                 self._traders[symbol] = Trader(account=account, symbol=symbol, execute=self._execute, config=self._config, orders=self._orders, granularity=self._granularity)
 
-    def market_update(self, kline: Kline, current_price: float):
+    def market_update(self, kline: Kline, current_price: float, current_ts: int):
         if kline.symbol not in self._traders.keys():
             print(f"Symbol {kline.symbol} not found in traders")
             return
 
         trader = self._traders[kline.symbol]
-        trader.market_update(kline, current_price=current_price)
+        trader.market_update(kline, current_price=current_price, current_ts=current_ts)
 
     def net_profit_percent(self, symbol: str):
         if symbol not in self._traders.keys():

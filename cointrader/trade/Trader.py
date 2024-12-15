@@ -14,6 +14,7 @@ from cointrader.signals.SupertrendSignal import SupertrendSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
 from colorama import Fore, Back, Style
 import time
+from datetime import datetime
 
 class Trader(object):
     _symbol = None
@@ -71,11 +72,11 @@ class Trader(object):
         for kline in klines:
             self._strategy.update(kline)
 
-    def market_update(self, kline: Kline, current_price: float):
+    def market_update(self, kline: Kline, current_price: float, current_ts: int):
         # if position has been closed, remove it from the list
         for position in self._positions:
             if kline.granularity == self._granularity:
-                position.market_update(current_price)
+                position.market_update(current_price=current_price, current_ts=current_ts)
 
             if position.opened() and self._config.trailing_stop_loss():
                 percent = self._config.stop_loss_percent()
@@ -102,12 +103,22 @@ class Trader(object):
             # handle closed position when sell order or stop loss has been filled
             if position.closed():
                 profit_percent = position.profit_percent()
+                buy_price = position.buy_price()
+                sell_price = position.sell_price()
+                buy_date = datetime.fromtimestamp(position.buy_ts())
+                sell_date = datetime.fromtimestamp(position.sell_ts())
                 if profit_percent >= 0:
                     self._positive_profit_percent += profit_percent
-                    print(f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}{Style.RESET_ALL}")
+                    msg = f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}"
+                    msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
+                    msg += f"{Style.RESET_ALL}"
+                    print(msg)
                 else:
                     self._negative_profit_percent += profit_percent
-                    print(f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}{Style.RESET_ALL}")
+                    msg = f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}"
+                    msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
+                    msg += f"{Style.RESET_ALL}"
+                    print(msg)
                     # Disable opening new positions for a period of time after a loss
                     if self._disable_after_loss_seconds > 0:
                         self._disable_until_ts = kline.ts + self._disable_after_loss_seconds
