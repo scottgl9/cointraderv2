@@ -34,13 +34,10 @@ class TraderPosition(object):
         self._entry_price = 0
         self._current_price = 0
         self._current_ts = 0
-        self._buy_price = 0.0
-        self._sell_price = 0.0
         self._stop_loss_price = 0.0
         self._stop_loss_limit_price = 0.0
         self._stop_loss_ts = 0
         self._timestamp = 0
-        self._buy_amount = 0.0
 
 
     def id(self):
@@ -199,7 +196,7 @@ class TraderPosition(object):
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price - current_price * limit_order_percent / 100)
             result = self._execute.limit_buy(symbol=self._symbol, limit_price=limit_price, amount=size)
-            print(f"limit buy order for {self._symbol} limit price: {limit_price} current price: {current_price} amount: {size}")
+            #print(f"limit buy order for {self._symbol} limit price: {limit_price} current price: {current_price} amount: {size}")
         elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price + current_price * limit_order_percent / 100)
@@ -216,9 +213,6 @@ class TraderPosition(object):
 
         # if this is a market order, the buy order should already be filled
         if self._buy_order.status == OrderStatus.FILLED:
-            self._buy_amount = self._buy_order.filled_size
-            self._buy_price = self._buy_order.price
-            self._buy_price_ts = self._buy_order.filled_ts
             self._opened_position_completed = True
 
 
@@ -234,7 +228,6 @@ class TraderPosition(object):
         result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
         self._buy_order.update_order(result)
         if self._buy_order.status == OrderStatus.FILLED:
-            self._buy_price = self._buy_order.price
             self._opened_position_completed = True
             return
         elif self._buy_order.status == OrderStatus.CANCELLED:
@@ -258,7 +251,6 @@ class TraderPosition(object):
         result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
         self._sell_order.update_order(result)
         if self._sell_order.status == OrderStatus.FILLED:
-            self._sell_price = self._sell_order.price
             self._closed_position_completed = True
             return
         elif self._sell_order.status == OrderStatus.CANCELLED:
@@ -284,7 +276,8 @@ class TraderPosition(object):
         self._stop_loss_limit_price = limit_price
         self._stop_loss_ts = current_ts
 
-        result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=limit_price, stop_price=stop_price, amount=self._buy_amount)
+        buy_amount = self._buy_order.filled_size
+        result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=limit_price, stop_price=stop_price, amount=buy_amount)
 
         self._stop_loss_order = Order(symbol=self._symbol)
         self._stop_loss_order.update_order(result)
@@ -317,18 +310,20 @@ class TraderPosition(object):
                 self._closed_position_completed = True
                 return
 
+        buy_amount = self._buy_order.filled_size
+
         if self._config.end_position_type() == OrderType.MARKET.name:
-            result = self._execute.market_sell(self._symbol, amount=self._buy_amount, current_price=current_price, current_ts=self._current_ts)
+            result = self._execute.market_sell(self._symbol, amount=buy_amount, current_price=current_price, current_ts=current_ts)
         elif self._config.end_position_type() == OrderType.LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price + current_price * limit_order_percent / 100)
-            result = self._execute.limit_sell(self._symbol, limit_price=limit_price, amount=self._buy_amount)
+            result = self._execute.limit_sell(self._symbol, limit_price=limit_price, amount=buy_amount)
         elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price - current_price * limit_order_percent / 100)
             stop_loss_percent = self._config.stop_loss_percent()
             stop_loss = self._account.round_quote(self._symbol, current_price - current_price * stop_loss_percent / 100)
-            result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=current_price, stop_price=stop_loss, amount=self._buy_amount)
+            result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=current_price, stop_price=stop_loss, amount=buy_amount)
 
         if not self._config.simulate():
             time.sleep(1)
@@ -336,9 +331,8 @@ class TraderPosition(object):
         self._sell_order = Order(symbol=self._symbol)
         self._sell_order.update_order(result)
 
+        # if this is a market order, the buy order should already be filled
         if self._sell_order.status == OrderStatus.FILLED:
-            self._sell_price = self._sell_order.price
-            self._sell_price_ts = self._sell_order.filled_ts
             self._closed_position_completed = True
 
 
@@ -355,14 +349,12 @@ class TraderPosition(object):
             result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
             self._buy_order.update_order(result)
             if self._buy_order.status == OrderStatus.FILLED:
-                self._buy_price = self._buy_order.price
                 self._opened_position_completed = True
 
         if self._sell_order and not self._sell_order.completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
             self._sell_order.update_order(result)
             if self._sell_order.status == OrderStatus.FILLED:
-                self._sell_price = self._sell_order.price
                 self._closed_position_completed = True
 
         if self._stop_loss_order and not self.stop_loss_is_completed():
@@ -381,7 +373,11 @@ class TraderPosition(object):
         """
         if not self.buy_order_completed():
             return 0.0
-        return (price - self._buy_price) / self._buy_price * 100
+        buy_price = self.buy_price()
+        if buy_price == 0.0:
+            print(f"buy price is zero for {self._symbol}")
+            return 0.0
+        return (price - buy_price) / buy_price * 100
 
 
     def profit_percent(self):
@@ -394,7 +390,7 @@ class TraderPosition(object):
             return profit
 
         if self._sell_order and self._sell_order.completed():
-            print(f"sell order filled size: {self._sell_order.filled_size} sell order price: {self._sell_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")
+            #print(f"sell order filled size: {self._sell_order.filled_size} sell order price: {self._sell_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")
             profit = (self._sell_order.filled_size * self._sell_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
         elif self._stop_loss_order and self._stop_loss_order.completed():
             #print(f"stop loss order filled size: {self._stop_loss_order.filled_size} stop loss order price: {self._stop_loss_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")

@@ -130,7 +130,7 @@ class TraderExecuteSimulate(ExecuteBase):
             if self._config.verbose():
                 print(f'base_balance: {base_balance}, new_base_balance: {new_base_balance}')
             raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
-    
+
     def _limit_buy_filled(self, symbol: str, price: float, amount: float):
         """
         Simulate account for limit buy order filled

@@ -139,6 +139,10 @@ class Trader(object):
         # Try to close position(s) on a sell signal
         if len(self._positions) > 0:
             for position in self._positions:
+                # for a position that hasn't completed the buy order yet, skip it
+                if not position.opened():
+                    continue
+
                 sell_signal = False
                 sell_signal_name = None
                 if strategy_sell_signal:
