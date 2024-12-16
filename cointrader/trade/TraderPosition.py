@@ -137,12 +137,18 @@ class TraderPosition(object):
         self._stop_loss = stop_loss
         self._timestamp = timestamp
 
+        limit_order_percent = self._config.limit_order_percent()
+
         if self._config.start_position_type() == OrderType.MARKET.name:
             result = self._execute.market_buy(symbol=self._symbol, amount=size, current_price=self._current_price, current_ts=self._current_ts)
         elif self._config.start_position_type() == OrderType.LIMIT.name:
-            result = self._execute.limit_buy(symbol=self._symbol, limit_price=price, amount=size)
+            limit_price = self._account.round_quote(self._symbol, price - price * limit_order_percent / 100)
+            result = self._execute.limit_buy(symbol=self._symbol, limit_price=limit_price, amount=size)
         elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
-            result = self._execute.stop_loss_limit_buy(symbol=self._symbol, limit_price=price, stop_price=stop_loss, amount=size)
+            limit_price = self._account.round_quote(self._symbol, price + price * limit_order_percent / 100)
+            stop_loss_percent = self._config.stop_loss_percent()
+            stop_loss = self._account.round_quote(self._symbol, price + price * stop_loss_percent / 100)
+            result = self._execute.stop_loss_limit_buy(symbol=self._symbol, limit_price=limit_price, stop_price=stop_loss, amount=size)
 
         if not self._config.simulate():
             time.sleep(1)
@@ -209,7 +215,7 @@ class TraderPosition(object):
         self._last_stop_loss_order.update_order(result)
         self._stop_loss_order = None
 
-    def close_position(self, price: float, timestamp: int):
+    def close_position(self, price: float, timestamp: int, current_price: float):
         """
         Close the position with a sell order
         """
@@ -238,9 +244,15 @@ class TraderPosition(object):
         if self._config.end_position_type() == OrderType.MARKET.name:
             result = self._execute.market_sell(self._symbol, amount=self._buy_amount, current_price=price, current_ts=self._current_ts)
         elif self._config.end_position_type() == OrderType.LIMIT.name:
-            result = self._execute.limit_sell(self._symbol, price=price, amount=self._buy_amount)
-        #elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
-        #    result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=price, stop_price=self._stop_loss, amount=self._buy_amount)
+            limit_order_percent = self._config.limit_order_percent()
+            limit_price = self._account.round_quote(self._symbol, price + price * limit_order_percent / 100)
+            result = self._execute.limit_sell(self._symbol, limit_price=limit_price, amount=self._buy_amount)
+        elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
+            limit_order_percent = self._config.limit_order_percent()
+            limit_price = self._account.round_quote(self._symbol, price - price * limit_order_percent / 100)
+            stop_loss_percent = self._config.stop_loss_percent()
+            stop_loss = self._account.round_quote(self._symbol, price - price * stop_loss_percent / 100)
+            result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=price, stop_price=stop_loss, amount=self._buy_amount)
 
         if not self._config.simulate():
             time.sleep(1)

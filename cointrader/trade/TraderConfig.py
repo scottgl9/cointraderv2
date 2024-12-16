@@ -3,23 +3,25 @@ import json
 
 # Example of a trade config
 DEFAULT_TRADE_CONFIG = {
-    'simulate': False,
-    'verbose': False,
-    'max_positions': 1,
-    'quote_currency': 'USD',
-    'max_position_quote_size': 25.0,
-    'strategy': 'Default',
+    'simulate': True,                      # Simulate trading without making real trades
+    'verbose': False,                      # Print verbose output
+    'max_positions': 1,                    # Maximum number of positions to hold per symbol
+    'quote_currency': 'USD',               # Currency to use for trading
+    'max_position_quote_size': 25.0,       # Maximum size of a position in quote currency
+    'strategy': 'SignalStrength',          # Strategy to use for trading
     'trade_symbols': ['BTC-USD', 'ETH-USD', 'SOL-USD'],
-    'stop_loss_percent': 5.0,
-    'trailing_stop_loss': False,
-    'min_take_profit_percent': 5.0,
-    'stop_on_loss': True,                 # Stop trading bot after a loss
-    'max_total_loss_percent': 10.0,
+    'stop_loss_percent': 5.0,              # percent stop loss to set under the buy price
+    'stop_loss_limit_order_percent': 0.1,  # percent to set the stop loss above or below the limit price
+    'limit_order_percent': 0.2,            # percent to set the limit price above or below the current price
+    'trailing_stop_loss': False,           # stop loss follows the price up
+    'min_take_profit_percent': 0.5,        # minimum percent profit to take
+    'stop_on_loss': True,                  # Stop trading bot after a loss
+    'max_total_loss_percent': 10.0,        # Maximum total loss percent before stopping the bot
     'cooldown_period_seconds': 3600,       # cooldown period after entering a position before opening another
     'disable_after_loss_seconds': 86400,   # Disable trading for this many seconds after a loss
-    'start_position_type': 'MARKET',
-    'end_position_type': 'MARKET',
-    'sell_all_on_stop': False
+    'start_position_type': 'MARKET',       # Type of order to open a position (MARKET, LIMIT, STOP_LOSS_LIMIT)
+    'end_position_type': 'MARKET',         # Type of order to open a position (MARKET, LIMIT, STOP_LOSS_LIMIT)
+    'sell_all_on_stop': False              # sell all open positions when the bot stops
 }
 
 class TraderConfig(object):
@@ -122,6 +124,18 @@ class TraderConfig(object):
     
     def set_stop_loss_percent(self, stop_loss_percent: float):
         self.set('stop_loss_percent', stop_loss_percent)
+
+    def stop_loss_limit_order_percent(self) -> float:
+        return self.get('stop_loss_limit_order_percent')
+    
+    def set_stop_loss_limit_order_percent(self, stop_loss_limit_order_percent: float):
+        self.set('stop_loss_limit_order_percent', stop_loss_limit_order_percent)
+
+    def limit_order_percent(self) -> float:
+        return self.get('limit_order_percent')
+    
+    def set_limit_order_percent(self, limit_order_percent: float):
+        self.set('limit_order_percent', limit_order_percent)
 
     def trailing_stop_loss(self) -> bool:
         return self.get('trailing_stop_loss')

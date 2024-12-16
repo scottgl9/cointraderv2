@@ -78,10 +78,12 @@ class Trader(object):
             if kline.granularity == self._granularity:
                 position.market_update(current_price=current_price, current_ts=current_ts)
 
+            # handle trailing stop loss
             if position.opened() and self._config.trailing_stop_loss():
                 percent = self._config.stop_loss_percent()
-                # set the stop 0.1% above the limit price
-                stop_price = self._account.round_quote(self._symbol, (1 - ((percent - 0.1) / 100.0)) * position.buy_price())
+                stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
+                # set the stop X% above the limit price
+                stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * position.buy_price())
                 limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
                 # handle setting and updating stop loss orders if enabled
                 if not position.stop_loss_is_set():
@@ -95,7 +97,7 @@ class Trader(object):
                         if not self._config.simulate():
                             # wait for the order to be cancelled
                             time.sleep(1)
-                        new_stop_price = self._account.round_quote(self._symbol, (1 - ((percent - 0.1) / 100.0)) * current_price)
+                        new_stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * current_price)
                         new_stop_limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * current_price)
                         #print(f"{self._symbol} Updating stop loss: {stop_loss_limit_price} -> {new_stop_limit_price}")
                         position.create_stop_loss_position(stop_price=new_stop_price, limit_price=new_stop_limit_price, timestamp=kline.ts)
@@ -196,7 +198,7 @@ class Trader(object):
                     #if position.stop_loss_is_set():
                     #    position.cancel_stop_loss_position()
                     #print(f'Sell signal {sell_signal_name} for {self._symbol}')
-                    position.close_position(price=kline.close, timestamp=kline.ts)
+                    position.close_position(price=kline.close, timestamp=kline.ts, current_price=current_price)
 
     def net_profit_percent(self) -> float:
         """
