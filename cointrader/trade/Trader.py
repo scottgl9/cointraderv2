@@ -88,7 +88,7 @@ class Trader(object):
                 # handle setting and updating stop loss orders if enabled
                 if not position.stop_loss_is_set():
                     #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
-                    position.create_stop_loss_position(stop_price=stop_price, limit_price=limit_price, timestamp=kline.ts)
+                    position.create_stop_loss_position(stop_price=stop_price, limit_price=limit_price, current_ts=current_ts)
                 else:
                     # update the stop loss order so it trails the position, if the price has moved up 1%
                     stop_loss_limit_price = position.stop_loss_limit_price()
@@ -100,7 +100,7 @@ class Trader(object):
                         new_stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * current_price)
                         new_stop_limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * current_price)
                         #print(f"{self._symbol} Updating stop loss: {stop_loss_limit_price} -> {new_stop_limit_price}")
-                        position.create_stop_loss_position(stop_price=new_stop_price, limit_price=new_stop_limit_price, timestamp=kline.ts)
+                        position.create_stop_loss_position(stop_price=new_stop_price, limit_price=new_stop_limit_price, current_ts=current_ts)
 
             # handle closed position when sell order or stop loss has been filled
             if position.closed():
@@ -123,7 +123,7 @@ class Trader(object):
                     print(msg)
                     # Disable opening new positions for a period of time after a loss
                     if self._disable_after_loss_seconds > 0:
-                        self._disable_until_ts = kline.ts + self._disable_after_loss_seconds
+                        self._disable_until_ts = current_ts + self._disable_after_loss_seconds
                         self._disabled = True
 
                 self._net_profit_percent += profit_percent
@@ -150,24 +150,24 @@ class Trader(object):
         self._strategy.update(kline)
 
         # Disable opening new positions for a period of time after a loss
-        if self._disable_until_ts != 0 and kline.ts >= self._disable_until_ts:
+        if self._disable_until_ts != 0 and current_ts >= self._disable_until_ts:
             self._disable_until_ts = 0
             self._disabled = False
 
         # Open a position on a buy signal
         if not self._disabled and self._strategy.buy_signal() and len(self._positions) < self._max_positions:
-            size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / kline.close)
+            size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
             if size < self._account.get_base_min_size(self._symbol):
                 print(f"Size too small: {size}")
                 return
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
-            position.open_position(price=kline.close, size=size, timestamp=kline.ts, current_price=current_price)
+            position.open_position(size=size, current_price=current_price, current_ts=current_ts)
             self._positions.append(position)
             self._cur_id += 1
             if self._cooldown_period_seconds > 0:
                 self._disabled = True
-                self._disable_until_ts = kline.ts + self._cooldown_period_seconds
+                self._disable_until_ts = current_ts + self._cooldown_period_seconds
 
             # if we have a market order filled immediately, then set the stop loss
             if position.opened() and self._config.trailing_stop_loss():
@@ -176,7 +176,7 @@ class Trader(object):
                 # handle setting and updating stop loss orders if enabled
                 if not position.stop_loss_is_set():
                     #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
-                    position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_price, timestamp=kline.ts)
+                    position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_price, current_ts=current_ts)
 
         strategy_sell_signal = self._strategy.sell_signal()
 
@@ -184,12 +184,12 @@ class Trader(object):
         if len(self._positions) > 0:
             for position in self._positions:
                 if not self._disabled and not position.buy_order_completed() and self._strategy.buy_signal():
-                    size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / kline.close)
+                    size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
                     if size < self._account.get_base_min_size(self._symbol):
                         print(f"Size too small: {size}")
                         return
                     #print(f"Buy signal {self._strategy.buy_signal_name()} for {self._symbol}")
-                    position.update_buy_position(price=kline.close, size=size, current_price=current_price, current_ts=current_ts)
+                    position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)
                 sell_signal = False
                 sell_signal_name = None
                 if strategy_sell_signal:
@@ -197,18 +197,18 @@ class Trader(object):
                     if self._config.min_take_profit_percent() <= position.current_position_percent(current_price):
                         sell_signal = True
                         sell_signal_name = self._strategy.sell_signal_name()
-                #elif position.current_position_percent(kline.close) < -self._stop_loss_percent:
+                #elif position.current_position_percent(current_price) < -self._stop_loss_percent:
                 #    sell_signal = True
                 #    sell_signal_name = 'stop_loss'
 
                 if sell_signal and not position.closed_position_completed():
                     #print(f'Sell signal {sell_signal_name} for {self._symbol}')
-                    position.update_sell_position(price=kline.close, current_price=current_price, current_ts=current_ts)
+                    position.update_sell_position(current_price=current_price, current_ts=current_ts)
                 elif sell_signal and not position.closed_position():
                     #if position.stop_loss_is_set():
                     #    position.cancel_stop_loss_position()
                     #print(f'Sell signal {sell_signal_name} for {self._symbol}')
-                    position.close_position(price=kline.close, timestamp=kline.ts, current_price=current_price)
+                    position.close_position(current_price=current_price, current_ts=current_ts)
 
     def net_profit_percent(self) -> float:
         """
@@ -229,7 +229,13 @@ class Trader(object):
         return self._negative_profit_percent
 
     def buys(self) -> list:
+        """
+        Get the list of all buy orders for the symbol (for simulation)
+        """
         return self._buys
     
     def sells(self) -> list:
+        """
+        Get the list of all sell orders for the symbol (for simulation)
+        """
         return self._sells

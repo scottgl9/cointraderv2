@@ -126,27 +126,28 @@ class TraderPosition(object):
     def sell_info(self):
         return {'price': self.sell_price(), 'ts': self.sell_ts()}
 
-    def open_position(self, price: float, size: float, timestamp: int, current_price: float):
+    def open_position(self, size: float, current_price: float, current_ts: int):
         """
         Open a position with a buy order
         """
         self._current_price = current_price
-        self._current_ts = timestamp
+        self._current_ts = current_ts
         self._opened_position = True
-        self._entry_price = price
-        self._timestamp = timestamp
+        self._entry_price = current_price
+        self._timestamp = current_ts
 
         if self._config.start_position_type() == OrderType.MARKET.name:
             result = self._execute.market_buy(symbol=self._symbol, amount=size, current_price=self._current_price, current_ts=self._current_ts)
         elif self._config.start_position_type() == OrderType.LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
-            limit_price = self._account.round_quote(self._symbol, price - price * limit_order_percent / 100)
+            limit_price = self._account.round_quote(self._symbol, current_price - current_price * limit_order_percent / 100)
             result = self._execute.limit_buy(symbol=self._symbol, limit_price=limit_price, amount=size)
+            print(f"limit buy order for {self._symbol} limit price: {limit_price} current price: {current_price} amount: {size}")
         elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
-            limit_price = self._account.round_quote(self._symbol, price + price * limit_order_percent / 100)
+            limit_price = self._account.round_quote(self._symbol, current_price + current_price * limit_order_percent / 100)
             stop_loss_percent = self._config.stop_loss_percent()
-            stop_loss = self._account.round_quote(self._symbol, price + price * stop_loss_percent / 100)
+            stop_loss = self._account.round_quote(self._symbol, current_price + current_price * stop_loss_percent / 100)
             result = self._execute.stop_loss_limit_buy(symbol=self._symbol, limit_price=limit_price, stop_price=stop_loss, amount=size)
 
         if not self._config.simulate():
@@ -161,7 +162,7 @@ class TraderPosition(object):
             self._buy_price_ts = self._buy_order.filled_ts
             self._opened_position_completed = True
 
-    def update_buy_position(self, price: float, size: float, current_price: float, current_ts: int):
+    def update_buy_position(self, size: float, current_price: float, current_ts: int):
         """
         For limit and stop loss limit orders, check if the buy order should be cancelled and replaced
         """
@@ -177,7 +178,7 @@ class TraderPosition(object):
             self._opened_position_completed = True
             return
         elif self._buy_order.status == OrderStatus.CANCELLED:
-            self.open_position(price, size, current_ts, current_price)
+            self.open_position(current_price, size, current_ts, current_price)
             return
         elif self._buy_order.status == OrderStatus.PLACED:
             # cancel buy order so we can replace it
@@ -185,9 +186,9 @@ class TraderPosition(object):
             self._buy_order.update_order(result)
             if not self._config.simulate():
                 time.sleep(1)
-            self.open_position(price, size, current_ts, current_price)
+            self.open_position(size=size, current_price=current_price, current_ts=current_ts)
     
-    def update_sell_position(self, price: float, current_price: float, current_ts: int):
+    def update_sell_position(self, current_price: float, current_ts: int):
         """
         For limit and stop loss limit orders, check if the sell order should be cancelled and replaced
         """
@@ -200,7 +201,7 @@ class TraderPosition(object):
             self._closed_position_completed = True
             return
         elif self._sell_order.status == OrderStatus.CANCELLED:
-            self.close_position(price, current_ts, current_price)
+            self.close_position(current_price=current_price, current_ts=current_ts)
             return
         elif self._sell_order.status == OrderStatus.PLACED:
             # cancel sell order so we can replace it
@@ -208,9 +209,9 @@ class TraderPosition(object):
             self._sell_order.update_order(result)
             if not self._config.simulate():
                 time.sleep(1)
-            self.close_position(price, current_ts, current_price)
+            self.close_position(current_price=current_price, current_ts=current_ts)
 
-    def create_stop_loss_position(self, stop_price: float, limit_price: float, timestamp: int):
+    def create_stop_loss_position(self, stop_price: float, limit_price: float, current_ts: int):
         """
         Create a stop loss order
         """
@@ -219,7 +220,7 @@ class TraderPosition(object):
         #print(f"Creating stop loss order for {self._symbol} stop price: {stop_price} limit price: {limit_price}")
         self._stop_loss_price = stop_price
         self._stop_loss_limit_price = limit_price
-        self._stop_loss_ts = timestamp
+        self._stop_loss_ts = current_ts
 
         result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=limit_price, stop_price=stop_price, amount=self._buy_amount)
 
@@ -261,13 +262,13 @@ class TraderPosition(object):
         self._last_stop_loss_order.update_order(result)
         self._stop_loss_order = None
 
-    def close_position(self, price: float, timestamp: int, current_price: float):
+    def close_position(self, current_price: float, current_ts: int):
         """
         Close the position with a sell order
         """
         self._closed_position = True
-        self._current_price = price
-        self._current_ts = timestamp
+        self._current_price = current_price
+        self._current_ts = current_ts
 
         # check if we have an open stop loss order, if so we need to cancel it
         if self._stop_loss_order:
@@ -288,17 +289,17 @@ class TraderPosition(object):
                 return
 
         if self._config.end_position_type() == OrderType.MARKET.name:
-            result = self._execute.market_sell(self._symbol, amount=self._buy_amount, current_price=price, current_ts=self._current_ts)
+            result = self._execute.market_sell(self._symbol, amount=self._buy_amount, current_price=current_price, current_ts=self._current_ts)
         elif self._config.end_position_type() == OrderType.LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
-            limit_price = self._account.round_quote(self._symbol, price + price * limit_order_percent / 100)
+            limit_price = self._account.round_quote(self._symbol, current_price + current_price * limit_order_percent / 100)
             result = self._execute.limit_sell(self._symbol, limit_price=limit_price, amount=self._buy_amount)
         elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
-            limit_price = self._account.round_quote(self._symbol, price - price * limit_order_percent / 100)
+            limit_price = self._account.round_quote(self._symbol, current_price - current_price * limit_order_percent / 100)
             stop_loss_percent = self._config.stop_loss_percent()
-            stop_loss = self._account.round_quote(self._symbol, price - price * stop_loss_percent / 100)
-            result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=price, stop_price=stop_loss, amount=self._buy_amount)
+            stop_loss = self._account.round_quote(self._symbol, current_price - current_price * stop_loss_percent / 100)
+            result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=current_price, stop_price=stop_loss, amount=self._buy_amount)
 
         if not self._config.simulate():
             time.sleep(1)
