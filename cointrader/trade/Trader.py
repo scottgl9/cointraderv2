@@ -56,14 +56,17 @@ class Trader(object):
 
         print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
 
+
     def symbol(self) -> str:
         return self._symbol
     
+
     def position_count(self) -> int:
         """
         Get the number of positions open
         """
         return len(self._positions)
+
 
     def market_preload(self, klines: list[Kline]):
         """
@@ -71,6 +74,7 @@ class Trader(object):
         """
         for kline in klines:
             self._strategy.update(kline)
+
 
     def market_update(self, kline: Kline, current_price: float, current_ts: int):
         # if position has been closed, remove it from the list
@@ -80,59 +84,11 @@ class Trader(object):
 
             # handle trailing stop loss
             if position.opened() and self._config.trailing_stop_loss():
-                percent = self._config.stop_loss_percent()
-                stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
-                # set the stop X% above the limit price
-                stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * position.buy_price())
-                limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
-                # handle setting and updating stop loss orders if enabled
-                if not position.stop_loss_is_set():
-                    #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
-                    position.create_stop_loss_position(stop_price=stop_price, limit_price=limit_price, current_ts=current_ts)
-                else:
-                    # update the stop loss order so it trails the position, if the price has moved up 1%
-                    stop_loss_limit_price = position.stop_loss_limit_price()
-                    if ((current_price - stop_loss_limit_price) / stop_loss_limit_price) * 100.0 > percent + 1.0:
-                        position.cancel_stop_loss_position()
-                        if not self._config.simulate():
-                            # wait for the order to be cancelled
-                            time.sleep(1)
-                        new_stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * current_price)
-                        new_stop_limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * current_price)
-                        #print(f"{self._symbol} Updating stop loss: {stop_loss_limit_price} -> {new_stop_limit_price}")
-                        position.create_stop_loss_position(stop_price=new_stop_price, limit_price=new_stop_limit_price, current_ts=current_ts)
+                self.update_trailing_stop_loss_position(position, current_price, current_ts)
 
             # handle closed position when sell order or stop loss has been filled
             if position.closed():
-                profit_percent = position.profit_percent()
-                buy_price = position.buy_price()
-                sell_price = position.sell_price()
-                buy_date = datetime.fromtimestamp(position.buy_ts())
-                sell_date = datetime.fromtimestamp(position.sell_ts())
-                if profit_percent >= 0:
-                    self._positive_profit_percent += profit_percent
-                    msg = f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}"
-                    msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
-                    msg += f"{Style.RESET_ALL}"
-                    print(msg)
-                else:
-                    self._negative_profit_percent += profit_percent
-                    msg = f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}"
-                    msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
-                    msg += f"{Style.RESET_ALL}"
-                    print(msg)
-                    # Disable opening new positions for a period of time after a loss
-                    if self._disable_after_loss_seconds > 0:
-                        self._disable_until_ts = current_ts + self._disable_after_loss_seconds
-                        self._disabled = True
-
-                self._net_profit_percent += profit_percent
-
-                if self._config.simulate():
-                    self._buys.append(position.buy_info())
-                    self._sells.append(position.sell_info())
-                self._positions.remove(position)
-                continue
+                self.remove_position(position, current_ts)
 
         # if kline.granularity != self._granularity:
         #    # handle daily klines
@@ -180,16 +136,9 @@ class Trader(object):
 
         strategy_sell_signal = self._strategy.sell_signal()
 
-        # Process updates to positions, and close a position on a sell signal
+        # Try to close position(s) on a sell signal
         if len(self._positions) > 0:
             for position in self._positions:
-                if not self._disabled and not position.buy_order_completed() and self._strategy.buy_signal():
-                    size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
-                    if size < self._account.get_base_min_size(self._symbol):
-                        print(f"Size too small: {size}")
-                        return
-                    #print(f"Buy signal {self._strategy.buy_signal_name()} for {self._symbol}")
-                    position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)
                 sell_signal = False
                 sell_signal_name = None
                 if strategy_sell_signal:
@@ -197,18 +146,73 @@ class Trader(object):
                     if self._config.min_take_profit_percent() <= position.current_position_percent(current_price):
                         sell_signal = True
                         sell_signal_name = self._strategy.sell_signal_name()
-                #elif position.current_position_percent(current_price) < -self._stop_loss_percent:
-                #    sell_signal = True
-                #    sell_signal_name = 'stop_loss'
-
-                if sell_signal and not position.closed_position_completed():
-                    #print(f'Sell signal {sell_signal_name} for {self._symbol}')
-                    position.update_sell_position(current_price=current_price, current_ts=current_ts)
-                elif sell_signal and not position.closed_position():
+                if sell_signal and not position.closed_position():
                     #if position.stop_loss_is_set():
                     #    position.cancel_stop_loss_position()
                     #print(f'Sell signal {sell_signal_name} for {self._symbol}')
                     position.close_position(current_price=current_price, current_ts=current_ts)
+
+
+    def update_trailing_stop_loss_position(self, position: TraderPosition, current_price: float, current_ts: int):
+        """
+        Update the trailing stop loss position
+        """
+        percent = self._config.stop_loss_percent()
+        stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
+        # set the stop X% above the limit price
+        stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * position.buy_price())
+        limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
+        # handle setting and updating stop loss orders if enabled
+        if not position.stop_loss_is_set():
+            #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
+            position.create_stop_loss_position(stop_price=stop_price, limit_price=limit_price, current_ts=current_ts)
+        else:
+            # update the stop loss order so it trails the position, if the price has moved up 1%
+            stop_loss_limit_price = position.stop_loss_limit_price()
+            if ((current_price - stop_loss_limit_price) / stop_loss_limit_price) * 100.0 > percent + 1.0:
+                position.cancel_stop_loss_position()
+                if not self._config.simulate():
+                    # wait for the order to be cancelled
+                    time.sleep(1)
+                new_stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * current_price)
+                new_stop_limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * current_price)
+                #print(f"{self._symbol} Updating stop loss: {stop_loss_limit_price} -> {new_stop_limit_price}")
+                position.create_stop_loss_position(stop_price=new_stop_price, limit_price=new_stop_limit_price, current_ts=current_ts)
+
+
+    def remove_position(self, position: TraderPosition, current_ts: int):
+        """
+        Remove a position from the list, and collect stats on the position
+        """
+        profit_percent = position.profit_percent()
+        buy_price = position.buy_price()
+        sell_price = position.sell_price()
+        buy_date = datetime.fromtimestamp(position.buy_ts())
+        sell_date = datetime.fromtimestamp(position.sell_ts())
+        if profit_percent >= 0:
+            self._positive_profit_percent += profit_percent
+            msg = f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}"
+            msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
+            msg += f"{Style.RESET_ALL}"
+            print(msg)
+        else:
+            self._negative_profit_percent += profit_percent
+            msg = f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}"
+            msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
+            msg += f"{Style.RESET_ALL}"
+            print(msg)
+            # Disable opening new positions for a period of time after a loss
+            if self._disable_after_loss_seconds > 0:
+                self._disable_until_ts = current_ts + self._disable_after_loss_seconds
+                self._disabled = True
+
+        self._net_profit_percent += profit_percent
+
+        if self._config.simulate():
+            self._buys.append(position.buy_info())
+            self._sells.append(position.sell_info())
+        self._positions.remove(position)
+
 
     def net_profit_percent(self) -> float:
         """
@@ -216,17 +220,20 @@ class Trader(object):
         """
         return self._net_profit_percent
 
+
     def positive_profit_percent(self) -> float:
         """
         Get the positive profit percent for the symbol
         """
         return self._positive_profit_percent
-    
+
+
     def negative_profit_percent(self) -> float:
         """
         Get the negative profit percent for the symbol
         """
         return self._negative_profit_percent
+
 
     def buys(self) -> list:
         """
@@ -234,6 +241,7 @@ class Trader(object):
         """
         return self._buys
     
+
     def sells(self) -> list:
         """
         Get the list of all sell orders for the symbol (for simulation)
