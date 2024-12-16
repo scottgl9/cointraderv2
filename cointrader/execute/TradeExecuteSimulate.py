@@ -22,13 +22,14 @@ class TraderExecuteSimulate(ExecuteBase):
         """
         Simulate placing a market buy order
         """
+        amount = self._account.round_base(symbol, amount)
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.FILLED
         result.side = OrderSide.BUY
         result.type = OrderType.MARKET
         result.price = current_price
-        result.size = self._account.round_base(symbol, amount)
+        result.size = amount
         result.filled_size = result.size
         result.filled_ts = current_ts
 
@@ -63,13 +64,14 @@ class TraderExecuteSimulate(ExecuteBase):
         """
         Simulate placing a market sell order
         """
+        amount = self._account.round_base(symbol, amount)
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.FILLED
         result.side = OrderSide.SELL
         result.type = OrderType.MARKET
         result.price = current_price
-        result.size = self._account.round_base(symbol, amount)
+        result.size = amount
         result.filled_size = result.size
         result.filled_ts = current_ts
 
@@ -217,17 +219,18 @@ class TraderExecuteSimulate(ExecuteBase):
         """
         Simulate placing a limit buy order
         """
+        amount = self._account.round_base(symbol, amount)
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
         result.side = OrderSide.BUY
         result.type = OrderType.LIMIT
         result.limit_price = limit_price
-        result.size = self._account.round_base(symbol, result.size)
+        result.size = amount
         result.filled_size = 0.0
 
         # simulate account update
-        self._limit_buy_placed(symbol, limit_price, amount)
+        self._limit_buy_placed(symbol, limit_price, result.size)
 
         self._orders[result.id] = result
         return result
@@ -236,13 +239,14 @@ class TraderExecuteSimulate(ExecuteBase):
         """
         Simulate placing a limit sell order
         """
+        amount = self._account.round_base(symbol, amount)
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
         result.side = OrderSide.SELL
         result.type = OrderType.LIMIT
         result.limit_price = limit_price
-        result.size = self._account.round_base(symbol, amount)
+        result.size = amount
         result.filled_size = 0.0
 
         # simulate account update
@@ -255,6 +259,7 @@ class TraderExecuteSimulate(ExecuteBase):
         """
         Simulate a stop loss buy order
         """
+        amount = self._account.round_base(symbol, amount)
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
@@ -262,7 +267,7 @@ class TraderExecuteSimulate(ExecuteBase):
         result.type = OrderType.STOP_LOSS_LIMIT
         result.limit_price = limit_price
         result.stop_price = stop_price
-        result.size = amount #self._account.round_base(symbol, amount)
+        result.size = amount
         result.filled_size = 0.0
 
         if self._config.verbose():
@@ -278,6 +283,7 @@ class TraderExecuteSimulate(ExecuteBase):
         """
         Simulate placing a stop loss sell order
         """
+        amount = self._account.round_base(symbol, amount)
         result = OrderResult(symbol)
         result.id = str(uuid.uuid4())
         result.status = OrderStatus.PLACED
@@ -285,14 +291,14 @@ class TraderExecuteSimulate(ExecuteBase):
         result.type = OrderType.STOP_LOSS_LIMIT
         result.limit_price = limit_price
         result.stop_price = stop_price
-        result.size = amount #self._account.round_base(symbol, result.size)
+        result.size = amount
         result.filled_size = 0.0
 
         if self._config.verbose():
             print(f'stop_loss_limit_sell: {symbol}, {limit_price}, {amount}, {result.size}')
 
         # simulate account update
-        self._limit_sell_placed(symbol, limit_price, amount)
+        self._limit_sell_placed(symbol, limit_price, result.size)
 
         self._orders[result.id] = result
         return result
@@ -308,13 +314,13 @@ class TraderExecuteSimulate(ExecuteBase):
         if order.type == OrderType.MARKET or order.status == OrderStatus.FILLED:
             return order
         elif order.type == OrderType.LIMIT and order.status == OrderStatus.PLACED:
-            if order.side == OrderSide.SELL and current_price >= order.price:
+            if order.side == OrderSide.SELL and current_price >= order.limit_price:
                 order.status = OrderStatus.FILLED
                 order.price = order.limit_price
                 order.filled_size = order.size
                 order.filled_ts = current_ts
                 sold  = True
-            elif order.side == OrderSide.BUY and current_price <= order.price:
+            elif order.side == OrderSide.BUY and current_price <= order.limit_price:
                 order.status = OrderStatus.FILLED
                 order.price = order.limit_price
                 order.filled_size = order.size

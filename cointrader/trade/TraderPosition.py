@@ -213,6 +213,8 @@ class TraderPosition(object):
         self._buy_order = Order(symbol=self._symbol)
         self._buy_order.update_order(result)
         self._orders.add_order(self._symbol, self._buy_order)
+
+        # if this is a market order, the buy order should already be filled
         if self._buy_order.status == OrderStatus.FILLED:
             self._buy_amount = self._buy_order.filled_size
             self._buy_price = self._buy_order.price
@@ -351,17 +353,15 @@ class TraderPosition(object):
 
         if self._buy_order and not self.buy_order_completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
-            prev_status = self._buy_order.status
             self._buy_order.update_order(result)
-            if self._buy_order.status == OrderStatus.FILLED and prev_status != OrderStatus.FILLED:
+            if self._buy_order.status == OrderStatus.FILLED:
                 self._buy_price = self._buy_order.price
                 self._opened_position_completed = True
 
         if self._sell_order and not self._sell_order.completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
-            prev_status = self._buy_order.status
             self._sell_order.update_order(result)
-            if self._sell_order.status == OrderStatus.FILLED and prev_status != OrderStatus.FILLED:
+            if self._sell_order.status == OrderStatus.FILLED:
                 self._sell_price = self._sell_order.price
                 self._closed_position_completed = True
 
@@ -369,8 +369,7 @@ class TraderPosition(object):
             #print(f"stop loss order: {self._stop_loss_order}")
             result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=current_price, current_ts=current_ts)
             self._stop_loss_order.update_order(result)
-            prev_status = self._buy_order.status
-            if self._stop_loss_order.status == OrderStatus.FILLED and prev_status != OrderStatus.FILLED:
+            if self._stop_loss_order.status == OrderStatus.FILLED:
                 self._stop_loss_price = self._stop_loss_order.price
                 self._stop_loss_ts = self._stop_loss_order.filled_ts
                 self._closed_position_completed = True
@@ -395,7 +394,7 @@ class TraderPosition(object):
             return profit
 
         if self._sell_order and self._sell_order.completed():
-            #print(f"sell order filled size: {self._sell_order.filled_size} sell order price: {self._sell_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")
+            print(f"sell order filled size: {self._sell_order.filled_size} sell order price: {self._sell_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")
             profit = (self._sell_order.filled_size * self._sell_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
         elif self._stop_loss_order and self._stop_loss_order.completed():
             #print(f"stop loss order filled size: {self._stop_loss_order.filled_size} stop loss order price: {self._stop_loss_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")
