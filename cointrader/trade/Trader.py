@@ -103,15 +103,19 @@ class Trader(object):
         #        #print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
         #    return
 
-        self._strategy.update(kline)
+        if kline.granularity == self._granularity:
+            self._strategy.update(kline)
 
         # Disable opening new positions for a period of time after a loss
         if self._disable_until_ts != 0 and current_ts >= self._disable_until_ts:
             self._disable_until_ts = 0
             self._disabled = False
 
+        opened_position_id = -1
+        buy_signal = self._strategy.buy_signal()
+
         # Open a position on a buy signal
-        if not self._disabled and self._strategy.buy_signal() and len(self._positions) < self._max_positions:
+        if not self._disabled and buy_signal and len(self._positions) < self._max_positions:
             size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
             if size < self._account.get_base_min_size(self._symbol):
                 print(f"Size too small: {size}")
@@ -119,6 +123,7 @@ class Trader(object):
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
             position.open_position(size=size, current_price=current_price, current_ts=current_ts)
+            opened_position_id = self._cur_id
             self._positions.append(position)
             self._cur_id += 1
             if self._cooldown_period_seconds > 0:
@@ -140,6 +145,17 @@ class Trader(object):
         if len(self._positions) > 0:
             for position in self._positions:
                 # for a position that hasn't completed the buy order yet, skip it
+                if position.id() == opened_position_id:
+                    continue
+
+                # for limit and stop loss orders, we may need to cancel them if the price has moved, and place a new order
+                if not self._disabled and buy_signal:
+                    size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
+                    if size < self._account.get_base_min_size(self._symbol):
+                        print(f"Size too small: {size}")
+                        return
+                    position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)
+
                 if not position.opened():
                     continue
 
@@ -150,9 +166,8 @@ class Trader(object):
                     if self._config.min_take_profit_percent() <= position.current_position_percent(current_price):
                         sell_signal = True
                         sell_signal_name = self._strategy.sell_signal_name()
+                # if we have not yet attempted to close the position
                 if sell_signal and not position.closed_position():
-                    #if position.stop_loss_is_set():
-                    #    position.cancel_stop_loss_position()
                     #print(f'Sell signal {sell_signal_name} for {self._symbol}')
                     position.close_position(current_price=current_price, current_ts=current_ts)
 

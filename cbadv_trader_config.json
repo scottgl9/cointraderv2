@@ -4,7 +4,7 @@
     "max_positions": 5,
     "quote_currency": "USD",
     "max_position_quote_size": 50.0,
-    "strategy": "Default",
+    "strategy": "SignalStrength",
     "trade_symbols": [
         "BTC-USDT",
         "ETH-USDT",
@@ -22,7 +22,7 @@
     "max_total_loss_percent": 10.0,
     "cooldown_period_seconds": 3600,
     "disable_after_loss_seconds": 86400,
-    "start_position_type": "MARKET",
-    "end_position_type": "MARKET",
+    "start_position_type": "STOP_LOSS_LIMIT",
+    "end_position_type": "STOP_LOSS_LIMIT",
     "sell_all_on_stop": false
 }

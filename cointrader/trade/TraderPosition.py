@@ -210,6 +210,8 @@ class TraderPosition(object):
             stop_loss_percent = self._config.stop_loss_percent()
             stop_loss = self._account.round_quote(self._symbol, current_price + current_price * stop_loss_percent / 100)
             result = self._execute.stop_loss_limit_buy(symbol=self._symbol, limit_price=limit_price, stop_price=stop_loss, amount=size)
+        else:
+            raise ValueError(f"Invalid start position type: {self._config.start_position_type()}")
 
         if not self._config.simulate():
             time.sleep(1)
@@ -232,8 +234,9 @@ class TraderPosition(object):
 
         if not self._buy_order or self.buy_order_completed():
             return
-        result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
-        self._buy_order.update_order(result)
+
+        # result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
+        # self._buy_order.update_order(result)
         if self._buy_order.status == OrderStatus.FILLED:
             self._opened_position_completed = True
             return
@@ -241,12 +244,23 @@ class TraderPosition(object):
             self.open_position(current_price, size, current_ts, current_price)
             return
         elif self._buy_order.status == OrderStatus.PLACED:
-            # cancel buy order so we can replace it
-            result = self._execute.cancel(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
-            self._buy_order.update_order(result)
-            if not self._config.simulate():
-                time.sleep(1)
-            self.open_position(size=size, current_price=current_price, current_ts=current_ts)
+            #print(f"Updating buy order for {self._symbol} current price: {current_price} limit price: {self._buy_order.limit_price}")
+
+            replace_buy_order = False
+            if self._config.start_position_type() == OrderType.LIMIT.name:
+                if self._buy_order.limit_price * (1 + 0.1) < current_price:
+                    replace_buy_order = True
+            elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
+                if self._buy_order.limit_price * (1 - 0.1) > current_price:
+                    replace_buy_order = True
+            if replace_buy_order:
+                print(f"Replacing buy order for {self._symbol} current price: {current_price} limit price: {self._buy_order.limit_price}")
+                # cancel buy order so we can replace it
+                result = self._execute.cancel(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
+                self._buy_order.update_order(result)
+                if not self._config.simulate():
+                    time.sleep(1)
+                self.open_position(size=size, current_price=current_price, current_ts=current_ts)
     
 
     def update_sell_position(self, current_price: float, current_ts: int):
@@ -320,6 +334,10 @@ class TraderPosition(object):
                 self._closed_position_completed = True
                 return
 
+        if self._sell_order and self._sell_order.completed():
+            self._closed_position_completed = True
+            return
+
         buy_amount = self._buy_order.filled_size
 
         if self._config.end_position_type() == OrderType.MARKET.name:
@@ -334,6 +352,8 @@ class TraderPosition(object):
             stop_loss_percent = self._config.stop_loss_percent()
             stop_loss = self._account.round_quote(self._symbol, current_price - current_price * stop_loss_percent / 100)
             result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=current_price, stop_price=stop_loss, amount=buy_amount)
+        else:
+            raise ValueError(f"Invalid end position type: {self._config.end_position_type()}")
 
         if not self._config.simulate():
             time.sleep(1)
