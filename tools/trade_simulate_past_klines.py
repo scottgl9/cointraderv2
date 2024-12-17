@@ -23,6 +23,7 @@ from cointrader.execute.TradeExecuteSimulate import TraderExecuteSimulate
 from cointrader.market.Market import Market
 from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
+from cointrader.order.Orders import Orders
 from cointrader.common.Kline import Kline
 from cointrader.config import *
 from cointrader.indicators.EMA import EMA
@@ -33,7 +34,14 @@ def main(args):
 
     exchange = TraderSelectExchange(name).get_exchange()
 
-    market = Market(exchange=exchange, db_path=args.db_path)
+    tconfig = TraderConfig(path=f'{name}_trader_config.json')
+    if not tconfig.load_config():
+        tconfig.save_config()
+
+    if tconfig.strategy() != args.strategy:
+        tconfig.set_strategy(args.strategy)
+
+    market = Market(exchange=exchange, db_path=tconfig.market_db_path())
     account = AccountSimulate(exchange=exchange, market=market)
     account.load_symbol_info()
     account.load_asset_info()
@@ -43,17 +51,15 @@ def main(args):
 
     account.update_asset_balance("USD", available=initial_usd, hold=0.0)
 
-    ex = TraderExecuteSimulate(exchange=exchange, account=account)
-
     print(account.get_account_balances())
     print("Start Total USD Balance:")
     print(account.get_total_balance("USD"))
 
-    tconfig = TraderConfig(path=f'{name}_trader_config.json')
-    if not tconfig.load_config():
-        tconfig.save_config()
+    ex = TraderExecuteSimulate(exchange=exchange, account=account, config=tconfig)
 
-    mtrader = MultiTrader(account=account, execute=ex, config=tconfig)
+    orders = Orders(db_path=tconfig.orders_db_path(), reset=True)
+
+    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, granularity=args.granularity)
 
     start_ts = int(datetime.fromisoformat(args.start_date).timestamp())
     if args.end_date == 'now':
@@ -70,6 +76,8 @@ def main(args):
     # determin which symbol has the fewest klines
     lowest_kline_count = 0
 
+    print(f"Getting klines for {args.start_date} to {args.end_date}")
+
     # get all klines for each symbol stored in the market db
     for symbol in symbols:
         all_klines[symbol] = market.market_get_stored_klines_range(symbol, start_ts=start_ts, end_ts=end_ts, granularity=args.granularity)
@@ -78,6 +86,8 @@ def main(args):
             lowest_kline_count = kline_count
         emas[symbol] = EMA(period=12)
         ema_values[symbol] = []
+
+    print(f"Simulating with {lowest_kline_count} klines")
 
     kline = Kline()
     #kline.set_dict_names(ts='start')
@@ -88,9 +98,12 @@ def main(args):
             #print(k)
             kline.from_dict(k)
             kline.symbol = symbol
-            mtrader.market_update(kline)
+            kline.granularity = args.granularity
+            mtrader.market_update(kline=kline, current_price=kline.close, current_ts=kline.ts)
             value = emas[symbol].update(kline)
             ema_values[symbol].append(value)
+
+    orders.commit()
 
     last_prices = {}
     for symbol in symbols:
@@ -147,10 +160,10 @@ if __name__ == '__main__':
     parser.add_argument('--initial_usd', type=float, default=10000.0, help='Initial USD amount for simulation')
     parser.add_argument('--exchange', type=str, default="cbadv", help='Account to use for simulation')
     parser.add_argument('--granularity', type=int, default=300, help='Granularity of klines')
-    parser.add_argument('--db_path', type=str, default='market_data.db', help='Path to the database file')
     parser.add_argument('--symbols', type=str, default='BTC-USD,ETH-USD,SOL-USD', help='Comma separated list of symbols')
     parser.add_argument('--start_date', type=str, default='2024-12-02', help='Start date for klines')
     parser.add_argument('--end_date', type=str, default='now', help='End date for klines')
     parser.add_argument('--plot', action='store_true', help='Plot the results')
+    parser.add_argument('--strategy', type=str, default='Default', help='Strategy to use for simulation')
     args = parser.parse_args()
     main(args)

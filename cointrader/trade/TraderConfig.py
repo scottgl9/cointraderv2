@@ -5,6 +5,8 @@ import json
 DEFAULT_TRADE_CONFIG = {
     'simulate': True,                      # Simulate trading without making real trades
     'verbose': False,                      # Print verbose output
+    'orders_db_path': 'orders.db',          # Path to the order database
+    'market_db_path': 'market_data.db',    # Path to the market database
     'max_positions': 1,                    # Maximum number of positions to hold per symbol
     'quote_currency': 'USD',               # Currency to use for trading
     'max_position_quote_size': 100.0,      # Maximum size of a position in quote currency
@@ -92,6 +94,12 @@ class TraderConfig(object):
     
     def verbose(self):
         return self.get('verbose')
+
+    def orders_db_path(self):
+        return self.get('order_db_path')
+    
+    def market_db_path(self):
+        return self.get('market_db_path')
 
     def max_positions(self):
         return self.get('max_positions')

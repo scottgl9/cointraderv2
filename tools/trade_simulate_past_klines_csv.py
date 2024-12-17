@@ -23,6 +23,7 @@ from cointrader.execute.TradeExecuteSimulate import TraderExecuteSimulate
 from cointrader.market.Market import Market
 from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
+from cointrader.order.Orders import Orders
 from cointrader.common.Kline import Kline
 from cointrader.config import *
 from cointrader.indicators.EMA import EMA
@@ -34,7 +35,18 @@ def main(args):
 
     exchange = TraderSelectExchange(name).get_exchange()
 
-    market = Market(exchange=exchange)
+    tconfig = TraderConfig(path=f'{name}_trader_config.json')
+    if not tconfig.load_config():
+        tconfig.save_config()
+
+    tconfig.set_trade_symbols(symbols)
+
+    if tconfig.strategy() != args.strategy:
+        tconfig.set_strategy(args.strategy)
+
+    print(f"Using strategy: {tconfig.strategy()}")
+
+    market = Market(exchange=exchange, db_path=tconfig.market_db_path())
     account = AccountSimulate(exchange=exchange, market=market)
     account.load_symbol_info()
     account.load_asset_info()
@@ -48,20 +60,11 @@ def main(args):
     print("Start Total USDT Balance:")
     print(account.get_total_balance("USDT"))
 
-    tconfig = TraderConfig(path=f'{name}_trader_config.json')
-    if not tconfig.load_config():
-        tconfig.save_config()
-
-    tconfig.set_trade_symbols(symbols)
-
-    if tconfig.strategy() != args.strategy:
-        tconfig.set_strategy(args.strategy)
-
-    print(f"Using strategy: {tconfig.strategy()}")
-
     ex = TraderExecuteSimulate(exchange=exchange, account=account, config=tconfig)
 
-    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, granularity=args.granularity)
+    orders = Orders(db_path=tconfig.orders_db_path(), reset=True)
+
+    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, granularity=args.granularity)
 
     start_ts = int(datetime.fromisoformat(args.start_date).timestamp())
     if args.end_date == 'now':
@@ -129,6 +132,8 @@ def main(args):
             #    if kline:
             #        kline.symbol = symbol
             #        mtrader.market_update(kline=kline, current_price=kline.close)
+
+    orders.commit()
 
     # calculate what the profit would be if we just bought and held
     total_hold_profit = 0
