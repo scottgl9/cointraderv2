@@ -36,6 +36,21 @@ class SignalStrength(Strategy):
         self.signals['psar'] = PSARSignal(symbol=self._symbol, af=0.02, max_af=0.2)
         self.signals['vwap'] = VWAPSignal(symbol=self._symbol, period=14)
 
+        self._signal_weights = {
+            'macd': 1.5,
+            'sama': 1.0,
+            'zlema': 1.2,
+            'rsi': 1.3,
+            'ema': 1.1,
+            'sma': 1.0,
+            'supertrend': 1.4,
+            'adx': 1.3,
+            'squeeze': 1.2,
+            'roc': 1.0,
+            'psar': 1.1,
+            'vwap': 1.2
+        }
+
         self.signal_states: dict[str, OrderSide] = {}
         for name in self.signals.keys():
             self.signal_states[name] = OrderSide.NONE
@@ -143,14 +158,30 @@ class SignalStrength(Strategy):
                 self._sell_signal_name += name
         return buy_signal_count, sell_signal_count
 
+    def _weighted_count_signals(self):
+        self._buy_signal_name = ""
+        self._sell_signal_name = ""
+        buy_signal_weight = 0
+        sell_signal_weight = 0
+
+        for name, state in self.signal_states.items():
+            weight = self._signal_weights.get(name, 1.0)
+            if state == OrderSide.BUY:
+                buy_signal_weight += weight
+                self._buy_signal_name += name
+            elif state == OrderSide.SELL:
+                sell_signal_weight += weight
+                self._sell_signal_name += name
+        return buy_signal_weight, sell_signal_weight
+
     def buy_signal(self):
-        buy_signal_count, sell_signal_count = self._count_signals()
-        if buy_signal_count > sell_signal_count:
+        buy_signal_weight, sell_signal_weight = self._weighted_count_signals()
+        if buy_signal_weight > sell_signal_weight:
             return True
         return False
 
     def sell_signal(self):
-        buy_signal_count, sell_signal_count = self._count_signals()
-        if sell_signal_count > buy_signal_count:
+        buy_signal_weight, sell_signal_weight = self._weighted_count_signals()
+        if sell_signal_weight > buy_signal_weight:
             return True
         return False
