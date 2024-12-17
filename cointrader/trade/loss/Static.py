@@ -10,6 +10,12 @@ class Static(TradeLossBase):
         self._stop_loss_percent = self._config.stop_loss_percent()
         self._stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
 
+    def reset(self):
+        pass
+
+    def ready():
+        return True
+
     def get_stop_loss_price(self, price: float, current_ts: int) -> float:
         # set the stop loss price slightly above the limit price (determined by stop_loss_limit_percent)
         stop_price = self._account.round_quote(self._symbol, (1 - ((self._stop_loss_percent - self._stop_loss_limit_percent) / 100.0)) * price)

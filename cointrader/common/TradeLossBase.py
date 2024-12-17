@@ -15,6 +15,12 @@ class TradeLossBase(object):
         self._config = config
         self._symbol = symbol
 
+    def reset(self):
+        raise NotImplementedError
+
+    def ready(self) -> bool:
+        raise NotImplementedError
+
     def name(self) -> str:
         return self._name
 

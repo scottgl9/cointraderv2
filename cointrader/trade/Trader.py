@@ -129,10 +129,9 @@ class Trader(object):
 
         # Open a position on a buy signal
         if not self._disabled and buy_signal and len(self._positions) < self._max_positions:
-            #size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
-            #if size < self._account.get_base_min_size(self._symbol):
-            #    print(f"Size too small: {size}")
-            #    return
+            if not self._size_strategy.ready():
+                print(f"{self._symbol} Size strategy not ready")
+                return
             size = self._size_strategy.get_base_trade_size(current_price=current_price, current_ts=current_ts)
             if not size:
                 print(f"{self._symbol} Size too small: {size}")
@@ -149,9 +148,7 @@ class Trader(object):
                 self._disable_until_ts = current_ts + self._cooldown_period_seconds
 
             # if we have a market order filled immediately, then set the stop loss
-            if position.opened() and self._config.trailing_stop_loss():
-                #percent = self._config.stop_loss_percent()
-                #stop_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
+            if position.opened() and self._config.trailing_stop_loss() and self._loss_strategy.ready():
                 stop_price = self._loss_strategy.get_stop_loss_price(price=position.buy_price(), current_ts=current_ts)
                 stop_limit_price = self._loss_strategy.get_stop_limit_price(price=position.buy_price(), current_ts=current_ts)
                 print(f"{self._symbol} Stop loss: {stop_price} Limit: {stop_limit_price}")
@@ -172,9 +169,11 @@ class Trader(object):
 
                 # for limit and stop loss orders, we may need to cancel them if the price has moved, and place a new order
                 if not self._disabled and buy_signal:
+                    if not self._size_strategy.ready():
+                        continue
                     size = self._size_strategy.get_base_trade_size(current_price, current_ts)
                     if not size:
-                        return
+                        continue
 
                     position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)
 
@@ -205,12 +204,12 @@ class Trader(object):
         # check if we have already closed the position, then we can't create a stop loss order
         if position.closed():
             return
+        
+        if not self._loss_strategy.ready():
+            return
 
         percent = self._config.stop_loss_percent()
-        #stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
         # set the stop X% above the limit price
-        #stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * position.buy_price())
-        #limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
         stop_price = self._loss_strategy.get_stop_loss_price(price=position.buy_price(), current_ts=current_ts)
         stop_limit_price = self._loss_strategy.get_stop_limit_price(price=position.buy_price(), current_ts=current_ts)
         # handle setting and updating stop loss orders if enabled

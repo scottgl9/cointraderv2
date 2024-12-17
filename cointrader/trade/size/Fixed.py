@@ -9,6 +9,12 @@ class Fixed(TradeSizeBase):
         super().__init__(name=name, symbol=symbol, account=account, config=config)
         self._max_position_quote_size = self._config.max_position_quote_size
 
+    def reset(self):
+        pass
+
+    def ready(self) -> bool:
+        return True
+
     def get_base_trade_size(self, current_price: float, current_ts: int) -> float:
         if current_price > 0:
             size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
