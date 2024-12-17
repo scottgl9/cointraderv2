@@ -21,7 +21,10 @@ from cointrader.execute.TradeExecute import TraderExecute
 from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
 from cointrader.common.Kline import Kline
+from cointrader.order.Orders import Orders
 from cointrader.config import *
+
+GRANULARITY = 300
 
 class CBADVLive:
     def __init__(self, mtrader: MultiTrader, tconfig: TraderConfig):
@@ -46,11 +49,15 @@ class CBADVLive:
                         self.prev_klines[kline.symbol] = kline
                     pd.to_datetime(kline.ts, unit='s')
                     print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
+                    self.mtrader.market_update(kline, current_price=kline.close, current_ts=kline.ts)
 
 def main(name):
     exchange = TraderSelectExchange(name).get_exchange()
 
-    market = Market(exchange=exchange)
+    tconfig = TraderConfig(path=f'config/{name}_trader_live_config.json')
+    tconfig.save_config()
+
+    market = Market(exchange=exchange, db_path=tconfig.market_db_path())
     account = Account(exchange=exchange, market=market)
     account.load_symbol_info()
     account.load_asset_info()
@@ -63,12 +70,9 @@ def main(name):
     print("Total USD Balance:")
     print(account.get_total_balance("USD"))
 
-    tconfig = TraderConfig(path=f'{name}_trader_config.json')
-    tconfig.save_config()
-
     ex = TraderExecute(exchange=exchange, account=account)
 
-    mtrader = MultiTrader(account=account, execute=ex, config=tconfig)
+    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, granularity=GRANULARITY)
     rt = CBADVLive(mtrader=mtrader, tconfig=tconfig)
     ws_client = WSClient(api_key=CBADV_KEY, api_secret=CBADV_SECRET, on_message=rt.on_message)
     #accnt = AccountCoinbaseAdvanced(exchange=exchange, simulate=False, live=False, logger=logger)

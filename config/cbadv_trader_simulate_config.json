@@ -1,0 +1,31 @@
+{
+    "simulate": true,
+    "verbose": false,
+    "orders_db_path": "orders.db",
+    "market_db_path": "market_data.db",
+    "max_positions": 5,
+    "quote_currency": "USD",
+    "max_position_quote_size": 100.0,
+    "strategy": "SignalStrength",
+    "loss_strategy": "ChandelierExit",
+    "size_strategy": "Fixed",
+    "trade_symbols": [
+        "BTC-USD",
+        "ETH-USD",
+        "SOL-USD"
+    ],
+    "stop_loss_percent": 5.0,
+    "stop_loss_limit_order_percent": 0.1,
+    "limit_order_percent": 0.2,
+    "replace_buy_order_percent": 1.0,
+    "replace_sell_order_percent": 1.0,
+    "trailing_stop_loss": true,
+    "min_take_profit_percent": 0.5,
+    "stop_on_loss": true,
+    "max_total_loss_percent": 10.0,
+    "cooldown_period_seconds": 3600,
+    "disable_after_loss_seconds": 86400,
+    "start_position_type": "STOP_LOSS_LIMIT",
+    "end_position_type": "STOP_LOSS_LIMIT",
+    "sell_all_on_stop": false
+}

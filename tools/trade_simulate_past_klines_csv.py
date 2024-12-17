@@ -35,7 +35,9 @@ def main(args):
 
     exchange = TraderSelectExchange(name).get_exchange()
 
-    tconfig = TraderConfig(path=f'{name}_trader_config.json')
+    symbols = args.symbols.split(',')
+
+    tconfig = TraderConfig(path=f'config/{name}_trader_simulate_csv_config.json')
     if not tconfig.load_config():
         tconfig.save_config()
 
@@ -52,7 +54,6 @@ def main(args):
     account.load_asset_info()
 
     all_klines = {}
-    symbols = args.symbols.split(',')
 
     account.update_asset_balance("USDT", available=initial_usdt, hold=0.0)
 

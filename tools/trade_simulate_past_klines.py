@@ -34,7 +34,7 @@ def main(args):
 
     exchange = TraderSelectExchange(name).get_exchange()
 
-    tconfig = TraderConfig(path=f'{name}_trader_config.json')
+    tconfig = TraderConfig(path=f'config/{name}_trader_simulate_config.json')
     if not tconfig.load_config():
         tconfig.save_config()
 
