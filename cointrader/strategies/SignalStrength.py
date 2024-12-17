@@ -4,6 +4,7 @@ from cointrader.common.Signal import Signal
 from cointrader.order.OrderSide import OrderSide
 from cointrader.signals.MACDSignal import MACDSignal
 from cointrader.signals.RSISignal import RSISignal
+from cointrader.signals.StochasticSignal import StochasticSignal
 from cointrader.signals.SAMASignal import SAMASignal
 from cointrader.signals.ZLEMACross import ZLEMACross
 from cointrader.signals.EMACross import EMACross
@@ -27,6 +28,7 @@ class SignalStrength(Strategy):
         self.signals['sama'] = SAMASignal(symbol=self._symbol)
         self.signals['zlema'] = ZLEMACross(symbol=self._symbol, short_period=12, long_period=26)
         self.signals['rsi'] = RSISignal(symbol=self._symbol, period=14, overbought=70, oversold=30)
+        self.signals['stochastic'] = StochasticSignal(symbol=self._symbol, k_period=14, d_period=3, overbought=80, oversold=20)
         self.signals['ema'] = EMACross(symbol=self._symbol, short_period=12, long_period=26)
         self.signals['sma'] = SMACross(symbol=self._symbol, short_period=50, long_period=100)
         self.signals['supertrend'] = SupertrendSignal(symbol=self._symbol, period=14, multiplier=3)
@@ -41,6 +43,7 @@ class SignalStrength(Strategy):
             'sama': 1.0,
             'zlema': 1.2,
             'rsi': 1.3,
+            'stochastic': 1.3,
             'ema': 1.1,
             'sma': 1.0,
             'supertrend': 1.4,
@@ -84,6 +87,12 @@ class SignalStrength(Strategy):
                 self.signal_states['rsi'] = OrderSide.BUY
             else:
                 self.signal_states['rsi'] = OrderSide.NONE
+
+        if self.signals['stochastic'].ready():
+            if self.signals['stochastic'].cross_up():
+                self.signal_states['stochastic'] = OrderSide.BUY
+            elif self.signals['stochastic'].cross_down():
+                self.signal_states['stochastic'] = OrderSide.SELL
 
         if self.signals['ema'].ready():
             if self.signals['ema'].cross_up():

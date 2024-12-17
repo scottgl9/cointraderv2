@@ -18,6 +18,13 @@ class StochasticOscillator(Indicator):
         self._last_value = None
         self._last_kline = None
 
+    def reset(self):
+        self.highs.clear()
+        self.lows.clear()
+        self.d_sma.reset()
+        self._last_value = None
+        self._last_kline = None
+
     def update(self, kline: Kline):
         # Add current high and low
         self.highs.append(kline.high)
