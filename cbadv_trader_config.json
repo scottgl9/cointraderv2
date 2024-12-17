@@ -3,7 +3,7 @@
     "verbose": false,
     "max_positions": 5,
     "quote_currency": "USD",
-    "max_position_quote_size": 50.0,
+    "max_position_quote_size": 100.0,
     "strategy": "SignalStrength",
     "loss_strategy": "ChandelierExit",
     "size_strategy": "Fixed",

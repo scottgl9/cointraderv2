@@ -7,7 +7,7 @@ DEFAULT_TRADE_CONFIG = {
     'verbose': False,                      # Print verbose output
     'max_positions': 1,                    # Maximum number of positions to hold per symbol
     'quote_currency': 'USD',               # Currency to use for trading
-    'max_position_quote_size': 25.0,       # Maximum size of a position in quote currency
+    'max_position_quote_size': 100.0,      # Maximum size of a position in quote currency
     'strategy': 'SignalStrength',          # Strategy to use for trading
     'loss_strategy': 'Static',             # Strategy to use for setting stop loss
     'size_strategy': 'Fixed',              # Strategy to use for setting trade size
