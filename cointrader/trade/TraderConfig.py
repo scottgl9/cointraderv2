@@ -13,7 +13,8 @@ DEFAULT_TRADE_CONFIG = {
     'stop_loss_percent': 5.0,              # percent stop loss to set under the buy price
     'stop_loss_limit_order_percent': 0.1,  # percent to set the stop loss above or below the limit price
     'limit_order_percent': 0.2,            # percent to set the limit price above or below the current price
-    'cancel_order_percent': 3.0,           # of price movement away from order before order gets cancelled (limit and stop loss limit orders)
+    'replace_buy_order_percent': 1.0,      # percent of price movement away from order before buy order gets replaced (limit and stop loss limit orders)
+    'replace_sell_order_percent': 1.0,     # percent of price movement away from order before sell order gets replaced (limit and stop loss limit orders)
     'trailing_stop_loss': False,           # stop loss follows the price up
     'min_take_profit_percent': 0.5,        # minimum percent profit to take
     'stop_on_loss': True,                  # Stop trading bot after a loss
@@ -138,11 +139,17 @@ class TraderConfig(object):
     def set_limit_order_percent(self, limit_order_percent: float):
         self.set('limit_order_percent', limit_order_percent)
 
-    def cancel_order_percent(self) -> float:
-        return self.get('cancel_order_percent')
+    def replace_buy_order_percent(self) -> float:
+        return self.get('replace_buy_order_percent')
     
-    def set_cancel_order_percent(self, cancel_order_percent: float):
-        self.set('cancel_order_percent', cancel_order_percent)
+    def set_replace_buy_order_percent(self, replace_buy_order_percent: float):
+        self.set('replace_buy_order_percent', replace_buy_order_percent)
+
+    def replace_sell_order_percent(self) -> float:
+        return self.get('replace_sell_order_percent')
+    
+    def set_replace_sell_order_percent(self, replace_sell_order_percent: float):
+        self.set('replace_sell_order_percent', replace_sell_order_percent)
 
     def trailing_stop_loss(self) -> bool:
         return self.get('trailing_stop_loss')

@@ -247,12 +247,14 @@ class TraderPosition(object):
             #print(f"Updating buy order for {self._symbol} current price: {current_price} limit price: {self._buy_order.limit_price}")
 
             replace_buy_order = False
+            replace_order_percent = self._config.replace_buy_order_percent()
             if self._config.start_position_type() == OrderType.LIMIT.name:
-                if self._buy_order.limit_price * (1 + 0.1) < current_price:
+                if self._buy_order.limit_price * (1.0 + replace_order_percent / 100.0) < current_price:
                     replace_buy_order = True
             elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
-                if self._buy_order.limit_price * (1 - 0.1) > current_price:
+                if self._buy_order.limit_price * (1.0 - replace_order_percent / 100.0) > current_price:
                     replace_buy_order = True
+
             if replace_buy_order:
                 print(f"Replacing buy order for {self._symbol} current price: {current_price} limit price: {self._buy_order.limit_price}")
                 # cancel buy order so we can replace it
@@ -269,8 +271,8 @@ class TraderPosition(object):
         """
         if not self._sell_order or self.sell_order_completed():
             return
-        result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
-        self._sell_order.update_order(result)
+        #result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
+        #self._sell_order.update_order(result)
         if self._sell_order.status == OrderStatus.FILLED:
             self._closed_position_completed = True
             return
@@ -278,12 +280,23 @@ class TraderPosition(object):
             self.close_position(current_price=current_price, current_ts=current_ts)
             return
         elif self._sell_order.status == OrderStatus.PLACED:
-            # cancel sell order so we can replace it
-            result = self._execute.cancel(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
-            self._sell_order.update_order(result)
-            if not self._config.simulate():
-                time.sleep(1)
-            self.close_position(current_price=current_price, current_ts=current_ts)
+            replace_sell_order = False
+            replace_order_percent = self._config.replace_sell_order_percent()
+            if self._config.end_position_type() == OrderType.LIMIT.name:
+                if self._sell_order.limit_price * (1.0 - replace_order_percent / 100.0) > current_price:
+                    replace_sell_order = True
+            elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
+                if self._sell_order.limit_price * (1.0 + replace_order_percent / 100.0) < current_price:
+                    replace_sell_order = True
+
+            if replace_sell_order:
+                print(f"Replacing sell order for {self._symbol} current price: {current_price} limit price: {self._sell_order.limit_price}")
+                # cancel sell order so we can replace it
+                result = self._execute.cancel(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
+                self._sell_order.update_order(result)
+                if not self._config.simulate():
+                    time.sleep(1)
+                self.close_position(current_price=current_price, current_ts=current_ts)
 
 
     def create_stop_loss_position(self, stop_price: float, limit_price: float, current_ts: int):

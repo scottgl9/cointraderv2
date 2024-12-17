@@ -167,9 +167,13 @@ class Trader(object):
                         sell_signal = True
                         sell_signal_name = self._strategy.sell_signal_name()
                 # if we have not yet attempted to close the position
-                if sell_signal and not position.closed_position():
-                    #print(f'Sell signal {sell_signal_name} for {self._symbol}')
-                    position.close_position(current_price=current_price, current_ts=current_ts)
+                if sell_signal:
+                    if not position.closed_position():
+                        #print(f'Sell signal {sell_signal_name} for {self._symbol}')
+                        position.close_position(current_price=current_price, current_ts=current_ts)
+                    elif not position.closed():
+                        # for limit and stop loss orders, we may need to cancel them if the price has moved, and place a new order
+                        position.update_sell_position(current_price=current_price, current_ts=current_ts)
 
 
     def update_trailing_stop_loss_position(self, position: TraderPosition, current_price: float, current_ts: int):
