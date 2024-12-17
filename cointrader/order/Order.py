@@ -58,3 +58,9 @@ class Order(OrderResult):
         Check if the order has been completed
         """
         return self.filled_size == self.size and self.status == OrderStatus.FILLED
+
+    def cancelled(self) -> bool:
+        """
+        Check if the order has been cancelled
+        """
+        return self.status == OrderStatus.CANCELLED

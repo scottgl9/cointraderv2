@@ -82,8 +82,8 @@ class Trader(object):
             if kline.granularity == self._granularity:
                 position.market_update(current_price=current_price, current_ts=current_ts)
 
-            # handle trailing stop loss
-            if position.opened() and self._config.trailing_stop_loss():
+            # handle trailing stop loss, prevent placing stop loss if we have already started closing the position
+            if position.opened() and not position.closed_position() and self._config.trailing_stop_loss():
                 self.update_trailing_stop_loss_position(position, current_price, current_ts)
 
             # handle closed position when sell order or stop loss has been filled
@@ -161,6 +161,10 @@ class Trader(object):
         """
         Update the trailing stop loss position
         """
+        # check if we have already closed the position, then we can't create a stop loss order
+        if position.closed():
+            return
+
         percent = self._config.stop_loss_percent()
         stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
         # set the stop X% above the limit price

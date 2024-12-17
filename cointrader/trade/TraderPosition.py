@@ -84,6 +84,13 @@ class TraderPosition(object):
         return self._stop_loss_limit_price
 
 
+    def stop_loss_is_cancelled(self):
+        """
+        Check if the stop loss order has been cancelled
+        """
+        return self._stop_loss_order and self._stop_loss_order.cancelled()
+
+
     def stop_loss_is_completed(self):
         """
         Check if the stop loss order has been filled
@@ -269,8 +276,10 @@ class TraderPosition(object):
         """
         Create a stop loss order
         """
+        # check if we don't have a completed buy order, then we can't create a stop loss order
         if not self.opened():
             return
+
         #print(f"Creating stop loss order for {self._symbol} stop price: {stop_price} limit price: {limit_price}")
         self._stop_loss_price = stop_price
         self._stop_loss_limit_price = limit_price
@@ -302,6 +311,7 @@ class TraderPosition(object):
                     self._closed_position_completed = True
                     return
                 else:
+                    # cancel stop loss order so we can place a new sell order
                     self.cancel_stop_loss_position()
                     if not self._config.simulate():
                         time.sleep(1)
@@ -345,19 +355,19 @@ class TraderPosition(object):
         self._current_price = current_price
         self._current_ts = current_ts
 
-        if self._buy_order and not self.buy_order_completed():
+        if self._buy_order and not self._buy_order.completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
             self._buy_order.update_order(result)
             if self._buy_order.status == OrderStatus.FILLED:
                 self._opened_position_completed = True
 
-        if self._sell_order and not self._sell_order.completed():
+        if not self._closed_position_completed and self._sell_order and not self._sell_order.completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
             self._sell_order.update_order(result)
             if self._sell_order.status == OrderStatus.FILLED:
                 self._closed_position_completed = True
 
-        if self._stop_loss_order and not self.stop_loss_is_completed():
+        if not self._closed_position_completed and self._stop_loss_order and not self.stop_loss_is_cancelled() and not self._stop_loss_order.completed():
             #print(f"stop loss order: {self._stop_loss_order}")
             result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=current_price, current_ts=current_ts)
             self._stop_loss_order.update_order(result)
