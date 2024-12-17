@@ -12,6 +12,8 @@ import importlib
 from cointrader.signals.EMACross import EMACross
 from cointrader.signals.SupertrendSignal import SupertrendSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
+from cointrader.common.TradeLossBase import TradeLossBase
+from cointrader.common.TradeSizeBase import TradeSizeBase
 from colorama import Fore, Back, Style
 import time
 from datetime import datetime
@@ -22,6 +24,8 @@ class Trader(object):
     _positions: list[TraderPosition] = []
     _strategy_name = None
     _strategy: Strategy = None
+    _loss_strategy: TradeLossBase = None
+    _size_strategy: TradeSizeBase = None
     _max_positions = 0
 
     def __init__(self, account: Account, symbol: str, execute: ExecuteBase, config: TraderConfig, orders: Orders, granularity: int = 0):
@@ -42,6 +46,13 @@ class Trader(object):
 
         strategy_module = importlib.import_module(f'cointrader.strategies.{self._strategy_name}')
         self._strategy = getattr(strategy_module, self._strategy_name)(symbol=symbol)
+
+        # load the loss and size strategies
+        loss_module = importlib.import_module(f'cointrader.trade.loss.{self._config.loss_strategy()}')
+        self._loss_strategy = getattr(loss_module, self._config.loss_strategy())(symbol=symbol, account=account, config=config)
+        size_module = importlib.import_module(f'cointrader.trade.size.{self._config.size_strategy()}')
+        self._size_strategy = getattr(size_module, self._config.size_strategy())(symbol=symbol, account=account, config=config)
+
         self._max_positions = config.max_positions()
         self._net_profit_percent = 0.0
         self._positive_profit_percent = 0.0
@@ -105,6 +116,8 @@ class Trader(object):
 
         if kline.granularity == self._granularity:
             self._strategy.update(kline)
+            self._loss_strategy.update(kline, current_price, current_ts)
+            self._size_strategy.update(kline, current_price, current_ts)
 
         # Disable opening new positions for a period of time after a loss
         if self._disable_until_ts != 0 and current_ts >= self._disable_until_ts:
@@ -116,10 +129,15 @@ class Trader(object):
 
         # Open a position on a buy signal
         if not self._disabled and buy_signal and len(self._positions) < self._max_positions:
-            size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
-            if size < self._account.get_base_min_size(self._symbol):
-                print(f"Size too small: {size}")
+            #size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
+            #if size < self._account.get_base_min_size(self._symbol):
+            #    print(f"Size too small: {size}")
+            #    return
+            size = self._size_strategy.get_base_trade_size(current_price=current_price, current_ts=current_ts)
+            if not size:
+                print(f"{self._symbol} Size too small: {size}")
                 return
+
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
             position.open_position(size=size, current_price=current_price, current_ts=current_ts)
@@ -132,12 +150,16 @@ class Trader(object):
 
             # if we have a market order filled immediately, then set the stop loss
             if position.opened() and self._config.trailing_stop_loss():
-                percent = self._config.stop_loss_percent()
-                stop_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
+                #percent = self._config.stop_loss_percent()
+                #stop_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
+                stop_price = self._loss_strategy.get_stop_loss_price(price=position.buy_price(), current_ts=current_ts)
+                stop_limit_price = self._loss_strategy.get_stop_limit_price(price=position.buy_price(), current_ts=current_ts)
+                print(f"{self._symbol} Stop loss: {stop_price} Limit: {stop_limit_price}")
+
                 # handle setting and updating stop loss orders if enabled
                 if not position.stop_loss_is_set():
                     #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
-                    position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_price, current_ts=current_ts)
+                    position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_limit_price, current_ts=current_ts)
 
         strategy_sell_signal = self._strategy.sell_signal()
 
@@ -150,10 +172,10 @@ class Trader(object):
 
                 # for limit and stop loss orders, we may need to cancel them if the price has moved, and place a new order
                 if not self._disabled and buy_signal:
-                    size = self._account.round_base(self._symbol, self._config.max_position_quote_size() / current_price)
-                    if size < self._account.get_base_min_size(self._symbol):
-                        print(f"Size too small: {size}")
+                    size = self._size_strategy.get_base_trade_size(current_price, current_ts)
+                    if not size:
                         return
+
                     position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)
 
                 if not position.opened():
@@ -185,14 +207,16 @@ class Trader(object):
             return
 
         percent = self._config.stop_loss_percent()
-        stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
+        #stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
         # set the stop X% above the limit price
-        stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * position.buy_price())
-        limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
+        #stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * position.buy_price())
+        #limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * position.buy_price())
+        stop_price = self._loss_strategy.get_stop_loss_price(price=position.buy_price(), current_ts=current_ts)
+        stop_limit_price = self._loss_strategy.get_stop_limit_price(price=position.buy_price(), current_ts=current_ts)
         # handle setting and updating stop loss orders if enabled
         if not position.stop_loss_is_set():
             #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
-            position.create_stop_loss_position(stop_price=stop_price, limit_price=limit_price, current_ts=current_ts)
+            position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_limit_price, current_ts=current_ts)
         else:
             # update the stop loss order so it trails the position, if the price has moved up 1%
             stop_loss_limit_price = position.stop_loss_limit_price()
@@ -201,8 +225,11 @@ class Trader(object):
                 if not self._config.simulate():
                     # wait for the order to be cancelled
                     time.sleep(1)
-                new_stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * current_price)
-                new_stop_limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * current_price)
+
+                #new_stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * current_price)
+                #new_stop_limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * current_price)
+                new_stop_price = self._loss_strategy.get_stop_loss_price(price=current_price, current_ts=current_ts)
+                new_stop_limit_price = self._loss_strategy.get_stop_limit_price(price=current_price, current_ts=current_ts)
                 #print(f"{self._symbol} Updating stop loss: {stop_loss_limit_price} -> {new_stop_limit_price}")
                 position.create_stop_loss_position(stop_price=new_stop_price, limit_price=new_stop_limit_price, current_ts=current_ts)
 

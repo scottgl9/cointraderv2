@@ -9,6 +9,8 @@ DEFAULT_TRADE_CONFIG = {
     'quote_currency': 'USD',               # Currency to use for trading
     'max_position_quote_size': 25.0,       # Maximum size of a position in quote currency
     'strategy': 'SignalStrength',          # Strategy to use for trading
+    'loss_strategy': 'Static',             # Strategy to use for setting stop loss
+    'size_strategy': 'Fixed',              # Strategy to use for setting trade size
     'trade_symbols': ['BTC-USD', 'ETH-USD', 'SOL-USD'],
     'stop_loss_percent': 5.0,              # percent stop loss to set under the buy price
     'stop_loss_limit_order_percent': 0.1,  # percent to set the stop loss above or below the limit price
@@ -114,6 +116,18 @@ class TraderConfig(object):
     
     def set_strategy(self, strategy: str):
         self.set('strategy', strategy)
+
+    def loss_strategy(self) -> str:
+        return self.get('loss_strategy')
+    
+    def set_loss_strategy(self, loss_strategy: str):
+        self.set('loss_strategy', loss_strategy)
+
+    def size_strategy(self) -> str:
+        return self.get('size_strategy')
+    
+    def set_size_strategy(self, size_strategy: str):
+        self.set('size_strategy', size_strategy)
 
     def trade_symbols(self) -> dict:
         return self.get('trade_symbols')

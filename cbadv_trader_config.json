@@ -5,6 +5,8 @@
     "quote_currency": "USD",
     "max_position_quote_size": 50.0,
     "strategy": "SignalStrength",
+    "loss_strategy": "Static",
+    "size_strategy": "Fixed",
     "trade_symbols": [
         "BTC-USDT",
         "ETH-USDT",
