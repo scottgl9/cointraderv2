@@ -92,6 +92,7 @@ def main(args):
     kline = Kline()
     #kline.set_dict_names(ts='start')
 
+    first_prices = {}
     last_prices = {}
 
     # emitter takes in hourly klines, and emits daily klines
@@ -109,6 +110,10 @@ def main(args):
                 'close': row['Close'],
                 'volume': row['Volume USDT']
             }
+
+            if symbol not in first_prices:
+                first_prices[symbol] = kline_data['close']
+
             #print(kline_data)
             kline.from_dict(kline_data)
             kline.symbol = symbol
@@ -124,6 +129,15 @@ def main(args):
             #    if kline:
             #        kline.symbol = symbol
             #        mtrader.market_update(kline=kline, current_price=kline.close)
+
+    # calculate what the profit would be if we just bought and held
+    total_hold_profit = 0
+    for symbol in symbols:
+        profit = (last_prices[symbol] - first_prices[symbol]) / first_prices[symbol] * 100
+        total_hold_profit += profit
+        print(f"{symbol} buy and hold profit: {profit:.2f}%")
+
+    print(f"\nTotal buy and hold profit: {total_hold_profit:.2f}%")
 
     print(account.get_account_balances())
     print("\nFinal Total USDT Balance:")

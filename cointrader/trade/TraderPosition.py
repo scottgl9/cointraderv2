@@ -434,9 +434,11 @@ class TraderPosition(object):
 
         if self._sell_order and self._sell_order.completed():
             #print(f"sell order filled size: {self._sell_order.filled_size} sell order price: {self._sell_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")
-            profit = (self._sell_order.filled_size * self._sell_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
+            #profit = (self._sell_order.filled_size * self._sell_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
+            profit = (self._sell_order.price - self._buy_order.price) / self._buy_order.price * 100
         elif self._stop_loss_order and self._stop_loss_order.completed():
             #print(f"stop loss order filled size: {self._stop_loss_order.filled_size} stop loss order price: {self._stop_loss_order.price} buy order filled size: {self._buy_order.filled_size} buy order price: {self._buy_order.price}")
-            profit = (self._stop_loss_order.filled_size * self._stop_loss_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
+            #profit = (self._stop_loss_order.filled_size * self._stop_loss_order.price - self._buy_order.filled_size * self._buy_order.price) / (self._buy_order.filled_size * self._buy_order.price) * 100
+            profit = (self._stop_loss_order.price - self._buy_order.price) / self._buy_order.price * 100
 
         return round(profit, 2)
