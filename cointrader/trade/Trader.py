@@ -5,7 +5,7 @@ from cointrader.common.Strategy import Strategy
 from cointrader.account.Account import Account
 from .TraderConfig import TraderConfig
 from cointrader.execute.ExecuteBase import ExecuteBase
-from .TraderPosition import TraderPosition
+from .position.TraderPosition import TraderPosition
 from cointrader.order.Orders import Orders
 from cointrader.order.OrderStatus import OrderStatus
 from cointrader.order.OrderSide import OrderSide

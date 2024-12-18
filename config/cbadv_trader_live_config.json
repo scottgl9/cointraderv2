@@ -1,6 +1,6 @@
 {
     "simulate": false,
-    "verbose": false,
+    "verbose": true,
     "orders_db_path": "orders.db",
     "market_db_path": "market_data.db",
     "max_positions": 1,
@@ -55,8 +55,8 @@
     "min_take_profit_percent": 0.5,
     "stop_on_loss": true,
     "max_total_loss_percent": 10.0,
-    "cooldown_period_seconds": 3600,
-    "disable_after_loss_seconds": 86400,
+    "cooldown_period_seconds": 900,
+    "disable_after_loss_seconds": 3600,
     "start_position_type": "STOP_LOSS_LIMIT",
     "end_position_type": "STOP_LOSS_LIMIT",
     "sell_all_on_stop": false
