@@ -1,13 +1,14 @@
-# Description: Enum class for OrderStatus
+# This file implements the OrderStatus enum class. This class is for the order status
 from enum import Enum
 
 class OrderStatus(Enum):
-    UNKNOWN = 0
-    NEW = 1
-    PLACED = 2
-    PARTIALLY_FILLED = 3
-    FILLED = 4
-    CANCELLED = 5
-    PENDING_CANCEL = 6
-    REJECTED = 7
-    EXPIRED = 8
+    UNKNOWN = "UNKNOWN"
+    NEW = "NEW"
+    PLACED = "PLACED"
+    PARTIALLY_FILLED = "PARTIALLY_FILLED"
+    FILLED = "FILLED"
+    CANCELLED = "CANCELLED"
+    PENDING_CANCEL = "PENDING_CANCEL"
+    REJECTED = "REJECTED"
+    EXPIRED = "EXPIRED"
+    ERROR = "ERROR"

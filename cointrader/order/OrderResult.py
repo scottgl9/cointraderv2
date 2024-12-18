@@ -59,7 +59,8 @@ class OrderResult(object):
             self.id = data['pid']
         if 'active' in data:
             self.active = data['active']
-        self.symbol = data['symbol']
+        if 'symbol' in data:
+            self.symbol = data['symbol']
         self.type = OrderType(data['type'])
         self.limit_type = OrderLimitType(data['limit_type'])
         self.side = OrderSide(data['side'])
@@ -106,8 +107,8 @@ class OrderResult(object):
     def __dict__(self):
         return self.to_dict()
 
-    def __repr__(self) -> dict:
-        return self.to_dict()
-    
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def __str__(self) -> str:
         return json.dumps(self.to_dict())

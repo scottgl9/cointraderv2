@@ -46,7 +46,7 @@ class Orders:
         elif symbol in self.orders:
             return list(self.orders[symbol].values())
 
-    def get_active_orders(self, symbol: str) -> list:
+    def get_active_orders(self, symbol: str) -> list[Order]:
         """
         Get all active orders for a symbol
         """

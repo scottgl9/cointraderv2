@@ -19,6 +19,7 @@ class OrderStorage:
 
     def reset(self):
         cursor = self._conn.cursor()
+        cursor.execute('DROP TABLE IF EXISTS orders')
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS orders (
                 id TEXT PRIMARY KEY,
@@ -66,16 +67,19 @@ class OrderStorage:
     def exists_order(self, order_id):
         return self.get_order(order_id) is not None
 
-    def get_order(self, order_id):
+    def get_order(self, order_id: str, symbol: str) -> Order:
         cursor = self._conn.cursor()
-        cursor.execute('SELECT * FROM orders WHERE order_id = ?', (order_id,))
+        if symbol is not None:
+            cursor.execute('SELECT * FROM orders WHERE id = ? AND symbol = ?', (order_id, symbol))
+        else:
+            cursor.execute('SELECT * FROM orders WHERE order_id = ?', (order_id,))
         columns = [column[0] for column in cursor.description]
         result = cursor.fetchone()
         if result is None:
             return None
-        return dict(zip(columns, result))
+        return Order(symbol=symbol, data=dict(zip(columns, result)))
 
-    def get_all_orders(self, symbol: str=None):
+    def get_all_orders(self, symbol: str=None) -> list[Order]:
         cursor = self._conn.cursor()
         if symbol is None:
             cursor.execute('SELECT * FROM orders')
@@ -85,9 +89,9 @@ class OrderStorage:
         result = cursor.fetchall()
         if result is None:
             return None
-        return [dict(zip(columns, row)) for row in result]
+        return [Order(symbol=symbol, data=dict(zip(columns, row))) for row in result]
     
-    def get_active_orders(self, symbol: str=None):
+    def get_active_orders(self, symbol: str=None) -> list[Order]:
         cursor = self._conn.cursor()
         if symbol is None:
             cursor.execute('SELECT * FROM orders WHERE active = 1')
@@ -97,7 +101,7 @@ class OrderStorage:
         result = cursor.fetchall()
         if result is None:
             return None
-        return [dict(zip(columns, row)) for row in result]
+        return [Order(symbol=symbol, data=dict(zip(columns, row))) for row in result]
 
     def update_order(self, order: Order):
         cursor = self._conn.cursor()

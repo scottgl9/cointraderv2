@@ -1,10 +1,10 @@
-# Description: Enum for order types
+# This file implements the OrderType enum class. This class is for the order type
 from enum import Enum
 
 class OrderType(Enum):
-    UNKNOWN = 0
-    LIMIT = 1
-    MARKET = 2
-    STOP_LOSS = 3
-    STOP_LOSS_LIMIT = 4
-    TAKE_PROFIT = 5
+    UNKNOWN = "UNKNOWN"
+    LIMIT = "LIMIT"
+    MARKET = "MARKET"
+    STOP_LOSS = "STOP_LOSS"
+    STOP_LOSS_LIMIT = "STOP_LOSS_LIMIT"
+    TAKE_PROFIT = "TAKE_PROFIT"
