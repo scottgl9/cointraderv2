@@ -127,7 +127,11 @@ class TraderPosition(object):
         if not self.buy_order_completed():
             return 0.0
         return self._buy_order.price
-    
+
+    def buy_size(self):
+        if not self.buy_order_completed():
+            return 0.0
+        return self._buy_order.filled_size    
 
     def buy_ts(self):
         if not self.buy_order_completed():
@@ -180,6 +184,7 @@ class TraderPosition(object):
         
         result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=self._current_price, current_ts=self._current_ts)
         self._stop_loss_order.update_order(result)
+        self._stop_loss_order.pid = self._pid
         self._orders.update_order(self._symbol, self._stop_loss_order)
 
         return self._stop_loss_order
@@ -196,6 +201,7 @@ class TraderPosition(object):
         result = self._execute.cancel(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=self._current_price, current_ts=self._current_ts)
         self._last_stop_loss_order = Order(symbol=self._symbol)
         self._last_stop_loss_order.update_order(result)
+        self._last_stop_loss_order.pid = self._pid
         self._orders.update_order(self._symbol, self._last_stop_loss_order)
         self._stop_loss_order = None
 
@@ -233,6 +239,7 @@ class TraderPosition(object):
 
         self._buy_order = Order(symbol=self._symbol)
         self._buy_order.update_order(result)
+        self._buy_order.pid = self._pid
         self._orders.add_order(self._symbol, self._buy_order)
 
         # if this is a market order, the buy order should already be filled
@@ -275,6 +282,7 @@ class TraderPosition(object):
                 # cancel buy order so we can replace it
                 result = self._execute.cancel(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
                 self._buy_order.update_order(result)
+                self._buy_order.pid = self._pid
                 self._orders.update_order(self._symbol, self._buy_order)
                 if not self._config.simulate():
                     time.sleep(1)
@@ -310,6 +318,7 @@ class TraderPosition(object):
                 # cancel sell order so we can replace it
                 result = self._execute.cancel(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
                 self._sell_order.update_order(result)
+                self._sell_order.pid = self._pid
                 self._orders.update_order(self._symbol, self._sell_order)
                 if not self._config.simulate():
                     time.sleep(1)
@@ -334,6 +343,7 @@ class TraderPosition(object):
 
         self._stop_loss_order = Order(symbol=self._symbol)
         self._stop_loss_order.update_order(result)
+        self._stop_loss_order.pid = self._pid
         self._orders.add_order(self._symbol, self._stop_loss_order)
 
 
@@ -392,6 +402,7 @@ class TraderPosition(object):
 
         self._sell_order = Order(symbol=self._symbol)
         self._sell_order.update_order(result)
+        self._sell_order.pid = self._pid
         self._orders.add_order(self._symbol, self._sell_order)
 
         # if this is a market order, the buy order should already be filled
@@ -411,6 +422,7 @@ class TraderPosition(object):
         if self._buy_order and not self._buy_order.completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
             self._buy_order.update_order(result)
+            self._buy_order.pid = self._pid
             self._orders.update_order(self._symbol, self._buy_order)
             if self._buy_order.status == OrderStatus.FILLED:
                 self._opened_position_completed = True
@@ -418,6 +430,7 @@ class TraderPosition(object):
         if not self._closed_position_completed and self._sell_order and not self._sell_order.completed():
             result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
             self._sell_order.update_order(result)
+            self._buy_order.pid = self._pid
             self._orders.update_order(self._symbol, self._sell_order)
             if self._sell_order.status == OrderStatus.FILLED:
                 self._closed_position_completed = True
@@ -426,6 +439,7 @@ class TraderPosition(object):
             #print(f"stop loss order: {self._stop_loss_order}")
             result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=current_price, current_ts=current_ts)
             self._stop_loss_order.update_order(result)
+            self._stop_loss_order.pid = self._pid
             self._orders.update_order(self._symbol, self._stop_loss_order)
             if self._stop_loss_order.status == OrderStatus.FILLED:
                 self._stop_loss_price = self._stop_loss_order.price

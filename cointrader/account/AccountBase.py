@@ -6,7 +6,7 @@ from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 class AccountBase(object):
     _logger = None
     _name = None
-    _exchange = None
+    _exchange: TraderExchangeBase = None
     _market = None
     def __init__(self, exchange: TraderExchangeBase, market: MarketBase, logger=None):
         self._cxlent = exchange
@@ -18,6 +18,18 @@ class AccountBase(object):
 
     def exchange(self):
         raise NotImplementedError
+
+    def get_base_name(self, symbol: str) -> str:
+        """
+        Get the base name
+        """
+        return self._exchange.info_ticker_get_base(symbol)
+
+    def get_quote_name(self, symbol: str) -> str:
+        """
+        Get the quote name
+        """
+        return self._exchange.info_ticker_get_quote(symbol)
 
     def get_base_precision(self, symbol: str) -> int:
         """
@@ -61,13 +73,13 @@ class AccountBase(object):
         """
         raise NotImplementedError
 
-    def get_account_balances(self) -> dict:
+    def get_account_balances(self, round: bool) -> dict:
         raise NotImplementedError
 
     def get_total_balance(self, currency : str, prices: dict = None) -> float:
         raise NotImplementedError
 
-    def get_asset_balance(self, asset : str) -> tuple[float, float]:
+    def get_asset_balance(self, asset : str, round: bool) -> tuple[float, float]:
         raise NotImplementedError
 
     def update_asset_balance(self, asset: str, available: float, hold: float):

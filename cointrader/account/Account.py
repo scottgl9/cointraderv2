@@ -104,17 +104,18 @@ class Account(AccountBase):
         #print(f'round_asset: {asset} {amount} -> {amount_str} {asset_precision}')
         return float(amount_str)
 
-    def get_account_balances(self) -> dict:
+    def get_account_balances(self, round=False) -> dict:
         """
         Get the account balances
         """
         result = {}
         balances = self._exchange.balance_all_get()
         for asset, (balance, hold) in balances.items():
-            if balance + hold > 0.0:
+            if round and balance != 0:
                 balance = self.round_asset(asset, balance)
+            if round and hold != 0:
                 hold = self.round_asset(asset, hold)
-                result[asset] = (balance, hold)
+            result[asset] = (balance, hold)
         return result
 
     def get_total_balance(self, currency : str, prices: dict = None) -> float:
@@ -184,13 +185,15 @@ class Account(AccountBase):
 
         return self.round_asset(currency, total_balance)
 
-    def get_asset_balance(self, asset : str) -> tuple[float, float]:
+    def get_asset_balance(self, asset : str, round=False) -> tuple[float, float]:
         """
         Get the asset balance
         """
         balance, hold = self._exchange.balance_get(asset)
-        balance = self.round_asset(asset, balance)
-        hold = self.round_asset(asset, hold)
+        if round and balance != 0:
+            balance = self.round_asset(asset, balance)
+        if round and hold != 0:
+            hold = self.round_asset(asset, hold)
         return tuple([balance, hold])
 
     def update_asset_balance(self, asset: str, available: float, hold: float):

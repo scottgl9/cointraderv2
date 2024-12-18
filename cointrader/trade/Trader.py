@@ -153,6 +153,14 @@ class Trader(object):
             if not self._config.simulate():
                 print(f"{self._symbol} Buy signal {self._strategy.buy_signal_name()} for {self._symbol} {position.pid()} size={size}")
 
+            # check if we have sufficient balance to open the position
+            quote_name = self._account.get_quote_name(self._symbol)
+            balance, _ = self._account.get_asset_balance(quote_name, round=False)
+            balance = self._account.round_quote(self._symbol, balance)
+            if balance < size:
+                print(f"{self._symbol} {quote_name} Insufficient balance {balance} to open position at price {current_price}")
+                return
+
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
             position.open_position(size=size, current_price=current_price, current_ts=current_ts)
@@ -191,7 +199,14 @@ class Trader(object):
                     if not size:
                         continue
 
-                    position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)
+                    # check if we have sufficient balance to update the buy position
+                    quote_name = self._account.get_quote_name(self._symbol)
+                    balance, _ = self._account.get_asset_balance(quote_name, round=False)
+                    balance = self._account.round_quote(self._symbol, balance)
+                    if balance >= size:
+                        position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)
+                    else:
+                        print(f"{self._symbol} {quote_name} Insufficient balance {balance} to update buy position at price {current_price}")
 
                 if not position.opened():
                     continue
@@ -209,9 +224,19 @@ class Trader(object):
                         print(f'Sell signal {sell_signal_name} for {self._symbol} {position.pid()}')
                     if not position.closed_position():
                         #print(f'Sell signal {sell_signal_name} for {self._symbol}')
+                        #base_name = self._account.get_base_name(self._symbol)
+                        #balance, _ = self._account.get_asset_balance(base_name, round=False)
+                        #if not position.stop_loss_is_set() and balance < position.buy_size():
+                        #    print(f"{self._symbol} {base_name} Insufficient balance {balance} to close position at price {current_price}")
+                        #else:
                         position.close_position(current_price=current_price, current_ts=current_ts)
                     elif not position.closed():
                         # for limit and stop loss orders, we may need to cancel them if the price has moved, and place a new order
+                        #base_name = self._account.get_base_name(self._symbol)
+                        #balance, _ = self._account.get_asset_balance(base_name, round=True)
+                        #if not position.stop_loss_is_set() and balance < position.buy_size():
+                        #    print(f"{self._symbol} {base_name} Insufficient balance {balance} to update sell position at price {current_price}")
+                        #else:
                         position.update_sell_position(current_price=current_price, current_ts=current_ts)
 
 
@@ -232,6 +257,13 @@ class Trader(object):
         stop_limit_price = self._loss_strategy.get_stop_limit_price(price=position.buy_price(), current_ts=current_ts)
         # handle setting and updating stop loss orders if enabled
         if not position.stop_loss_is_set():
+            # check if we have sufficient balance to create the stop loss order
+            base_name = self._account.get_base_name(self._symbol)
+            balance, _ = self._account.get_asset_balance(base_name, round=False)
+            balance = self._account.round_base(self._symbol, balance)
+            if balance < position.buy_size():
+                print(f"{self._symbol} {base_name} Insufficient balance {balance} to create stop loss position at price {current_price}")
+                return
             #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
             position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_limit_price, current_ts=current_ts)
         else:
@@ -243,6 +275,13 @@ class Trader(object):
                     # wait for the order to be cancelled
                     time.sleep(1)
 
+                # check if we have sufficient balance to update the stop loss order
+                base_name = self._account.get_base_name(self._symbol)
+                balance, _ = self._account.get_asset_balance(base_name, round=False)
+                balance = self._account.round_base(self._symbol, balance)
+                if balance < position.buy_size():
+                    print(f"{self._symbol} {base_name} Insufficient balance {balance} to update stop loss position at price {current_price}")
+                    return
                 #new_stop_price = self._account.round_quote(self._symbol, (1 - ((percent - stop_loss_limit_percent) / 100.0)) * current_price)
                 #new_stop_limit_price = self._account.round_quote(self._symbol, (1 - (percent / 100.0)) * current_price)
                 new_stop_price = self._loss_strategy.get_stop_loss_price(price=current_price, current_ts=current_ts)

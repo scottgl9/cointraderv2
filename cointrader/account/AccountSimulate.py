@@ -104,7 +104,7 @@ class AccountSimulate(AccountBase):
         #print(f'round_asset: {asset} {amount} -> {amount_str} {asset_precision}')
         return float(amount_str)
 
-    def get_account_balances(self) -> dict:
+    def get_account_balances(self, round=False) -> dict:
         """
         Get the account balances
         """
@@ -170,15 +170,15 @@ class AccountSimulate(AccountBase):
 
         return self.round_asset(currency, total_balance)
 
-    def get_asset_balance(self, asset : str) -> tuple[float, float]:
+    def get_asset_balance(self, asset : str, round=False) -> tuple[float, float]:
         """
         Get the asset balance
         """
         try:
             balance, hold = self._balances[asset]
-            if balance != 0.0:
+            if balance != 0.0 and round:
                 balance = self.round_asset(asset, balance)
-            if hold != 0.0:
+            if hold != 0.0 and round:
                 hold = self.round_asset(asset, hold)
             return tuple([balance, hold])
         except KeyError:

@@ -1,17 +1,19 @@
 # Orders class to store all orders
 from .Order import Order
 from .OrderStorage import OrderStorage
+from cointrader.trade.TraderConfig import TraderConfig
 
 class Orders:
-    def __init__(self, order_storage: OrderStorage = None, db_path='orders.db', reset=True):
+    def __init__(self, config: TraderConfig, order_storage: OrderStorage = None, db_path='orders.db', reset=True):
         self.orders = {}
+        self._config = config
         self._db_path = db_path
         if db_path is None:
             self._order_storage = None
         elif order_storage is not None:
             self._order_storage = order_storage
         else:
-            self._order_storage = OrderStorage(db_path=db_path, reset=reset)
+            self._order_storage = OrderStorage(config=config, db_path=db_path, reset=reset)
 
     def add_order(self, symbol: str, order: Order):
         if symbol not in self.orders:

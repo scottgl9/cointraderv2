@@ -57,7 +57,7 @@ def main(args):
 
     ex = TraderExecuteSimulate(exchange=exchange, account=account, config=tconfig)
 
-    orders = Orders(db_path=tconfig.orders_db_path(), reset=True)
+    orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
 
     mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, granularity=args.granularity)
 

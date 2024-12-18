@@ -14,7 +14,7 @@ class MultiTrader(object):
         self._granularity = granularity
 
         if not orders:
-            self._orders = Orders()
+            self._orders = Orders(config=self._config)
         else:
             self._orders = orders
         self._symbols = self._config.trade_symbols()
