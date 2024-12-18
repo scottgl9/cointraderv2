@@ -10,6 +10,7 @@ from .OrderErrorReason import OrderErrorReason
 class OrderResult(object):
     def __init__(self, symbol: str):
         self.id = ""
+        self.active = True
         self.symbol = symbol
         self.type = OrderType.UNKNOWN
         self.limit_type = OrderLimitType.UNKNOWN
@@ -31,6 +32,8 @@ class OrderResult(object):
 
     def from_dict(self, data: dict):
         self.id = data['id']
+        if 'active' in data:
+            self.active = data['active']
         self.symbol = data['symbol']
         self.type = OrderType(data['type'])
         self.limit_type = OrderLimitType(data['limit_type'])
@@ -53,6 +56,7 @@ class OrderResult(object):
     def to_dict(self):
         return {
             'id': self.id,
+            'active': self.active,
             'symbol': self.symbol,
             'type': self.type.name,
             'limit_type': self.limit_type.name,

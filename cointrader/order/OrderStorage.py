@@ -6,8 +6,8 @@ class OrderStorage:
     def __init__(self, db_path='orders.db', reset=True):
         self.db_path = db_path
         self._fields = [
-            'id', 'symbol', 'type', 'limit_type', 'side', 'price', 'limit_price', 'stop_price', 'stop_direction', 'size',
-            'filled_size', 'fee', 'placed_ts', 'filled_ts', 'msg', 'post_only', 'status', 'error_reason', 'error_msg'
+            'id', 'active', 'symbol', 'type', 'limit_type', 'side', 'price', 'limit_price', 'stop_price', 'stop_direction',
+            'size', 'filled_size', 'fee', 'placed_ts', 'filled_ts', 'msg', 'post_only', 'status', 'error_reason', 'error_msg'
         ]
         print(f"db_path: {db_path}")
         self._conn = sqlite3.connect(self.db_path)
@@ -20,6 +20,7 @@ class OrderStorage:
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS orders (
                 id TEXT PRIMARY KEY,
+                active INTEGER,
                 symbol TEXT NOT NULL,
                 type TEXT NOT NULL,
                 limit_type TEXT,
@@ -51,8 +52,8 @@ class OrderStorage:
     def add_order(self, order: Order):
         field_str = ', '.join(self._fields)
         cursor = self._conn.cursor()
-        cursor.execute(f"INSERT INTO orders ({field_str}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (order.id, order.symbol, order.type.name, order.limit_type.name, order.side.name, order.price, order.limit_price,
+        cursor.execute(f"INSERT INTO orders ({field_str}) VALUES (? ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (order.id, int(order.active), order.symbol, order.type.name, order.limit_type.name, order.side.name, order.price, order.limit_price,
                 order.stop_price, order.stop_direction.name, order.size, order.filled_size, order.fee, order.placed_ts,
                 order.filled_ts, order.msg, int(order.post_only), order.status.name, order.error_reason.name, str(order.error_msg)))
         self._conn.commit()
@@ -69,9 +70,24 @@ class OrderStorage:
             return None
         return dict(zip(columns, result))
 
-    def get_all_orders(self):
+    def get_all_orders(self, symbol: str=None):
         cursor = self._conn.cursor()
-        cursor.execute('SELECT * FROM orders')
+        if symbol is None:
+            cursor.execute('SELECT * FROM orders')
+        else:
+            cursor.execute('SELECT * FROM orders WHERE symbol = ?', (symbol,))
+        columns = [column[0] for column in cursor.description]
+        result = cursor.fetchall()
+        if result is None:
+            return None
+        return [dict(zip(columns, row)) for row in result]
+    
+    def get_active_orders(self, symbol: str=None):
+        cursor = self._conn.cursor()
+        if symbol is None:
+            cursor.execute('SELECT * FROM orders WHERE active = 1')
+        else:
+            cursor.execute('SELECT * FROM orders WHERE symbol = ? AND active = 1', (symbol,))
         columns = [column[0] for column in cursor.description]
         result = cursor.fetchall()
         if result is None:
@@ -80,13 +96,18 @@ class OrderStorage:
 
     def update_order(self, order: Order):
         cursor = self._conn.cursor()
-        cursor.execute('UPDATE orders SET symbol = ?, type = ?, limit_type = ?, side = ?, price = ?, limit_price = ?, stop_price = ?, stop_direction = ?, size = ?, filled_size = ?, fee = ?, placed_ts = ?, filled_ts = ?, msg = ?, post_only = ?, status = ?, error_reason = ?, error_msg = ? WHERE id = ?',
-            (order.symbol, order.type.name, order.limit_type.name, order.side.name, order.price, order.limit_price, order.stop_price, order.stop_direction.name, order.size, order.filled_size, order.fee, order.placed_ts, order.filled_ts, order.msg, int(order.post_only), order.status.name, order.error_reason.name, str(order.error_msg), order.id))
+        cursor.execute('UPDATE orders SET symbol = ?, active = ?, type = ?, limit_type = ?, side = ?, price = ?, limit_price = ?, stop_price = ?, stop_direction = ?, size = ?, filled_size = ?, fee = ?, placed_ts = ?, filled_ts = ?, msg = ?, post_only = ?, status = ?, error_reason = ?, error_msg = ? WHERE id = ?',
+            (order.symbol, int(order.active), order.type.name, order.limit_type.name, order.side.name, order.price, order.limit_price, order.stop_price, order.stop_direction.name, order.size, order.filled_size, order.fee, order.placed_ts, order.filled_ts, order.msg, int(order.post_only), order.status.name, order.error_reason.name, str(order.error_msg), order.id))
         self._conn.commit()
 
     def update_order_status(self, order_id, status):
         cursor = self._conn.cursor()
         cursor.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id))
+
+    def update_order_active(self, order_id: str, active: bool):
+        cursor = self._conn.cursor()
+        cursor.execute('UPDATE orders SET active = ? WHERE id = ?', (active, int(order_id)))
+        self._conn.commit()
 
     def delete_order(self, order_id):
         cursor = self._conn.cursor()

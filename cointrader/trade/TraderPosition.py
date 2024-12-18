@@ -43,6 +43,17 @@ class TraderPosition(object):
     def id(self):
         return self._id
 
+    def symbol(self):
+        return self._symbol
+    
+    def buy_order(self):
+        return self._buy_order
+
+    def sell_order(self):
+        return self._sell_order
+    
+    def stop_loss_order(self):
+        return self._stop_loss_order
 
     def opened_position(self):
         return self._opened_position

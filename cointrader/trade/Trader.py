@@ -26,6 +26,7 @@ class Trader(object):
     _strategy: Strategy = None
     _loss_strategy: TradeLossBase = None
     _size_strategy: TradeSizeBase = None
+    _orders: Orders = None
     _max_positions = 0
 
     def __init__(self, account: Account, symbol: str, execute: ExecuteBase, config: TraderConfig, orders: Orders, granularity: int = 0):
@@ -101,6 +102,16 @@ class Trader(object):
 
             # handle closed position when sell order or stop loss has been filled
             if position.closed():
+                # mark the orders as inactive in Orders
+                buy_order = position.buy_order()
+                if buy_order:
+                    self._orders.update_order_active(self._symbol, buy_order.id, False)
+                sell_order = position.sell_order()
+                if sell_order:
+                    self._orders.update_order_active(self._symbol, sell_order.id, False)
+                stop_loss_order = position.stop_loss_order()
+                if stop_loss_order:
+                    self._orders.update_order_active(self._symbol, stop_loss_order.id, False)
                 self.remove_position(position, current_ts)
 
         # if kline.granularity != self._granularity:
