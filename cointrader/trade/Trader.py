@@ -136,6 +136,9 @@ class Trader(object):
             if not size:
                 print(f"{self._symbol} Size too small: {size}")
                 return
+            
+            if not self._config.simulate():
+                print(f"{self._symbol} Buy signal {self._strategy.buy_signal_name()} for {self._symbol} {position.id()} size={size}")
 
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
@@ -189,6 +192,8 @@ class Trader(object):
                         sell_signal_name = self._strategy.sell_signal_name()
                 # if we have not yet attempted to close the position
                 if sell_signal:
+                    if not self._config.simulate():
+                        print(f'Sell signal {sell_signal_name} for {self._symbol} {position.id()}')
                     if not position.closed_position():
                         #print(f'Sell signal {sell_signal_name} for {self._symbol}')
                         position.close_position(current_price=current_price, current_ts=current_ts)

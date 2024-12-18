@@ -193,6 +193,8 @@ class TraderPosition(object):
         """
         Open a position with a buy order
         """
+        if not self._config.simulate():
+            print(f"Closing position for {self._symbol} current price: {current_price}, current ts: {current_ts}")
         self._current_price = current_price
         self._current_ts = current_ts
         self._opened_position = True
@@ -328,6 +330,8 @@ class TraderPosition(object):
         """
         Close the position with a sell order
         """
+        if not self._config.simulate():
+            print(f"Closing position for {self._symbol} current price: {current_price}, current ts: {current_ts}")
         self._closed_position = True
         self._current_price = current_price
         self._current_ts = current_ts
