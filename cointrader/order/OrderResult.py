@@ -8,8 +8,31 @@ from .OrderStopDirection import OrderStopDirection
 from .OrderErrorReason import OrderErrorReason
 
 class OrderResult(object):
+    id: str                             # Order ID
+    pid: int                            # Position ID (used for restoring positions)
+    active: bool                        # Active order
+    symbol: str                         # Symbol (e.g. BTC/USD)
+    type: OrderType                     # Order type (e.g. MARKET, LIMIT)
+    limit_type: OrderLimitType          # Limit type (e.g. GTC, IOC)
+    side: OrderSide                     # Order side (e.g. BUY, SELL)
+    price: float                        # Executed order price
+    limit_price: float                  # Limit price
+    stop_price: float                   # Stop price
+    stop_direction: OrderStopDirection  # Stop direction (e.g. ABOVE, BELOW)
+    size: float                         # Order size
+    filled_size: float                  # Filled order size
+    fee: float                          # Order fee
+    placed_ts: int                      # Order placed timestamp
+    filled_ts: int                      # Order filled timestamp
+    msg: str                            # Raw result message
+    post_only: bool                     # Post only order
+    status: OrderStatus                 # Order status
+    error_reason: OrderErrorReason      # Order error reason
+    error_msg: str                      # Error message
+
     def __init__(self, symbol: str):
         self.id = ""
+        self.pid: int = 0
         self.active = True
         self.symbol = symbol
         self.type = OrderType.UNKNOWN
@@ -32,6 +55,8 @@ class OrderResult(object):
 
     def from_dict(self, data: dict):
         self.id = data['id']
+        if 'pid' in data:
+            self.id = data['pid']
         if 'active' in data:
             self.active = data['active']
         self.symbol = data['symbol']
@@ -56,6 +81,7 @@ class OrderResult(object):
     def to_dict(self):
         return {
             'id': self.id,
+            'pid': self.pid,
             'active': self.active,
             'symbol': self.symbol,
             'type': self.type.name,

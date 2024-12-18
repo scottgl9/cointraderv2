@@ -14,8 +14,8 @@ class TraderPosition(object):
     _stop_loss_order: Order = None
     _last_stop_loss_order: Order = None
 
-    def __init__(self, symbol: str, id: int, strategy: Strategy, execute: ExecuteBase, config: TraderConfig, orders: Orders):
-        self._id = id
+    def __init__(self, symbol: str, pid: int, strategy: Strategy, execute: ExecuteBase, config: TraderConfig, orders: Orders):
+        self._pid = pid
         self._symbol = symbol
         self._config = config
         self._orders = orders
@@ -40,8 +40,8 @@ class TraderPosition(object):
         self._timestamp = 0
 
 
-    def id(self):
-        return self._id
+    def pid(self):
+        return self._pid
 
     def symbol(self):
         return self._symbol

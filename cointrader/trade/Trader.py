@@ -151,10 +151,10 @@ class Trader(object):
                 return
             
             if not self._config.simulate():
-                print(f"{self._symbol} Buy signal {self._strategy.buy_signal_name()} for {self._symbol} {position.id()} size={size}")
+                print(f"{self._symbol} Buy signal {self._strategy.buy_signal_name()} for {self._symbol} {position.pid()} size={size}")
 
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
-            position = TraderPosition(symbol=self._symbol, id=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
+            position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
             position.open_position(size=size, current_price=current_price, current_ts=current_ts)
             opened_position_id = self._cur_id
             self._positions.append(position)
@@ -180,7 +180,7 @@ class Trader(object):
         if len(self._positions) > 0:
             for position in self._positions:
                 # for a position that hasn't completed the buy order yet, skip it
-                if position.id() == opened_position_id:
+                if position.pid() == opened_position_id:
                     continue
 
                 # for limit and stop loss orders, we may need to cancel them if the price has moved, and place a new order
@@ -206,7 +206,7 @@ class Trader(object):
                 # if we have not yet attempted to close the position
                 if sell_signal:
                     if not self._config.simulate():
-                        print(f'Sell signal {sell_signal_name} for {self._symbol} {position.id()}')
+                        print(f'Sell signal {sell_signal_name} for {self._symbol} {position.pid()}')
                     if not position.closed_position():
                         #print(f'Sell signal {sell_signal_name} for {self._symbol}')
                         position.close_position(current_price=current_price, current_ts=current_ts)
