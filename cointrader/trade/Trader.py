@@ -8,6 +8,7 @@ from cointrader.execute.ExecuteBase import ExecuteBase
 from .TraderPosition import TraderPosition
 from cointrader.order.Orders import Orders
 from cointrader.order.OrderStatus import OrderStatus
+from cointrader.order.OrderSide import OrderSide
 import importlib
 from cointrader.signals.EMACross import EMACross
 from cointrader.signals.SupertrendSignal import SupertrendSignal
@@ -80,6 +81,61 @@ class Trader(object):
         return len(self._positions)
 
 
+    def restore_positions(self, current_price: float, current_ts: int) -> bool:
+        """
+        Restore positions from the database. Used if trading bot exits prematurely, and we need to restore the positions from the order database
+        """
+        orders = self._orders.get_active_orders(symbol=self._symbol)
+        order_by_pid = {}
+        # reorganize orders by pid
+        for order in orders:
+            # if the order is cancelled, skip it
+            if order.cancelled():
+                continue
+            if order.pid not in order_by_pid.keys():
+                if order.side == OrderSide.BUY:
+                    result = self._execute.status(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                    order.update_order(result)
+                    if order.status == OrderStatus.PLACED:
+                        # for simplicity, just cancel the open order
+                        print(f"{self._symbol} Cancelling buy order {order}")
+                        result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                        if not self._config.simulate():
+                            time.sleep(1)
+                        order.update_order(result)
+                        order.active = False
+                        self._orders.update_order(symbol=self._symbol, order=order)
+                    elif order.status == OrderStatus.FILLED:
+                        order_by_pid[order.pid] = order
+
+                elif order.side == OrderSide.SELL and order.status == OrderStatus.PLACED:
+                    # to keep things simple, just cancel the order
+                    print(f"{self._symbol} Cancelling sell order {order}")
+                    result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                    if not self._config.simulate():
+                        time.sleep(1)
+                    order.update_order(result)
+                    order.active = False
+                    self._orders.update_order(symbol=self._symbol, order=order)
+            else:
+                if order.side == OrderSide.BUY and order.status == OrderStatus.PLACED:
+                    print(f"Error: Duplicate buy order found, cancelling order: {order}")
+                    result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                    if not self._config.simulate():
+                        time.sleep(1)
+                    order.update_order(result)
+                    order.active = False
+                    self._orders.update_order(symbol=self._symbol, order=order)
+        
+        # restore the positions with buy orders
+        for _, order in order_by_pid.items():
+            print(f"{self._symbol} Restoring position from order: {order}")
+            position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
+            position.restore_buy_order(order=order, current_price=current_price, current_ts=current_ts)
+            self._positions.append(position)
+            self._cur_id += 1
+
+
     def market_preload(self, klines: list[Kline]):
         """
         Preload klines for the strategy
@@ -90,10 +146,10 @@ class Trader(object):
             self._size_strategy.update(kline, current_price=kline.close, current_ts=kline.ts)
 
 
-    def market_update(self, kline: Kline, current_price: float, current_ts: int):
+    def market_update(self, kline: Kline, current_price: float, current_ts: int, granularity: int = 0):
         # if position has been closed, remove it from the list
         for position in self._positions:
-            if kline.granularity == self._granularity:
+            if granularity == self._granularity:
                 position.market_update(current_price=current_price, current_ts=current_ts)
 
             # handle trailing stop loss, prevent placing stop loss if we have already started closing the position
@@ -127,7 +183,7 @@ class Trader(object):
         #        #print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
         #    return
 
-        if kline.granularity == self._granularity:
+        if kline is not None and granularity == self._granularity:
             self._strategy.update(kline)
             self._loss_strategy.update(kline, current_price, current_ts)
             self._size_strategy.update(kline, current_price, current_ts)

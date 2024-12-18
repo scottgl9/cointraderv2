@@ -12,6 +12,7 @@ class MultiTrader(object):
         self._config = config
         self._execute = execute
         self._granularity = granularity
+        self._positions_restored = False
 
         if not orders:
             self._orders = Orders(config=self._config)
@@ -35,13 +36,19 @@ class MultiTrader(object):
         trader = self._traders[symbol]
         trader.market_preload(klines)
 
-    def market_update(self, kline: Kline, current_price: float, current_ts: int):
+    def market_update(self, kline: Kline, current_price: float, current_ts: int, granularity: int):
         if kline.symbol not in self._traders.keys():
             print(f"Symbol {kline.symbol} not found in traders")
             return
 
+        # restore positions for living trading
+        if not self._config.simulate() and not self._positions_restored:
+            for symbol in self._symbols:
+                self._traders[symbol].restore_positions()
+            self._positions_restored = True
+
         trader = self._traders[kline.symbol]
-        trader.market_update(kline, current_price=current_price, current_ts=current_ts)
+        trader.market_update(kline, current_price=current_price, current_ts=current_ts, granularity=granularity)
 
     def net_profit_percent(self, symbol: str):
         if symbol not in self._traders.keys():

@@ -49,6 +49,15 @@ class TraderPosition(object):
     def buy_order(self):
         return self._buy_order
 
+    def restore_buy_order(self, order: Order, current_price: float, current_ts: int):
+        """
+        Restore the buy order from the database
+        """
+        self._buy_order = order
+        self._opened_position_completed = True
+        self._current_price = current_price
+        self._current_ts = current_ts
+
     def sell_order(self):
         return self._sell_order
     

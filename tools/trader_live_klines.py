@@ -110,7 +110,7 @@ class CBADVLive:
                     if kline.ts != self._last_ts and kline.ts % 1800 == 0:
                         pd.to_datetime(kline.ts, unit='s')
                         print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
-                    self.mtrader.market_update(kline, current_price=kline.close, current_ts=kline.ts)
+                    self.mtrader.market_update(kline, current_price=kline.close, current_ts=kline.ts, granularity=self.granularity)
                     self._last_ts = kline.ts
 
 

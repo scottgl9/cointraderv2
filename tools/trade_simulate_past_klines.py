@@ -99,7 +99,7 @@ def main(args):
             kline.from_dict(k)
             kline.symbol = symbol
             kline.granularity = args.granularity
-            mtrader.market_update(kline=kline, current_price=kline.close, current_ts=kline.ts)
+            mtrader.market_update(kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=args.granularity)
             value = emas[symbol].update(kline)
             ema_values[symbol].append(value)
 
