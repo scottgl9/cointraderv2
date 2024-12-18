@@ -26,6 +26,8 @@ from cointrader.trade.TraderConfig import TraderConfig
 from cointrader.common.Kline import Kline
 from cointrader.order.Orders import Orders
 from cointrader.config import *
+import sys
+import select
 
 GRANULARITY = 300
 
@@ -76,8 +78,8 @@ class CBADVLive:
         #print(f"Channel: {ws_object.channel}")
         if ws_object.channel == "subscriptions":
             print(f"Subscriptions: {ws_object}")
-        elif ws_object.channel == "user":
-            print(f"User: {ws_object}")
+        #elif ws_object.channel == "user":
+        #    print(f"User: {ws_object}")
         elif ws_object.channel == "heartbeat":
             print(f"Heartbeat: {ws_object}")
         elif ws_object.channel == "candles":
@@ -157,8 +159,11 @@ def main(name):
     ]
 
     tconfig = TraderConfig(path=f'config/{name}_trader_live_config.json')
+    if not tconfig.load_config():
+        print(f"Failed to load config {tconfig.get_config_path()}")
+        tconfig.save_config()
+
     tconfig.set_trade_symbols(trade_symbols=top_crypto)
-    tconfig.save_config()
 
     market = Market(exchange=exchange, db_path=tconfig.market_db_path())
     account = Account(exchange=exchange, market=market)
@@ -192,9 +197,17 @@ def main(name):
 
     while running:
         try:
-            time.sleep(1)
+            # Wait for 1 second or until input is available
+            i, _, _ = select.select([sys.stdin], [], [], 1)
+            if i:
+                input_char = sys.stdin.readline().strip()
+                if input_char == 'q':
+                    ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
+                    ws_client.close()
+                    running = False
+                    print("Exiting...")
         except (KeyboardInterrupt, SystemExit):
-            ws_client.unsubscribe(product_ids=top_crypto, channels=channels)#, 'matches'])
+            ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
             ws_client.close()
             running = False
             print("Exiting...")

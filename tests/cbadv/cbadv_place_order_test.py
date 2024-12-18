@@ -10,6 +10,19 @@ CLIENT_NAME = "cbadv"
 
 if __name__ == '__main__':
     exchange = TraderSelectExchange(CLIENT_NAME).get_exchange()
+    # {'success': True, 'success_response': {'order_id': 'f01d3875-5940-4660-b8b5-b80682e02209', 'product_id': 'AVAX-USD', 'side': 'BUY', 'client_order_id': 'da5167f74c19494db183d1542aef5cc7', 'attached_order_id': ''}, 'order_configuration': {'market_market_ioc': {'base_size': '0.01', 'rfq_enabled': False, 'rfq_disabled': False}}}
+
+    # {'success': True, 'success_response': {'order_id': 'abf231e1-9231-4eaf-9d3b-aeadac489534', 'product_id': 'AVAX-USD', 'side': 'BUY', 'client_order_id': '8347d761e6ec4044b7172d929321e825', 'attached_order_id': ''}, 'order_configuration': {'market_market_ioc': {'base_size': '1e-05', 'rfq_enabled': False, 'rfq_disabled': False}}}
+    # result = exchange.trade_buy_market('AVAX-USD', 0.00001)
+    # print("")
+    # print(result)
+    # print("")
+
+    # {'order': {'order_id': 'abf231e1-9231-4eaf-9d3b-aeadac489534', 'product_id': 'AVAX-USD', 'user_id': '449e61a2-b98d-5be4-8ad1-bcfbb826ca32', 'order_configuration': {'market_market_ioc': {'base_size': '0.00001', 'rfq_enabled': False, 'rfq_disabled': False}}, 'side': 'BUY', 'client_order_id': '8347d761e6ec4044b7172d929321e825', 'status': 'OPEN', 'time_in_force': 'IMMEDIATE_OR_CANCEL', 'created_time': '2024-12-18T21:09:24.242360Z', 'completion_percentage': '0', 'filled_size': '0', 'average_filled_price': '0', 'fee': '', 'number_of_fills': '0', 'filled_value': '0', 'pending_cancel': False, 'size_in_quote': False, 'total_fees': '0', 'size_inclusive_of_fees': False, 'total_value_after_fees': '0', 'trigger_status': 'INVALID_ORDER_TYPE', 'order_type': 'MARKET', 'reject_reason': 'REJECT_REASON_UNSPECIFIED', 'settled': False, 'product_type': 'SPOT', 'reject_message': '', 'cancel_message': '', 'order_placement_source': 'RETAIL_ADVANCED', 'outstanding_hold_amount': '0.0004632602625', 'is_liquidation': False, 'last_fill_time': None, 'edit_history': [], 'leverage': '', 'margin_type': 'UNKNOWN_MARGIN_TYPE', 'retail_portfolio_id': '449e61a2-b98d-5be4-8ad1-bcfbb826ca32', 'originating_order_id': '', 'attached_order_id': '', 'attached_order_configuration': None}}
+    # result = exchange.trade_get_order("AVAX-USD", result.id)
+    # print("")
+    # print(result)
+
     #print("exchange.trade_sell_market(\"BTC-USD\", 0.0001)")
     #result = exchange.trade_sell_market("BTC-USD", amount=0.0001)
     #print(str(result))
@@ -42,21 +55,27 @@ if __name__ == '__main__':
     #print(str(result))
 
     # {'success': True, 'response': {'order_id': '630939ab-6105-4062-b44a-342bcee33800', 'product_id': 'BTC-USD', 'side': 'BUY', 'exchange_order_id': '39bec75543d64aaf94d3dc3feeb24972', 'attached_order_id': ''}, 'order_configuration': {'stop_limit_stop_limit_gtc': {'base_size': '5e-05', 'limit_price': '200001', 'stop_price': '200000', 'stop_direction': 'STOP_DIRECTION_STOP_UP'}}}
-    #stop_result = exchange.trade_buy_stop_limit("BTC-USD", amount=0.00005, price=200001, stop_price=200000)
-    #print(str(stop_result))
+    stop_result = exchange.trade_buy_stop_limit("BTC-USD", amount=0.00005, price=200001, stop_price=200000)
+    print("")
+    print(str(stop_result))
+    print("")
     #print(stop_result.id)
 
     #print("Order Status")
-    #result = exchange.trade_get_order("BTC-USD", stop_result.id)
-    #print(str(result))
-
-    #print(f"Cancel order {stop_result.id}")
-    #result = exchange.trade_cancel_order("BTC-USD", stop_result.id)
-    #print(str(result))
-
-    result = exchange.trade_buy_market('XRP-USDC', 1)
-    print(result)
-
-    print("Order Status")
-    result = exchange.trade_get_order("XRP-USDC", result.id)
+    result = exchange.trade_get_order("BTC-USD", stop_result.id)
+    print("")
     print(str(result))
+    print("")
+
+    print(f"Cancel order {stop_result.id}")
+    result = exchange.trade_cancel_order("BTC-USD", stop_result.id)
+    print("")
+    print(str(result))
+    print("")
+
+    # result = exchange.trade_buy_market('XRP-USDC', 1)
+    # print(result)
+
+    # print("Order Status")
+    # result = exchange.trade_get_order("XRP-USDC", result.id)
+    # print(str(result))

@@ -12,7 +12,6 @@ class MultiTrader(object):
         self._config = config
         self._execute = execute
         self._granularity = granularity
-        self._positions_restored = False
 
         if not orders:
             self._orders = Orders(config=self._config)
@@ -22,8 +21,9 @@ class MultiTrader(object):
         print(f"MultiTrader: {self._symbols}")
         for symbol in self._symbols:
             if symbol not in self._traders.keys():
+                print(f"Restoring positions for {symbol}...")
                 self._traders[symbol] = Trader(account=account, symbol=symbol, execute=self._execute, config=self._config, orders=self._orders, granularity=self._granularity)
-
+                self._traders[symbol].restore_positions(current_price=0.0, current_ts=0)
 
     def market_preload(self, symbol: str, klines: list[Kline]):
         """
@@ -40,12 +40,6 @@ class MultiTrader(object):
         if kline.symbol not in self._traders.keys():
             print(f"Symbol {kline.symbol} not found in traders")
             return
-
-        # restore positions for living trading
-        if not self._config.simulate() and not self._positions_restored:
-            for symbol in self._symbols:
-                self._traders[symbol].restore_positions()
-            self._positions_restored = True
 
         trader = self._traders[kline.symbol]
         trader.market_update(kline, current_price=current_price, current_ts=current_ts, granularity=granularity)

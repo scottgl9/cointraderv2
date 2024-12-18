@@ -7,19 +7,20 @@ class OrderStorage:
     def __init__(self, config: TraderConfig, db_path='orders.db', reset=True):
         self._config = config
         self.db_path = db_path
+        self._reset = reset
         self._fields = [
             'id', 'pid', 'active', 'symbol', 'type', 'limit_type', 'side', 'price', 'limit_price', 'stop_price', 'stop_direction',
             'size', 'filled_size', 'fee', 'placed_ts', 'filled_ts', 'msg', 'post_only', 'status', 'error_reason', 'error_msg'
         ]
         print(f"db_path: {db_path}")
         self._conn = sqlite3.connect(self.db_path)
-        if reset:
-            self.reset()
+        self.reset()
 
 
     def reset(self):
         cursor = self._conn.cursor()
-        cursor.execute('DROP TABLE IF EXISTS orders')
+        if self._reset:
+            cursor.execute('DROP TABLE IF EXISTS orders')
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS orders (
                 id TEXT PRIMARY KEY,
@@ -80,6 +81,8 @@ class OrderStorage:
         return Order(symbol=symbol, data=dict(zip(columns, result)))
 
     def get_all_orders(self, symbol: str=None) -> list[Order]:
+        if not self.table_exists():
+            return []
         cursor = self._conn.cursor()
         if symbol is None:
             cursor.execute('SELECT * FROM orders')

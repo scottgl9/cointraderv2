@@ -7,14 +7,23 @@ sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.account.Account import Account
 from cointrader.market.Market import Market
+from cointrader.trade.TraderConfig import TraderConfig
 
 CLIENT_NAME = "cbadv"
 
 def main(args):
     print(f"Exchange name: {args.exchange_name}")
+    name = args.exchange_name
     exchange = TraderSelectExchange(args.exchange_name).get_exchange()
 
-    market = Market(exchange=exchange, db_path=args.db_path)
+    tconfig = TraderConfig(path=f'config/{name}_trader_simulate_csv_config.json')
+    if not tconfig.load_config():
+        print(f"Failed to load config {tconfig.get_config_path()}")
+        tconfig.save_config()
+    else:
+        print(f"Loaded config {tconfig.get_config_path()}")
+
+    market = Market(exchange=exchange, db_path=tconfig.market_db_path())
     account = Account(exchange=exchange, market=market)
     account.load_symbol_info()
 
@@ -48,7 +57,6 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--exchange-name', type=str, default=CLIENT_NAME, help='Exchange account name to use for simulation')
-    parser.add_argument('--db_path', type=str, default='market_data.db', help='Path to the database file')
     parser.add_argument('--symbols', type=str, default='BTC-USD,ETH-USD,SOL-USD', help='Comma separated list of symbols')
     parser.add_argument('--granularity', type=int, default=300)
     parser.add_argument('--start-date', type=str, default='2024-12-02', help='Start date for klines')

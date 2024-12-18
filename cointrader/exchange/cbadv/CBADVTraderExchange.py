@@ -245,6 +245,7 @@ class CBADVTraderExchange(TraderExchangeBase):
             result = {}
             result['success'] = False
             result['response'] = { 'error': 'UNKNOWN', 'message': str(e) }
+
         return self.trade_parse_order_result(result, ticker)
     
     def trade_sell_market(self, ticker: str, amount: float) -> dict:
@@ -349,19 +350,26 @@ class CBADVTraderExchange(TraderExchangeBase):
         order_result = OrderResult(symbol=ticker)
         sub_result = None
 
-        if isinstance(result, dict):
-            if 'success' in result:
-                if not result['success']:
-                    response = result['response']
-                    if 'error' in response:
-                        if response['error'] == "UNKNOWN":
-                            order_result.error_reason = OrderErrorReason.UNKNOWN
-                            order_result.error_msg = response['message']
-                            return order_result
-                        elif response['error'] == "INSUFFICIENT_FUND":
-                            order_result.error_reason = OrderErrorReason.INSUFFIENT_BALANCE
-                            order_result.error_msg = response['message']
-                            return order_result
+        if not isinstance(result, dict):
+            result = result.to_dict()
+
+        # handle error case
+        if 'success' in result:
+            if not result['success']:
+                response = result['response']
+                if 'error' in response:
+                    if response['error'] == "UNKNOWN":
+                        order_result.status = OrderStatus.REJECTED
+                        order_result.error_reason = OrderErrorReason.UNKNOWN
+                        order_result.error_msg = response['message']
+                        return order_result
+                    elif response['error'] == "INSUFFICIENT_FUND":
+                        order_result.status = OrderStatus.REJECTED
+                        order_result.error_reason = OrderErrorReason.INSUFFIENT_BALANCE
+                        order_result.error_msg = response['message']
+                        return order_result
+            elif 'success_response' in result:
+                sub_result = result['success_response']
 
         if 'response' in result:
             if not result['success']:
@@ -434,6 +442,10 @@ class CBADVTraderExchange(TraderExchangeBase):
                     order_result.limit_type = OrderLimitType.GTC
                 elif sub_result['time_in_force'] == 'IMMEDIATE_OR_CANCEL':
                     order_result.limit_type = OrderLimitType.IOC
+                elif sub_result['time_in_force'] == 'FILL_OR_KILL':
+                    order_result.limit_type = OrderLimitType.FOK
+                elif sub_result['time_in_force'] == 'GOOD_UNIT_DATE_TIME':
+                    order_result.limit_type = OrderLimitType.GTD
                 else:
                     order_result.limit_type = OrderLimitType.UNKNOWN
 
@@ -442,9 +454,14 @@ class CBADVTraderExchange(TraderExchangeBase):
             elif 'filled_value' in sub_result:
                 order_result.price = float(sub_result['filled_value'])
 
+            order_configuration = None
+
             if 'order_configuration' in sub_result:
                 order_configuration = sub_result['order_configuration']
+            elif 'order_configuration' in result:
+                order_configuration = result['order_configuration']
 
+            if order_configuration:
                 if 'market_market_ioc' in order_configuration:
                     order_type = 'market_market_ioc'
                     order_result.type = OrderType.MARKET
@@ -460,6 +477,29 @@ class CBADVTraderExchange(TraderExchangeBase):
                     order_result.error_reason = OrderErrorReason.NONE
                     if 'post_only' in order_configuration[order_type]:
                         order_result.post_only = order_configuration[order_type]['post_only']
+                elif 'sor_limit_ioc' in order_configuration:
+                    order_type = 'sor_limit_ioc'
+                    order_result.type = OrderType.LIMIT
+                    order_result.limit_price = float(order_configuration[order_type]['limit_price'])
+                    order_result.size = float(order_configuration[order_type]['base_size'])
+                    order_result.status = OrderStatus.PLACED
+                    order_result.error_reason = OrderErrorReason.NONE
+                elif 'limit_limit_gtd' in order_configuration:
+                    order_type = 'limit_limit_gtd'
+                    order_result.type = OrderType.LIMIT
+                    order_result.limit_price = float(order_configuration[order_type]['limit_price'])
+                    order_result.size = float(order_configuration[order_type]['base_size'])
+                    order_result.status = OrderStatus.PLACED
+                    order_result.error_reason = OrderErrorReason.NONE
+                    if 'post_only' in order_configuration[order_type]:
+                        order_result.post_only = order_configuration[order_type]['post_only']
+                elif 'limit_limit_fok' in order_configuration:
+                    order_type = 'limit_limit_fok'
+                    order_result.type = OrderType.LIMIT
+                    order_result.limit_price = float(order_configuration[order_type]['limit_price'])
+                    order_result.size = float(order_configuration[order_type]['base_size'])
+                    order_result.status = OrderStatus.PLACED
+                    order_result.error_reason = OrderErrorReason.NONE
                 elif 'stop_limit_stop_limit_gtc' in order_configuration:
                     order_type = 'stop_limit_stop_limit_gtc'
                     order_result.type = OrderType.STOP_LOSS_LIMIT
@@ -484,5 +524,19 @@ class CBADVTraderExchange(TraderExchangeBase):
                         order_result.status = OrderStatus.CANCELLED
                     elif sub_result['status'] == 'CANCEL_QUEUED':
                         order_result.status = OrderStatus.CANCELLED
+                    elif sub_result['status'] == 'OPEN':
+                        order_result.status = OrderStatus.PLACED
+                    elif sub_result['status'] == 'PENDING':
+                        order_result.status = OrderStatus.PENDING
+                    elif sub_result['status'] == 'EXPIRED':
+                        order_result.status = OrderStatus.EXPIRED
+                    elif sub_result['status'] == 'FAILED':
+                        order_result.status = OrderStatus.REJECTED
+                        order_result.error_reason = OrderErrorReason.UNKNOWN
+                    elif sub_result['status'] == 'UNKNOWN_ORDER_STATUS':
+                        order_result.status = OrderStatus.REJECTED
+                        order_result.error_reason = OrderErrorReason.UNKNOWN
+                    elif sub_result['status'] == 'QUEUED':
+                        order_result.status = OrderStatus.PENDING
 
         return order_result
