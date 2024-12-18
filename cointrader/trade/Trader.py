@@ -207,7 +207,7 @@ class Trader(object):
                 return
             
             if not self._config.simulate():
-                print(f"{self._symbol} Buy signal {self._strategy.buy_signal_name()} for {self._symbol} {position.pid()} size={size}")
+                print(f"{self._symbol} Buy signal {self._strategy.buy_signal_name()} for {self._symbol} size={size}")
 
             # check if we have sufficient balance to open the position
             quote_name = self._account.get_quote_name(self._symbol)
