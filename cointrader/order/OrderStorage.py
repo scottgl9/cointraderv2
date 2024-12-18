@@ -109,10 +109,12 @@ class OrderStorage:
     def update_order_status(self, order_id, status):
         cursor = self._conn.cursor()
         cursor.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id))
+        if not self._config.simulate():
+            self._conn.commit()
 
     def update_order_active(self, order_id: str, active: bool):
         cursor = self._conn.cursor()
-        cursor.execute('UPDATE orders SET active = ? WHERE id = ?', (active, int(order_id)))
+        cursor.execute('UPDATE orders SET active = ? WHERE id = ?', (active, order_id))
         if not self._config.simulate():
             self._conn.commit()
 

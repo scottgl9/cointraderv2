@@ -38,7 +38,7 @@ def main(args):
     if not tconfig.load_config():
         tconfig.save_config()
 
-    if tconfig.strategy() != args.strategy:
+    if args.strategy and tconfig.strategy() != args.strategy:
         tconfig.set_strategy(args.strategy)
 
     market = Market(exchange=exchange, db_path=tconfig.market_db_path())
@@ -164,6 +164,6 @@ if __name__ == '__main__':
     parser.add_argument('--start_date', type=str, default='2024-12-02', help='Start date for klines')
     parser.add_argument('--end_date', type=str, default='now', help='End date for klines')
     parser.add_argument('--plot', action='store_true', help='Plot the results')
-    parser.add_argument('--strategy', type=str, default='Default', help='Strategy to use for simulation')
+    parser.add_argument('--strategy', type=str, default='', help='Strategy to use for simulation')
     args = parser.parse_args()
     main(args)

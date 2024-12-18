@@ -8,10 +8,12 @@ from .OrderStopDirection import OrderStopDirection
 from .OrderStatus import OrderStatus
 
 class Order(OrderResult):
-    def __init__(self, symbol: str):
+    def __init__(self, symbol: str, data: dict = None):
         super().__init__(symbol)
         self.symbol = symbol
         self._last_order_result = None
+        if data:
+            self.from_dict(data)
 
     def update_order(self, result: OrderResult):
         """
@@ -38,7 +40,7 @@ class Order(OrderResult):
             self.stop_direction = result.stop_direction
         if self.size == 0.0:
             self.size = result.size
-        if self.filled_size == 0.0:
+        if self.filled_size == 0.0 or (result.filled_size != 0.0 and self.filled_size != result.filled_size):
             self.filled_size = result.filled_size
         if self.fee == 0.0:
             self.fee = result.fee

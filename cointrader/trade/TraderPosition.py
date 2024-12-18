@@ -202,6 +202,7 @@ class TraderPosition(object):
         self._last_stop_loss_order = Order(symbol=self._symbol)
         self._last_stop_loss_order.update_order(result)
         self._last_stop_loss_order.pid = self._pid
+        self._last_stop_loss_order.active = False
         self._orders.update_order(self._symbol, self._last_stop_loss_order)
         self._stop_loss_order = None
 
@@ -283,6 +284,7 @@ class TraderPosition(object):
                 result = self._execute.cancel(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
                 self._buy_order.update_order(result)
                 self._buy_order.pid = self._pid
+                self._buy_order.active = False
                 self._orders.update_order(self._symbol, self._buy_order)
                 if not self._config.simulate():
                     time.sleep(1)
@@ -319,6 +321,7 @@ class TraderPosition(object):
                 result = self._execute.cancel(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
                 self._sell_order.update_order(result)
                 self._sell_order.pid = self._pid
+                self._sell_order.active = False
                 self._orders.update_order(self._symbol, self._sell_order)
                 if not self._config.simulate():
                     time.sleep(1)
@@ -433,6 +436,11 @@ class TraderPosition(object):
             self._buy_order.pid = self._pid
             self._orders.update_order(self._symbol, self._sell_order)
             if self._sell_order.status == OrderStatus.FILLED:
+                # we're closing the position, so set orders to inactive
+                self._buy_order.active = False
+                self._orders.update_order_active(symbol=self._symbol, order_id=self._buy_order.id, active=False)
+                self._sell_order.active = False
+                self._orders.update_order_active(symbol=self._symbol, order_id=self._sell_order.id, active=False)
                 self._closed_position_completed = True
 
         if not self._closed_position_completed and self._stop_loss_order and not self.stop_loss_is_cancelled() and not self._stop_loss_order.completed():
@@ -442,6 +450,11 @@ class TraderPosition(object):
             self._stop_loss_order.pid = self._pid
             self._orders.update_order(self._symbol, self._stop_loss_order)
             if self._stop_loss_order.status == OrderStatus.FILLED:
+                # we're closing the position, so set orders to inactive
+                self._buy_order.active = False
+                self._orders.update_order_active(symbol=self._symbol, order_id=self._buy_order.id, active=False)
+                self._stop_loss_order.active = False
+                self._orders.update_order_active(symbol=self._symbol, order_id=self._stop_loss_order.id, active=False)
                 self._stop_loss_price = self._stop_loss_order.price
                 self._stop_loss_ts = self._stop_loss_order.filled_ts
                 self._closed_position_completed = True

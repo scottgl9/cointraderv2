@@ -38,6 +38,9 @@ class TraderConfig(object):
     def path(self) -> str:
         return self._path
 
+    def get_config_path(self) -> str:
+        return self._path
+
     def get_config(self):
         return self._config
 
@@ -81,7 +84,7 @@ class TraderConfig(object):
 
     def __getitem__(self, key):
         return self.get(key)
-    
+
     def __setitem__(self, key, value):
         self.set(key, value)
 
@@ -98,8 +101,8 @@ class TraderConfig(object):
         return self.get('verbose')
 
     def orders_db_path(self):
-        return self.get('order_db_path')
-    
+        return self.get('orders_db_path')
+
     def market_db_path(self):
         return self.get('market_db_path')
 

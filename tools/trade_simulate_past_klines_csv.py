@@ -39,14 +39,17 @@ def main(args):
 
     tconfig = TraderConfig(path=f'config/{name}_trader_simulate_csv_config.json')
     if not tconfig.load_config():
+        print(f"Failed to load config {tconfig.get_config_path()}")
         tconfig.save_config()
+    else:
+        print(f"Loaded config {tconfig.get_config_path()}")
 
     tconfig.set_trade_symbols(symbols)
 
-    if tconfig.strategy() != args.strategy:
+    if args.strategy and tconfig.strategy() != args.strategy:
         tconfig.set_strategy(args.strategy)
 
-    print(f"Using strategy: {tconfig.strategy()}")
+    print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
 
     market = Market(exchange=exchange, db_path=tconfig.market_db_path())
     account = AccountSimulate(exchange=exchange, market=market)
@@ -136,6 +139,8 @@ def main(args):
 
     orders.commit()
 
+    print(orders.get_active_orders(symbol=None))
+
     # calculate what the profit would be if we just bought and held
     total_hold_profit = 0
     for symbol in symbols:
@@ -198,7 +203,7 @@ if __name__ == '__main__':
     parser.add_argument('--granularity', type=int, default=3600, help='Granularity of klines')
     parser.add_argument('--csv_path', type=str, default='data/crypto_hourly_data/cryptotoken_full_binance_1h.csv', help='Path to the CSV file')
     parser.add_argument('--symbols', type=str, default='BTC-USDT,ETH-USDT,SOL-USDT,HBAR-USDT,DOT-USDT', help='Comma separated list of symbols')
-    parser.add_argument('--strategy', type=str, default='Default', help='Strategy to use for simulation')
+    parser.add_argument('--strategy', type=str, default='', help='Strategy to use for simulation')
     parser.add_argument('--start_date', type=str, default='2020-08-11 06:00:00', help='Start date for klines')
     parser.add_argument('--end_date', type=str, default='2023-10-19 23:00:00', help='End date for klines')
     args = parser.parse_args()

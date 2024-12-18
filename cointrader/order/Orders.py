@@ -8,6 +8,7 @@ class Orders:
         self.orders = {}
         self._config = config
         self._db_path = db_path
+
         if db_path is None:
             self._order_storage = None
         elif order_storage is not None:
@@ -50,7 +51,7 @@ class Orders:
         Get all active orders for a symbol
         """
         if self._order_storage:
-            return self._order_storage.get_active_orders()
+            return self._order_storage.get_active_orders(symbol=symbol)
         elif symbol in self.orders:
             return [order for order in self.orders[symbol].values() if order.active]
 
