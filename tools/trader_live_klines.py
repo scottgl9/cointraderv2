@@ -17,6 +17,7 @@ import pandas as pd
 
 from collections import deque
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
+from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.account.Account import Account
 from cointrader.market.Market import Market
 from cointrader.execute.TradeExecute import TraderExecute
@@ -29,11 +30,43 @@ from cointrader.config import *
 GRANULARITY = 300
 
 class CBADVLive:
-    def __init__(self, mtrader: MultiTrader, tconfig: TraderConfig, granularity: int = 300):
+    def __init__(self, mtrader: MultiTrader, market: Market, tconfig: TraderConfig, granularity: int = 300):
         self.prev_kline = {}
-        self.mtrader = mtrader
+        self.mtrader: MultiTrader = mtrader
+        self.market = market
         self.tconfig = tconfig
         self.granularity = granularity
+
+    def fetch_preload_klines(self, symbol: str, granularity: int):
+        klines = []
+        max_klines = self.market.market_get_max_kline_count(granularity)
+
+        minutes = 0
+        hours = 0
+
+        if granularity == 60:
+            minutes = max_klines
+        elif granularity == 300: # 5 minutes
+            minutes = max_klines * 5
+        elif granularity == 900: # 15 minutes
+            minutes = max_klines * 15
+        elif granularity == 3600: # 1 hour
+            hours = max_klines
+
+        end = datetime.now()
+        start = int((end - timedelta(hours=hours, minutes=minutes)).timestamp())
+        end = int(end.timestamp())
+
+        candles = self.market.market_get_klines_range(symbol, start, end, granularity)
+
+        for candle in reversed(candles):
+            kline = Kline()
+            kline.set_dict_names(ts='start')
+            kline.from_dict(candle)
+            kline.granularity = granularity
+            klines.append(kline)
+            #self.mtrader.market_preload(symbol, kline)
+        return klines
 
     def on_message(self, msg):
         kline = Kline()
@@ -53,19 +86,27 @@ class CBADVLive:
                     kline.granularity = self.granularity
 
                     # skip any old klines which may come in when first starting
-                    if abs(int(datetime.now().timestamp()) - kline.ts) > self.granularity * 2:
-                        continue
+                    #if abs(int(datetime.now().timestamp()) - kline.ts) > self.granularity * 2:
+                    #    continue
                     #print(f"{int(datetime.now().timestamp()) - kline.ts} {kline.symbol}")
                     if kline.symbol not in self.prev_kline:
-                        self.prev_kline[kline.symbol] = kline
+                        print(f"Pre-loading klines for {kline.symbol}")
+                        klines = self.fetch_preload_klines(kline.symbol, self.granularity)
+                        self.prev_kline[kline.symbol] = klines[-1]
+                        self.mtrader.market_preload(kline.symbol, klines)
+                        # if we already fetched the kline, skip it
+                        if klines[-1].ts >= kline.ts:
+                            continue
+                        else:
+                            self.prev_kline[kline.symbol] = kline
                     else:
                         prev_kline = self.prev_kline[kline.symbol]
-                        # skip any duplicate klines
-                        if kline.ts == prev_kline.ts:
+                        # skip any old klines or duplicates
+                        if kline.ts <= prev_kline.ts:
                             continue
                         self.prev_kline[kline.symbol] = kline
                     # print only once every 30 minutes
-                    if kline.ts % 1800 == 0:
+                    if kline.ts % 3600 == 0:
                         pd.to_datetime(kline.ts, unit='s')
                         print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
                     self.mtrader.market_update(kline, current_price=kline.close, current_ts=kline.ts)
@@ -133,7 +174,7 @@ def main(name):
     ex = TraderExecute(exchange=exchange, account=account, config=tconfig)
 
     mtrader = MultiTrader(account=account, execute=ex, config=tconfig, granularity=GRANULARITY)
-    rt = CBADVLive(mtrader=mtrader, tconfig=tconfig)
+    rt = CBADVLive(mtrader=mtrader, market=market, tconfig=tconfig)
     ws_client = WSClient(api_key=CBADV_KEY, api_secret=CBADV_SECRET, on_message=rt.on_message)
     #accnt = AccountCoinbaseAdvanced(exchange=exchange, simulate=False, live=False, logger=logger)
 

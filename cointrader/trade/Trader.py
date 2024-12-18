@@ -85,6 +85,8 @@ class Trader(object):
         """
         for kline in klines:
             self._strategy.update(kline)
+            self._loss_strategy.update(kline=kline, current_price=kline.close, current_ts=kline.ts)
+            self._size_strategy.update(kline, current_price=kline.close, current_ts=kline.ts)
 
 
     def market_update(self, kline: Kline, current_price: float, current_ts: int):

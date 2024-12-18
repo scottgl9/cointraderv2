@@ -23,6 +23,18 @@ class MultiTrader(object):
             if symbol not in self._traders.keys():
                 self._traders[symbol] = Trader(account=account, symbol=symbol, execute=self._execute, config=self._config, orders=self._orders, granularity=self._granularity)
 
+
+    def market_preload(self, symbol: str, klines: list[Kline]):
+        """
+        Preload klines for the strategy of the trader
+        """
+        if symbol not in self._traders.keys():
+            print(f"Symbol {symbol} not found in traders")
+            return
+
+        trader = self._traders[symbol]
+        trader.market_preload(klines)
+
     def market_update(self, kline: Kline, current_price: float, current_ts: int):
         if kline.symbol not in self._traders.keys():
             print(f"Symbol {kline.symbol} not found in traders")
