@@ -3,12 +3,12 @@ from coinbase.rest import RESTClient
 from coinbase.rest.types.orders_types import GetOrderResponse
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.order.OrderResult import OrderResult
-from cointrader.order.OrderStatus import OrderStatus
-from cointrader.order.OrderSide import OrderSide
-from cointrader.order.OrderType import OrderType
-from cointrader.order.OrderLimitType import OrderLimitType
-from cointrader.order.OrderStopDirection import OrderStopDirection
-from cointrader.order.OrderErrorReason import OrderErrorReason
+from cointrader.order.enum.OrderStatus import OrderStatus
+from cointrader.order.enum.OrderSide import OrderSide
+from cointrader.order.enum.OrderType import OrderType
+from cointrader.order.enum.OrderLimitType import OrderLimitType
+from cointrader.order.enum.OrderStopDirection import OrderStopDirection
+from cointrader.order.enum.OrderErrorReason import OrderErrorReason
 from datetime import datetime
 
 class CBADVTraderExchange(TraderExchangeBase):

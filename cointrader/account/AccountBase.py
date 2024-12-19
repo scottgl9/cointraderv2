@@ -7,17 +7,22 @@ class AccountBase(object):
     _logger = None
     _name = None
     _exchange: TraderExchangeBase = None
-    _market = None
-    def __init__(self, exchange: TraderExchangeBase, market: MarketBase, logger=None):
-        self._cxlent = exchange
+    _market: MarketBase = None
+    _symbol_info: SymbolInfo = None
+    _asset_info: AssetInfo = None
+    def __init__(self, exchange: TraderExchangeBase, market: MarketBase, symbol_info: SymbolInfo=None, asset_info: AssetInfo=None, logger=None):
+        self._name = exchange.name()
+        self._exchange = exchange
         self._market = market
+        self._symbol_info = symbol_info
+        self._asset_info = asset_info
         self._logger = logger
 
-    def name(self):
+    def name(self) -> str:
         return self._name
 
-    def exchange(self):
-        raise NotImplementedError
+    def exchange(self) -> TraderExchangeBase:
+        return self._exchange
 
     def get_base_name(self, symbol: str) -> str:
         """

@@ -7,24 +7,20 @@ from cointrader.common.AssetInfo import AssetInfo
 from cointrader.common.AssetInfoConfig import AssetInfoConfig
 
 class Account(AccountBase):
-    _symbol_info = None
-    def __init__(self, exchange: TraderExchangeBase, market: MarketBase, symbol_info=None, asset_info=None, logger=None):
-        super().__init__(exchange, market, logger)
-        self._name = exchange.name()
-        self._exchange = exchange
-        self._market = market
+    _exchange: TraderExchangeBase = None
+    _market: MarketBase = None
+    _symbol_info: SymbolInfo = None
+    _asset_info: AssetInfo = None
+
+    def __init__(self, exchange: TraderExchangeBase, market: MarketBase, symbol_info: SymbolInfo=None, asset_info: AssetInfo=None, logger=None):
+        name = exchange.name()
         if not symbol_info:
-            symbol_info = SymbolInfoConfig(exchange=exchange, path=f'{self._name}_symbol_info.json')
+            symbol_info = SymbolInfoConfig(exchange=exchange, path=f'config/{name}_symbol_info.json')
         if not asset_info:
-            asset_info = AssetInfoConfig(exchange=exchange, path=f'{self._name}_asset_info.json')
-        self._symbol_info = symbol_info
-        self._asset_info = asset_info
+            asset_info = AssetInfoConfig(exchange=exchange, path=f'config/{name}_asset_info.json')
+        super().__init__(exchange=exchange, market=market, symbol_info=symbol_info, asset_info=asset_info, logger=logger)
         self._balances = {}
         self._tickers_info = {}
-        self._exchange = exchange
-
-    def exchange(self) -> TraderExchangeBase:
-        return self._exchange
 
     def get_base_precision(self, symbol: str) -> int:
         """

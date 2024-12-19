@@ -1,11 +1,11 @@
 # This file contains the OrderResult class which is used to store the result of an order request.
 import json
-from .OrderType import OrderType
-from .OrderSide import OrderSide
-from .OrderStatus import OrderStatus
-from .OrderLimitType import OrderLimitType
-from .OrderStopDirection import OrderStopDirection
-from .OrderErrorReason import OrderErrorReason
+from .enum.OrderType import OrderType
+from .enum.OrderSide import OrderSide
+from .enum.OrderStatus import OrderStatus
+from .enum.OrderLimitType import OrderLimitType
+from .enum.OrderStopDirection import OrderStopDirection
+from .enum.OrderErrorReason import OrderErrorReason
 
 class OrderResult(object):
     id: str                             # Order ID

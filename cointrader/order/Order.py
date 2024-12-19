@@ -1,11 +1,11 @@
 # Description: Order class for representing an order
 from enum import Enum
 from .OrderResult import OrderResult
-from .OrderSide import OrderSide
-from .OrderType import OrderType
-from .OrderLimitType import OrderLimitType
-from .OrderStopDirection import OrderStopDirection
-from .OrderStatus import OrderStatus
+from .enum.OrderSide import OrderSide
+from .enum.OrderType import OrderType
+from .enum.OrderLimitType import OrderLimitType
+from .enum.OrderStopDirection import OrderStopDirection
+from .enum.OrderStatus import OrderStatus
 
 class Order(OrderResult):
     def __init__(self, symbol: str, data: dict = None):

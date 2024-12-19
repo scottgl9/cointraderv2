@@ -1,12 +1,12 @@
 # TraderExchangeBase is the base class for all exchange specific implementations
 from cointrader.common.SymbolInfo import SymbolInfo
 from cointrader.order.OrderResult import OrderResult
-from cointrader.order.OrderStopDirection import OrderStopDirection
+from cointrader.order.enum.OrderStopDirection import OrderStopDirection
 
 class TraderExchangeBase(object):
     _name = None
-    def __init__(self) -> None:
-        self._name = "generic"
+    def __init__(self):
+        self._name = "base"
 
 
     def name(self) -> str:

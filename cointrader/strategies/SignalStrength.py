@@ -1,7 +1,7 @@
 # Just like TradingView buy, strong buy, neutral, strong sell, etc we will use the various signals to determine performing a buy or sell based on indicator consensus.
 from cointrader.common.Strategy import Strategy
 from cointrader.common.Signal import Signal
-from cointrader.order.OrderSide import OrderSide
+from cointrader.order.enum.OrderSide import OrderSide
 from cointrader.signals.MACDSignal import MACDSignal
 from cointrader.signals.RSISignal import RSISignal
 from cointrader.signals.StochasticSignal import StochasticSignal

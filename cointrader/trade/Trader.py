@@ -7,8 +7,8 @@ from .TraderConfig import TraderConfig
 from cointrader.execute.ExecuteBase import ExecuteBase
 from .position.TraderPosition import TraderPosition
 from cointrader.order.Orders import Orders
-from cointrader.order.OrderStatus import OrderStatus
-from cointrader.order.OrderSide import OrderSide
+from cointrader.order.enum.OrderStatus import OrderStatus
+from cointrader.order.enum.OrderSide import OrderSide
 from cointrader.common.TradeLossBase import TradeLossBase
 from cointrader.common.TradeSizeBase import TradeSizeBase
 import importlib
