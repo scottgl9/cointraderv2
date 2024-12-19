@@ -253,7 +253,7 @@ class TraderPosition(PositionBase):
         self._current_price = current_price
         self._current_ts = current_ts
 
-        if self._buy_order and not self._buy_order.completed():
+        if self._buy_order and not self._buy_order.completed() and not self._buy_order.cancelled():
             result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
             self._buy_order.update_order(result)
             self._buy_order.pid = self._pid
@@ -268,7 +268,7 @@ class TraderPosition(PositionBase):
                 self._buy_order.active = False
                 self._orders.update_order_active(symbol=self._symbol, order_id=self._buy_order.id, active=False)
 
-        if not self._closed_position_completed and self._sell_order and not self._sell_order.completed():
+        if not self._closed_position_completed and self._sell_order and not self._sell_order.completed() and not self._sell_order.cancelled():
             result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
             self._sell_order.update_order(result)
             self._buy_order.pid = self._pid
