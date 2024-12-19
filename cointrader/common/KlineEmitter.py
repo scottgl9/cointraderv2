@@ -16,6 +16,12 @@ class KlineEmitter(object):
         self._klines.clear()
         self._dst_kline = None
 
+    def granularity(self):
+        """
+        Granularity of the klines being emitted
+        """
+        return self._dst_granularity
+
     def ready(self):
         return self._dst_kline is not None
 
@@ -29,18 +35,28 @@ class KlineEmitter(object):
         # if we have enough klines to emit, do so
         if len(self._klines) == self._ratio:
             self._dst_kline = Kline(granularity=self._dst_granularity)
+
+            if kline.symbol:
+                self._dst_kline.symbol = kline.symbol
+
             for i in range(self._ratio):
                 k = self._klines[i]
+                # set open and close prices
                 if i == 0:
                     self._dst_kline.open = k.open
-                    if k.high > self._dst_kline.high:
-                        self._dst_kline.high = k.high
-                    elif k.low < self._dst_kline.low:
-                        self._dst_kline.low = k.low
                 elif i == self._ratio - 1:
                     self._dst_kline.close = k.close
+                    self._dst_kline.ts = k.ts
+
+                # sum up the volume from all klines
                 self._dst_kline.volume += k.volume
-    
+
+                # set the high and low prices from all klines
+                if k.high > self._dst_kline.high:
+                    self._dst_kline.high = k.high
+                elif k.low < self._dst_kline.low:
+                    self._dst_kline.low = k.low
+
     def emit(self) -> Kline:
         """
         Emit the kline if it is ready

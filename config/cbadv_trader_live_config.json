@@ -8,6 +8,9 @@
     "quote_currency": "USD",
     "max_position_quote_size": 25.0,
     "strategy": "SignalStrength",
+    "granularity": 300,
+    "long_time_strategy": "SignalStrength",
+    "long_time_granularity": 3600,
     "loss_strategy": "ChandelierExit",
     "size_strategy": "Fixed",
     "trade_symbols": [

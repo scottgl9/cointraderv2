@@ -9,9 +9,6 @@ from .position.TraderPosition import TraderPosition
 from cointrader.order.Orders import Orders
 from cointrader.order.OrderStatus import OrderStatus
 from cointrader.order.OrderSide import OrderSide
-from cointrader.signals.EMACross import EMACross
-from cointrader.signals.SupertrendSignal import SupertrendSignal
-from cointrader.signals.VWAPSignal import VWAPSignal
 from cointrader.common.TradeLossBase import TradeLossBase
 from cointrader.common.TradeSizeBase import TradeSizeBase
 import importlib
@@ -25,6 +22,7 @@ class Trader(object):
     _positions: list[TraderPosition] = []
     _strategy_name = None
     _strategy: Strategy = None
+    _long_strategy: Strategy = None
     _loss_strategy: TradeLossBase = None
     _size_strategy: TradeSizeBase = None
     _orders: Orders = None
@@ -43,11 +41,19 @@ class Trader(object):
         self._buys = []
         self._sells = []
         self._strategy_name = config.strategy()
+        self._long_strategy_name = config.long_time_strategy()
+        self._long_granularity = config.long_time_granularity()
         #strategy_module = __import__(f'cointrader.strategies.{self._strategy_name}', fromlist=[self._strategy_name])
         #strategy_module = __import__(self._strategy_name, fromlist=[f'cointrader.strategies'])
 
         strategy_module = importlib.import_module(f'cointrader.strategies.{self._strategy_name}')
         self._strategy = getattr(strategy_module, self._strategy_name)(symbol=symbol)
+
+        if self._long_strategy_name != self._strategy_name:
+            long_strategy_module = importlib.import_module(f'cointrader.strategies.{self._long_strategy_name}')
+        else:
+            long_strategy_module = strategy_module
+            self._long_strategy = getattr(long_strategy_module, self._long_strategy_name)(symbol=symbol)
 
         # load the loss and size strategies
         loss_module = importlib.import_module(f'cointrader.trade.loss.{self._config.loss_strategy()}')
@@ -64,9 +70,6 @@ class Trader(object):
         self._cooldown_period_seconds = config.cooldown_period_seconds()
         self._disable_after_loss_seconds = config.disable_after_loss_seconds()
         self._disable_until_ts = 0
-        self._ema_cross = EMACross(name='ema_cross', symbol=symbol, short_period=12, long_period=26)
-        self._supertrend = SupertrendSignal(name='supertrend', symbol=symbol, period=20, multiplier=3)
-        self._vwap = VWAPSignal(name='vwap', symbol=symbol, period=14)
 
         #print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions_per_symbol}')
 
@@ -178,18 +181,16 @@ class Trader(object):
                     self._orders.update_order_active(self._symbol, stop_loss_order.id, False)
                 self.remove_position(position, current_ts)
 
-        # if kline.granularity != self._granularity:
-        #    # handle daily klines
-        #    self._supertrend.update(kline)
-        #    self._vwap.update(kline)
-        #    if self._supertrend.decreasing() and self._vwap.below():
-        #        self._disabled = True
-        #        self._disable_until_ts = 0
-        #    elif self._supertrend.increasing() and self._vwap.above():
-        #        self._disabled = False
-        #        self._disable_until_ts = 0
-        #        #print(f'{Fore.RED}{self._symbol} Supertrend cross down{Style.RESET_ALL}')
-        #    return
+        # handle long strategy
+        if kline.granularity == self._long_granularity:
+            self._long_strategy.update(kline)
+            if self._long_strategy.buy_signal():
+                self._disable_new_positions = False
+                print(f'{Fore.GREEN}{self._symbol} long strategy {self._long_strategy_name} buy signal{Style.RESET_ALL}')
+            elif self._long_strategy.sell_signal():
+                self._disable_new_positions = True
+                print(f'{Fore.RED}{self._symbol} long strategy {self._long_strategy_name} sell signal{Style.RESET_ALL}')
+            return
 
         if kline is not None and granularity == self._granularity:
             self._strategy.update(kline)

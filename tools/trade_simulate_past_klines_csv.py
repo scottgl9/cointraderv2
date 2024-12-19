@@ -51,6 +51,9 @@ def main(args):
 
     print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
 
+    granularity = tconfig.granularity()
+    long_granularity = tconfig.long_time_granularity()
+
     market = Market(exchange=exchange, db_path=tconfig.market_db_path())
     account = AccountSimulate(exchange=exchange, market=market)
     account.load_symbol_info()
@@ -68,7 +71,7 @@ def main(args):
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
 
-    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, granularity=args.granularity)
+    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, granularity=granularity)
 
     start_ts = int(datetime.fromisoformat(args.start_date).timestamp())
     if args.end_date == 'now':
@@ -103,7 +106,7 @@ def main(args):
     last_prices = {}
 
     # emitter takes in hourly klines, and emits daily klines
-    kline_emitter = KlineEmitter(src_granularity=args.granularity, dst_granularity=86400)
+    kline_emitter = KlineEmitter(src_granularity=granularity, dst_granularity=long_granularity)
 
     # iterate through all rows in the DataFrame
     for index, row in df.iterrows():
@@ -124,18 +127,19 @@ def main(args):
             #print(kline_data)
             kline.from_dict(kline_data)
             kline.symbol = symbol
-            kline.granularity = args.granularity
+            kline.granularity = granularity
 
-            mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=args.granularity)
+            mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=granularity)
             last_prices[symbol] = kline_data['close']
 
             # emit daily klines
-            #kline_emitter.update(kline)
-            #if kline_emitter.ready():
-            #    kline = kline_emitter.emit()
-            #    if kline:
-            #        kline.symbol = symbol
-            #        mtrader.market_update(kline=kline, current_price=kline.close)
+            kline_emitter.update(kline)
+            if kline_emitter.ready():
+                kline = kline_emitter.emit()
+                if kline:
+                    kline.symbol = symbol
+                    kline.granularity = long_granularity
+                    mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=kline_emitter.granularity())
 
     orders.commit()
 
@@ -200,7 +204,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trade simulation with past klines.')
     parser.add_argument('--initial_usdt', type=float, default=10000.0, help='Initial USDT amount for simulation')
     parser.add_argument('--exchange', type=str, default="cbadv", help='Account to use for simulation')
-    parser.add_argument('--granularity', type=int, default=3600, help='Granularity of klines')
+    #parser.add_argument('--granularity', type=int, default=3600, help='Granularity of klines')
     parser.add_argument('--csv_path', type=str, default='data/crypto_hourly_data/cryptotoken_full_binance_1h.csv', help='Path to the CSV file')
     parser.add_argument('--symbols', type=str, default='BTC-USDT,ETH-USDT,SOL-USDT,HBAR-USDT,DOT-USDT', help='Comma separated list of symbols')
     parser.add_argument('--strategy', type=str, default='', help='Strategy to use for simulation')
