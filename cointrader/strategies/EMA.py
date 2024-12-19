@@ -2,8 +2,8 @@ from cointrader.common.Strategy import Strategy
 from cointrader.signals.EMACross import EMACross
 
 class EMA(Strategy):
-    def __init__(self, symbol: str, name='ema_cross'):
-        super().__init__(symbol=symbol, name=name)
+    def __init__(self, symbol: str, name='ema_cross', granularity=0):
+        super().__init__(symbol=symbol, name=name, granularity=granularity)
         self.ema = EMACross(symbol=self._symbol, short_period=12, long_period=26)
         self._buy_signal_name = None
         self._sell_signal_name = None

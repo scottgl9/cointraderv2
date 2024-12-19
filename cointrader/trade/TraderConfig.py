@@ -11,6 +11,10 @@ DEFAULT_TRADE_CONFIG = {
     'max_positions': 5,                       # Maximum number of positions to hold
     'quote_currency': 'USD',                  # Currency to use for trading
     'max_position_quote_size': 100.0,         # Maximum size of a position in quote currency
+    'strategies': [                           # Strategies to use for trading
+        'SignalStrength:3600',
+        'SignalStrength:86400'
+    ],
     'strategy': 'SignalStrength',             # Strategy to use for trading (ex. 1 hour)
     'granularity': 3600,                      # Granularity of the klines to use
     'long_time_strategy': 'SignalStrength',   # Strategy to use for the longer time frame (ex. 1 day)
@@ -139,6 +143,15 @@ class TraderConfig(object):
     
     def set_strategy(self, strategy: str):
         self.set('strategy', strategy)
+
+    def strategies(self) -> list[str]:
+        """
+        Strategies to use for trading, which consist of a time frame/granularity (in seconds) and a strategy
+        """
+        return self.get('strategies')
+
+    def set_strategies(self, strategies: list[str]):
+        self.set('strategies', strategies)
 
     def granularity(self) -> int:
         return self.get('granularity')

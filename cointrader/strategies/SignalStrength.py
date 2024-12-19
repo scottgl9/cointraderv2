@@ -17,11 +17,10 @@ from cointrader.signals.PSARSignal import PSARSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
 
 class SignalStrength(Strategy):
-    def __init__(self, symbol: str, name='signal_strength'):
-        super().__init__(symbol=symbol, name=name)
+    def __init__(self, symbol: str, name='signal_strength', granularity=0):
+        super().__init__(symbol=symbol, name=name, granularity=granularity)
         self._buy_signal_name = None
         self._sell_signal_name = None
-        super().__init__(symbol=symbol, name=name)
 
         self.signals: dict[str, Signal] = {}
         self.signals['macd'] = MACDSignal(symbol=self._symbol, short_period=12, long_period=26, signal_period=9)

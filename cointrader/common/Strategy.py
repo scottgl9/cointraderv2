@@ -4,12 +4,23 @@ from .Kline import Kline
 class Strategy:
     _name = None
     _symbol = None
+    _granularity = 0
     _kwargs = None
 
-    def __init__(self, symbol, name, **kwargs):
+    def __init__(self, symbol, name, granularity, **kwargs):
         self._name = name
         self._symbol = symbol
+        self._granularity = granularity
         self._kwargs = kwargs
+
+    def name(self):
+        return self._name
+    
+    def symbol(self):
+        return self._symbol
+    
+    def granularity(self):
+        return self._granularity
 
     def update(self, kline : Kline):
         raise NotImplementedError

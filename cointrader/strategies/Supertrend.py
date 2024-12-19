@@ -4,8 +4,8 @@ from cointrader.signals.ADXSignal import ADXSignal
 from cointrader.signals.EMACross import EMACross
 
 class Supertrend(Strategy):
-    def __init__(self, symbol: str, name='supertrend'):
-        super().__init__(symbol=symbol, name=name)
+    def __init__(self, symbol: str, name='supertrend', granularity=0):
+        super().__init__(symbol=symbol, name=name, granularity=granularity)
         self.supertrend = SupertrendSignal(symbol=self._symbol, period=14, multiplier=3)
         self.adx = ADXSignal(symbol=self._symbol, period=14, threshold=20)
         self.ema = EMACross(symbol=self._symbol, short_period=12, long_period=24)

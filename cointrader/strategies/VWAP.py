@@ -3,8 +3,8 @@ from cointrader.signals.EMACross import EMACross
 from cointrader.signals.VWAPSignal import VWAPSignal
 
 class VWAP(Strategy):
-    def __init__(self, symbol: str, name='vwap'):
-        super().__init__(symbol=symbol, name=name)
+    def __init__(self, symbol: str, name='vwap', granularity=0):
+        super().__init__(symbol=symbol, name=name, granularity=granularity)
         self.vwap = VWAPSignal(symbol=self._symbol, period=14)
         self._buy_signal_name = None
         self._sell_signal_name = None

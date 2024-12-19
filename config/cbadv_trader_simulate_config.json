@@ -7,6 +7,10 @@
     "max_positions": 25,
     "quote_currency": "USD",
     "max_position_quote_size": 100.0,
+    "strategies": [
+        "SignalStrength:300",
+        "SignalStrength:3600"
+    ],
     "strategy": "SignalStrength",
     "granularity": 300,
     "long_time_strategy": "SignalStrength",

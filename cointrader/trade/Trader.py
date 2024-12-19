@@ -40,20 +40,25 @@ class Trader(object):
         self._positions = []
         self._buys = []
         self._sells = []
+        # configuration for strategies
+        self._strategies_config = config.strategies()
+        self._strategies: dict[int, Strategy] = {}
         self._strategy_name = config.strategy()
-        self._long_strategy_name = config.long_time_strategy()
-        self._long_granularity = config.long_time_granularity()
-        #strategy_module = __import__(f'cointrader.strategies.{self._strategy_name}', fromlist=[self._strategy_name])
-        #strategy_module = __import__(self._strategy_name, fromlist=[f'cointrader.strategies'])
+
+        # load the strategies for each granularity
+        for s in self._strategies_config:
+            strategy_name, strategy_granularity = s.split(':')
+            strategy_module = importlib.import_module(f'cointrader.strategies.{strategy_name}')
+            self._strategies[strategy_granularity] = getattr(strategy_module, strategy_name)(symbol=symbol, granularity=int(strategy_granularity))
 
         strategy_module = importlib.import_module(f'cointrader.strategies.{self._strategy_name}')
-        self._strategy = getattr(strategy_module, self._strategy_name)(symbol=symbol)
+        self._strategy = getattr(strategy_module, self._strategy_name)(symbol=symbol, granularity=granularity)
 
-        if self._long_strategy_name != self._strategy_name:
-            long_strategy_module = importlib.import_module(f'cointrader.strategies.{self._long_strategy_name}')
-        else:
-            long_strategy_module = strategy_module
-            self._long_strategy = getattr(long_strategy_module, self._long_strategy_name)(symbol=symbol)
+        #if self._long_strategy_name != self._strategy_name:
+        #    long_strategy_module = importlib.import_module(f'cointrader.strategies.{self._long_strategy_name}')
+        #else:
+        #    long_strategy_module = strategy_module
+        #    self._long_strategy = getattr(long_strategy_module, self._long_strategy_name)(symbol=symbol)
 
         # load the loss and size strategies
         loss_module = importlib.import_module(f'cointrader.trade.loss.{self._config.loss_strategy()}')
@@ -182,15 +187,15 @@ class Trader(object):
                 self.remove_position(position, current_ts)
 
         # handle long strategy
-        if kline is not None and kline.granularity == self._long_granularity:
-            self._long_strategy.update(kline)
-            if self._long_strategy.buy_signal():
-                self._disable_new_positions = False
-                print(f'{Fore.GREEN}{self._symbol} long strategy {self._long_strategy_name} buy signal{Style.RESET_ALL}')
-            elif self._long_strategy.sell_signal():
-                self._disable_new_positions = True
-                print(f'{Fore.RED}{self._symbol} long strategy {self._long_strategy_name} sell signal{Style.RESET_ALL}')
-            return
+        #if kline is not None and kline.granularity == self._long_granularity:
+        #    self._long_strategy.update(kline)
+        #    if self._long_strategy.buy_signal():
+        #        self._disable_new_positions = False
+        #        print(f'{Fore.GREEN}{self._symbol} long strategy {self._long_strategy_name} buy signal{Style.RESET_ALL}')
+        #    elif self._long_strategy.sell_signal():
+        #        self._disable_new_positions = True
+        #        print(f'{Fore.RED}{self._symbol} long strategy {self._long_strategy_name} sell signal{Style.RESET_ALL}')
+        #    return
 
         if kline is not None and granularity == self._granularity:
             self._strategy.update(kline)
