@@ -55,6 +55,13 @@ class Order(OrderResult):
         self.error_reason = result.error_reason
         self.error_msg = result.error_msg
 
+
+    def filled(self) -> bool:
+        """
+        Check if the order has been filled
+        """
+        return self.filled_size > 0.0 and self.status == OrderStatus.FILLED
+
     def completed(self) -> bool:
         """
         Check if the order has been completed
@@ -66,3 +73,15 @@ class Order(OrderResult):
         Check if the order has been cancelled
         """
         return self.status == OrderStatus.CANCELLED
+
+    def placed(self) -> bool:
+        """
+        Check if the order has been placed
+        """
+        return self.status == OrderStatus.PLACED
+
+    def rejected(self) -> bool:
+        """
+        Check if the order has been rejected
+        """
+        return self.status == OrderStatus.REJECTED

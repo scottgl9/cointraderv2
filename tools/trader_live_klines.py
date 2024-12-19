@@ -161,7 +161,7 @@ def main(name):
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=False)
 
-    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, granularity=GRANULARITY)
+    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, restore_positions=True, granularity=GRANULARITY)
     rt = CBADVLive(mtrader=mtrader, market=market, tconfig=tconfig)
     ws_client = WSClient(api_key=CBADV_KEY, api_secret=CBADV_SECRET, on_message=rt.on_message)
     #accnt = AccountCoinbaseAdvanced(exchange=exchange, simulate=False, live=False, logger=logger)

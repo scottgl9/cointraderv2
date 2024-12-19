@@ -71,7 +71,7 @@ def main(args):
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
 
-    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, granularity=granularity)
+    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, restore_positions=False, granularity=granularity)
 
     start_ts = int(datetime.fromisoformat(args.start_date).timestamp())
     if args.end_date == 'now':

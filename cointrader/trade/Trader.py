@@ -107,7 +107,7 @@ class Trader(object):
                 if order.side == OrderSide.BUY:
                     result = self._execute.status(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
                     order.update_order(result)
-                    if order.status == OrderStatus.PLACED:
+                    if order.placed():
                         # for simplicity, just cancel the open order
                         print(f"{self._symbol} Cancelling buy order {order}")
                         result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
@@ -116,10 +116,10 @@ class Trader(object):
                         order.update_order(result)
                         order.active = False
                         self._orders.update_order(symbol=self._symbol, order=order)
-                    elif order.status == OrderStatus.FILLED:
+                    elif order.filled():
                         order_by_pid[order.pid] = order
 
-                elif order.side == OrderSide.SELL and order.status == OrderStatus.PLACED:
+                elif order.side == OrderSide.SELL and order.placed():
                     # to keep things simple, just cancel the order
                     print(f"{self._symbol} Cancelling sell order {order}")
                     result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
@@ -129,7 +129,7 @@ class Trader(object):
                     order.active = False
                     self._orders.update_order(symbol=self._symbol, order=order)
             else:
-                if order.side == OrderSide.BUY and order.status == OrderStatus.PLACED:
+                if order.side == OrderSide.BUY and order.placed():
                     print(f"Error: Duplicate buy order found, cancelling order: {order}")
                     result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
                     if not self._config.simulate():

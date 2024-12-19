@@ -97,7 +97,7 @@ class TraderPosition(PositionBase):
         self._orders.add_order(self._symbol, self._buy_order)
 
         # if this is a market order, the buy order should already be filled
-        if self._buy_order.status == OrderStatus.FILLED:
+        if self._buy_order.filled():
             self._opened_position_completed = True
 
 
@@ -113,13 +113,13 @@ class TraderPosition(PositionBase):
 
         # result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
         # self._buy_order.update_order(result)
-        if self._buy_order.status == OrderStatus.FILLED:
+        if self._buy_order.filled():
             self._opened_position_completed = True
             return
-        elif self._buy_order.status == OrderStatus.CANCELLED:
+        elif self._buy_order.cancelled():
             self.open_position(size=size, current_price=current_price, current_ts=current_ts)
             return
-        elif self._buy_order.status == OrderStatus.PLACED:
+        elif self._buy_order.placed():
             #print(f"Updating buy order for {self._symbol} current price: {current_price} limit price: {self._buy_order.limit_price}")
 
             replace_buy_order = False
@@ -152,13 +152,13 @@ class TraderPosition(PositionBase):
             return
         #result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
         #self._sell_order.update_order(result)
-        if self._sell_order.status == OrderStatus.FILLED:
+        if self._sell_order.filled():
             self._closed_position_completed = True
             return
-        elif self._sell_order.status == OrderStatus.CANCELLED:
+        elif self._sell_order.cancelled():
             self.close_position(current_price=current_price, current_ts=current_ts)
             return
-        elif self._sell_order.status == OrderStatus.PLACED:
+        elif self._sell_order.placed():
             replace_sell_order = False
             replace_order_percent = self._config.replace_sell_order_percent()
             if self._config.end_position_type() == OrderType.LIMIT.name:
@@ -258,11 +258,11 @@ class TraderPosition(PositionBase):
             self._buy_order.update_order(result)
             self._buy_order.pid = self._pid
             self._orders.update_order(self._symbol, self._buy_order)
-            if self._buy_order.status == OrderStatus.FILLED:
+            if self._buy_order.filled():
                 if not self._config.simulate():
                     print(f"Buy order filled for {self._symbol} current price: {current_price}")
                 self._opened_position_completed = True
-            elif self._buy_order.status == OrderStatus.CANCELLED:
+            elif self._buy_order.cancelled():
                 if not self._config.simulate():
                     print(f"Buy order cancelled for {self._symbol} current price: {current_price}")
                 self._buy_order.active = False
@@ -273,7 +273,7 @@ class TraderPosition(PositionBase):
             self._sell_order.update_order(result)
             self._buy_order.pid = self._pid
             self._orders.update_order(self._symbol, self._sell_order)
-            if self._sell_order.status == OrderStatus.FILLED:
+            if self._sell_order.filled():
                 if not self._config.simulate():
                     print(f"Sell order filled for {self._symbol} current price: {current_price}")
                 # we're closing the position, so set orders to inactive
@@ -282,7 +282,7 @@ class TraderPosition(PositionBase):
                 self._sell_order.active = False
                 self._orders.update_order_active(symbol=self._symbol, order_id=self._sell_order.id, active=False)
                 self._closed_position_completed = True
-            elif self._sell_order.status == OrderStatus.CANCELLED:
+            elif self._sell_order.cancelled():
                 if not self._config.simulate():
                     print(f"Sell order cancelled for {self._symbol} current price: {current_price}")
                 self._sell_order.active = False
@@ -294,7 +294,7 @@ class TraderPosition(PositionBase):
             self._stop_loss_order.update_order(result)
             self._stop_loss_order.pid = self._pid
             self._orders.update_order(self._symbol, self._stop_loss_order)
-            if self._stop_loss_order.status == OrderStatus.FILLED:
+            if self._stop_loss_order.filled():
                 if not self._config.simulate():
                     print(f"Stop loss order filled for {self._symbol} current price: {current_price}")
                 # we're closing the position, so set orders to inactive
@@ -303,7 +303,7 @@ class TraderPosition(PositionBase):
                 self._stop_loss_order.active = False
                 self._orders.update_order_active(symbol=self._symbol, order_id=self._stop_loss_order.id, active=False)
                 self._closed_position_completed = True
-            elif self._stop_loss_order.status == OrderStatus.CANCELLED:
+            elif self._stop_loss_order.cancelled():
                 if not self._config.simulate():
                     print(f"Stop loss order cancelled for {self._symbol} current price: {current_price}")
                 self._stop_loss_order.active = False

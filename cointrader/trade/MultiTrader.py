@@ -6,7 +6,7 @@ from cointrader.account.AccountBase import AccountBase
 from cointrader.common.Kline import Kline
 
 class MultiTrader(object):
-    def __init__(self, account: AccountBase, execute: ExecuteBase, config: TraderConfig, orders: Orders = None, granularity: int = 0):
+    def __init__(self, account: AccountBase, execute: ExecuteBase, config: TraderConfig, orders: Orders = None, restore_positions = False, granularity: int = 0):
         self._traders: dict[str, Trader] = {}
         self._account = account
         self._config = config
@@ -26,7 +26,9 @@ class MultiTrader(object):
         for symbol in self._symbols:
             if symbol not in self._traders.keys():
                 self._traders[symbol] = Trader(account=account, symbol=symbol, execute=self._execute, config=self._config, orders=self._orders, granularity=self._granularity)
-                self._traders[symbol].restore_positions(current_price=0.0, current_ts=0)
+                # restore previously open positions if needed
+                if restore_positions:
+                    self._traders[symbol].restore_positions(current_price=0.0, current_ts=0)
 
     def market_preload(self, symbol: str, klines: list[Kline]):
         """
@@ -41,7 +43,7 @@ class MultiTrader(object):
 
     def market_update(self, symbol: str, kline: Kline, current_price: float, current_ts: int, granularity: int):
         if symbol not in self._traders.keys():
-            print(f"Symbol {symbol} not found in traders")
+            print(f"Symbol {symbol} not found in traders: {self._traders.keys()}")
             return
 
         trader = self._traders[symbol]
