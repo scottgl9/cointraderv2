@@ -73,6 +73,12 @@ class AccountBase(object):
         """
         raise NotImplementedError
 
+    def get_all_prices(self) -> dict:
+        """
+        Get all current prices
+        """
+        raise NotImplementedError
+
     def get_account_balances(self, round: bool) -> dict:
         raise NotImplementedError
 

@@ -187,6 +187,8 @@ class SignalStrength(Strategy):
         buy_signal_weight, sell_signal_weight = self._weighted_count_signals()
         if buy_signal_weight == 0 or sell_signal_weight == 0:
             return False
+        if buy_signal_weight < 3.0:
+            return False
         if buy_signal_weight > sell_signal_weight:
             return True
         return False

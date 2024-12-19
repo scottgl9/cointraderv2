@@ -173,16 +173,19 @@ def main(name):
     symbols = account.get_symbol_list()
 
     prev_kline = {}
-    rt.last_ts = 0
+    last_ts = 0
+    last_price_check_ts = 0
+    trading_symbol_list = top_crypto
 
     # preload klines
-    for symbol in top_crypto:
+    for symbol in trading_symbol_list:
         if symbol not in symbols:
             print(f"Symbol {symbol} not in list of symbols")
             continue
         print(f"Pre-loading klines for {symbol}")
         klines = fetch_preload_klines(market, symbol, GRANULARITY)
         prev_kline[symbol] = klines[-1]
+        last_ts = prev_kline[symbol].ts
         mtrader.market_preload(symbol, klines)
         time.sleep(1)
 
@@ -202,17 +205,32 @@ def main(name):
                 if input_char == 'q':
                     running = False
                     print("Exiting...")
-            
+    
+            # every 60 seconds, get all prices
+            current_ts = int(datetime.now().timestamp())
+            if last_price_check_ts == 0 or current_ts - last_price_check_ts >= 60:
+                last_price_check_ts = current_ts
+                prices = account.get_all_prices()
+                #print(f"Prices: {prices}")
+
+                for symbol in trading_symbol_list:
+                    if symbol in prices:
+                        mtrader.market_update(symbol=symbol, kline=None, current_price=prices[symbol], current_ts=current_ts, granularity=GRANULARITY)
+                    else:
+                        print(f"Symbol {symbol} not in prices")
+
             with rt.lock:
                 while len(rt.kline_queue) > 0:
                     kline = rt.kline_queue.popleft()
                     if kline.ts <= prev_kline[kline.symbol].ts:
                         continue
                     #print(kline)
-                    pd.to_datetime(kline.ts, unit='s')
-                    print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
-                    mtrader.market_update(kline, current_price=kline.close, current_ts=kline.ts, granularity=GRANULARITY)
+                    if kline.ts != last_ts:
+                        pd.to_datetime(kline.ts, unit='s')
+                        print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
+                    mtrader.market_update(symbol=kline.symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=GRANULARITY)
                     prev_kline[kline.symbol] = kline
+                    last_ts = kline.ts
 
         except (KeyboardInterrupt, SystemExit):
             running = False

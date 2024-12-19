@@ -104,6 +104,12 @@ class Account(AccountBase):
         #print(f'round_asset: {asset} {amount} -> {amount_str} {asset_precision}')
         return float(amount_str)
 
+    def get_all_prices(self) -> dict:
+        """
+        Get all the current prices
+        """
+        return self._market.market_ticker_prices_all_get()
+
     def get_account_balances(self, round=False) -> dict:
         """
         Get the account balances

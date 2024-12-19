@@ -37,12 +37,13 @@ class MultiTrader(object):
         trader = self._traders[symbol]
         trader.market_preload(klines)
 
-    def market_update(self, kline: Kline, current_price: float, current_ts: int, granularity: int):
-        if kline.symbol not in self._traders.keys():
-            print(f"Symbol {kline.symbol} not found in traders")
+    def market_update(self, symbol: str, kline: Kline, current_price: float, current_ts: int, granularity: int):
+
+        if symbol not in self._traders.keys():
+            print(f"Symbol {symbol} not found in traders")
             return
 
-        trader = self._traders[kline.symbol]
+        trader = self._traders[symbol]
         trader.market_update(kline, current_price=current_price, current_ts=current_ts, granularity=granularity)
 
     def net_profit_percent(self, symbol: str):
