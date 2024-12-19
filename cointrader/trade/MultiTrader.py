@@ -12,6 +12,8 @@ class MultiTrader(object):
         self._config = config
         self._execute = execute
         self._granularity = granularity
+        self._max_positions = self._config.max_positions()
+        self._position_count_per_symbol = {}
 
         if not orders:
             self._orders = Orders(config=self._config)
@@ -44,7 +46,23 @@ class MultiTrader(object):
             return
 
         trader = self._traders[symbol]
+
+        self._position_count_per_symbol[symbol] = trader.position_count()
+
+        total_position_count = 0
+        for count in self._position_count_per_symbol.values():
+            total_position_count += count
+
+        # enforce max position count
+        if total_position_count >= self._max_positions:
+            #print(f"Max positions reached: {total_position_count} >= {self._max_positions}")
+            trader.disable_new_positions(True)
+        else:
+            trader.disable_new_positions(False)
+
         trader.market_update(kline, current_price=current_price, current_ts=current_ts, granularity=granularity)
+        self._position_count_per_symbol[symbol] = trader.position_count()
+
 
     def net_profit_percent(self, symbol: str):
         if symbol not in self._traders.keys():

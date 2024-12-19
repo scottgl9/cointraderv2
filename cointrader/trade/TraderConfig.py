@@ -7,7 +7,8 @@ DEFAULT_TRADE_CONFIG = {
     'verbose': False,                         # Print verbose output
     'orders_db_path': 'orders.db',            # Path to the order database
     'market_db_path': 'market_data.db',       # Path to the market database
-    'max_positions': 1,                       # Maximum number of positions to hold per symbol
+    'max_position_per_symbol': 1,             # Maximum number of positions to hold per symbol
+    'max_positions': 5,                       # Maximum number of positions to hold
     'quote_currency': 'USD',                  # Currency to use for trading
     'max_position_quote_size': 100.0,         # Maximum size of a position in quote currency
     'strategy': 'SignalStrength',             # Strategy to use for trading
@@ -105,6 +106,12 @@ class TraderConfig(object):
 
     def market_db_path(self):
         return self.get('market_db_path')
+
+    def max_positions_per_symbol(self):
+        return self.get('max_positions_per_symbol')
+    
+    def set_max_positions_per_symbol(self, max_positions_per_symbol):
+        self.set('max_positions_per_symbol', max_positions_per_symbol)
 
     def max_positions(self):
         return self.get('max_positions')

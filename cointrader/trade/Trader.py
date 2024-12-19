@@ -28,7 +28,7 @@ class Trader(object):
     _loss_strategy: TradeLossBase = None
     _size_strategy: TradeSizeBase = None
     _orders: Orders = None
-    _max_positions = 0
+    _max_positions_per_symbol = 0
 
     def __init__(self, account: Account, symbol: str, execute: ExecuteBase, config: TraderConfig, orders: Orders, granularity: int = 0):
         self._symbol = symbol
@@ -55,7 +55,8 @@ class Trader(object):
         size_module = importlib.import_module(f'cointrader.trade.size.{self._config.size_strategy()}')
         self._size_strategy = getattr(size_module, self._config.size_strategy())(symbol=symbol, account=account, config=config)
 
-        self._max_positions = config.max_positions()
+        self._max_positions_per_symbol = config.max_positions_per_symbol()
+        self._disable_new_positions = False
         self._net_profit_percent = 0.0
         self._positive_profit_percent = 0.0
         self._negative_profit_percent = 0.0
@@ -67,7 +68,7 @@ class Trader(object):
         self._supertrend = SupertrendSignal(name='supertrend', symbol=symbol, period=20, multiplier=3)
         self._vwap = VWAPSignal(name='vwap', symbol=symbol, period=14)
 
-        #print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
+        #print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions_per_symbol}')
 
 
     def symbol(self) -> str:
@@ -79,6 +80,13 @@ class Trader(object):
         Get the number of positions open
         """
         return len(self._positions)
+    
+    
+    def disable_new_positions(self, disable: bool):
+        """
+        Disable opening new positions
+        """
+        self._disable_new_positions = disable
 
 
     def restore_positions(self, current_price: float, current_ts: int) -> bool:
@@ -197,7 +205,7 @@ class Trader(object):
         buy_signal = self._strategy.buy_signal()
 
         # Open a position on a buy signal
-        if not self._disabled and buy_signal and len(self._positions) < self._max_positions:
+        if not self._disabled and not self._disable_new_positions and buy_signal and len(self._positions) < self._max_positions_per_symbol:
             if not self._size_strategy.ready():
                 print(f"{self._symbol} Size strategy not ready")
                 return
