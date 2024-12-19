@@ -37,6 +37,9 @@ class CCXTTraderExchange(TraderExchangeBase):
             86400: '1d',
         }
 
+    def get_client(self):
+        return self.client
+
     def _ccxt_symbol(self, ticker: str) -> str:
         # Convert from BASE-QUOTE to BASE/QUOTE
         return ticker.replace('-', '/')
