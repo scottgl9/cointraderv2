@@ -40,7 +40,6 @@ class MultiTrader(object):
         trader.market_preload(klines)
 
     def market_update(self, symbol: str, kline: Kline, current_price: float, current_ts: int, granularity: int):
-
         if symbol not in self._traders.keys():
             print(f"Symbol {symbol} not found in traders")
             return
