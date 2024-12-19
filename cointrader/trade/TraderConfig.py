@@ -17,8 +17,6 @@ DEFAULT_TRADE_CONFIG = {
     ],
     'strategy': 'SignalStrength',             # Strategy to use for trading (ex. 1 hour)
     'granularity': 3600,                      # Granularity of the klines to use
-    'long_time_strategy': 'SignalStrength',   # Strategy to use for the longer time frame (ex. 1 day)
-    'long_time_granularity': 86400,           # Granularity of the klines to use for the longer time frame
     'loss_strategy': 'ChandelierExit',        # Strategy to use for setting stop loss
     'size_strategy': 'Fixed',                 # Strategy to use for setting trade size
     'trade_symbols': ['BTC-USD', 'ETH-USD', 'SOL-USD'],
@@ -155,18 +153,6 @@ class TraderConfig(object):
 
     def granularity(self) -> int:
         return self.get('granularity')
-
-    def long_time_strategy(self) -> str:
-        return self.get('long_time_strategy')
-
-    def set_long_time_strategy(self, long_time_strategy: str):
-        self.set('long_time_strategy', long_time_strategy)
-
-    def long_time_granularity(self) -> int:
-        return self.get('long_time_granularity')
-    
-    def set_long_time_granularity(self, long_time_granularity: int):
-        self.set('long_time_granularity', long_time_granularity)
 
     def loss_strategy(self) -> str:
         return self.get('loss_strategy')

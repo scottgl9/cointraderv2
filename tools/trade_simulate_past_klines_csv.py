@@ -52,7 +52,6 @@ def main(args):
     print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
 
     granularity = tconfig.granularity()
-    long_granularity = tconfig.long_time_granularity()
 
     market = Market(exchange=exchange, db_path=tconfig.market_db_path())
     account = AccountSimulate(exchange=exchange, market=market)
@@ -106,7 +105,7 @@ def main(args):
     last_prices = {}
 
     # emitter takes in hourly klines, and emits daily klines
-    kline_emitter = KlineEmitter(src_granularity=granularity, dst_granularity=long_granularity)
+    kline_emitter = KlineEmitter(src_granularity=granularity, dst_granularity=86400)
 
     # iterate through all rows in the DataFrame
     for index, row in df.iterrows():
@@ -138,7 +137,7 @@ def main(args):
                 kline = kline_emitter.emit()
                 if kline:
                     kline.symbol = symbol
-                    kline.granularity = long_granularity
+                    kline.granularity = 86400
                     mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=kline_emitter.granularity())
 
     orders.commit()
