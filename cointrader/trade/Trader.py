@@ -67,7 +67,7 @@ class Trader(object):
         self._supertrend = SupertrendSignal(name='supertrend', symbol=symbol, period=20, multiplier=3)
         self._vwap = VWAPSignal(name='vwap', symbol=symbol, period=14)
 
-        print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
+        #print(f'{self._symbol} Loading strategy: {self._strategy_name} max_positions={self._max_positions}')
 
 
     def symbol(self) -> str:

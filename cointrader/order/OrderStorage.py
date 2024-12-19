@@ -60,7 +60,6 @@ class OrderStorage:
         if self._simulate:
             return self._conn
         else:
-            print(f"db_path: {self.db_path}")
             return sqlite3.connect(self.db_path)
 
     def table_exists(self):

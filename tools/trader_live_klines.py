@@ -38,6 +38,7 @@ class CBADVLive:
         self.market = market
         self.tconfig = tconfig
         self.granularity = granularity
+        self.running = True
         self._last_ts = 0
 
     def fetch_preload_klines(self, symbol: str, granularity: int):
@@ -56,7 +57,7 @@ class CBADVLive:
         elif granularity == 3600: # 1 hour
             hours = max_klines
 
-        end = datetime.now() - timedelta(seconds=granularity)
+        end = datetime.now() #- timedelta(seconds=granularity)
         start = int((end - timedelta(hours=hours, minutes=minutes)).timestamp())
         end = int(end.timestamp())
 
@@ -99,7 +100,7 @@ class CBADVLive:
                         self.mtrader.market_preload(kline.symbol, klines)
                         # if we already fetched the kline, skip it
                         if klines[-1].ts >= kline.ts:
-                            self._last_ts = kline[-1].ts
+                            self._last_ts = klines[-1].ts
                             continue
                         else:
                             self.prev_kline[kline.symbol] = kline
@@ -110,11 +111,17 @@ class CBADVLive:
                             self._last_ts = prev_kline.ts
                             continue
                         self.prev_kline[kline.symbol] = kline
-                    # print only once every 30 minutes
-                    if kline.ts != self._last_ts: # and kline.ts % 1800 == 0:
+                    # print only once every 15 minutes
+                    if kline.ts != self._last_ts and kline.ts % 900 == 0:
+                        self._last_ts = kline.ts
                         pd.to_datetime(kline.ts, unit='s')
                         print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
-                    self.mtrader.market_update(kline, current_price=kline.close, current_ts=kline.ts, granularity=self.granularity)
+                    try:
+                        self.mtrader.market_update(kline, current_price=kline.close, current_ts=kline.ts, granularity=self.granularity)
+                    except Exception as e:
+                        print(f"Error: {e}")
+                        self.running = False
+                        return
                     self._last_ts = kline.ts
 
 
@@ -199,25 +206,25 @@ def main(name):
 
     while running:
         try:
+            if not rt.running:
+                running = False
+                break
             # Wait for 1 second or until input is available
             i, _, _ = select.select([sys.stdin], [], [], 1)
             if i:
                 input_char = sys.stdin.readline().strip()
                 if input_char == 'q':
-                    ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
-                    ws_client.close()
                     running = False
                     print("Exiting...")
         except (KeyboardInterrupt, SystemExit):
-            ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
-            ws_client.close()
             running = False
             print("Exiting...")
         except Exception as e:
             print(f"Error: {e}")
-            ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
-            ws_client.close()
             running = False
+
+    ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
+    ws_client.close()
 
 if __name__ == '__main__':
     main("cbadv")

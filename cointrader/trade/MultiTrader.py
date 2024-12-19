@@ -18,10 +18,11 @@ class MultiTrader(object):
         else:
             self._orders = orders
         self._symbols = self._config.trade_symbols()
-        print(f"MultiTrader: {self._symbols}")
+
+        print(f"MultiTrader: strategy: {self._config.strategy()} trade_quote_size: {self._config.max_position_quote_size()} max_positions: {self._config.max_positions()} symbols: {self._symbols} ")
+
         for symbol in self._symbols:
             if symbol not in self._traders.keys():
-                print(f"Restoring positions for {symbol}...")
                 self._traders[symbol] = Trader(account=account, symbol=symbol, execute=self._execute, config=self._config, orders=self._orders, granularity=self._granularity)
                 self._traders[symbol].restore_positions(current_price=0.0, current_ts=0)
 
