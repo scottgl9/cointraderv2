@@ -16,6 +16,7 @@ except ImportError:
 import pandas as pd
 
 from collections import deque
+from threading import Lock, Thread
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.account.Account import Account
@@ -31,6 +32,37 @@ import select
 
 GRANULARITY = 300
 
+def fetch_preload_klines(market: Market, symbol: str, granularity: int):
+    klines = []
+    max_klines = market.market_get_max_kline_count(granularity)
+
+    minutes = 0
+    hours = 0
+
+    if granularity == 60:
+        minutes = max_klines
+    elif granularity == 300: # 5 minutes
+        minutes = max_klines * 5
+    elif granularity == 900: # 15 minutes
+        minutes = max_klines * 15
+    elif granularity == 3600: # 1 hour
+        hours = max_klines
+
+    end = datetime.now() #- timedelta(seconds=granularity)
+    start = int((end - timedelta(hours=hours, minutes=minutes)).timestamp())
+    end = int(end.timestamp())
+
+    candles = market.market_get_klines_range(symbol, start, end, granularity)
+
+    for candle in reversed(candles):
+        kline = Kline()
+        kline.set_dict_names(ts='start')
+        kline.from_dict(candle)
+        kline.granularity = granularity
+        klines.append(kline)
+        #self.mtrader.market_preload(symbol, kline)
+    return klines
+
 class CBADVLive:
     def __init__(self, mtrader: MultiTrader, market: Market, tconfig: TraderConfig, granularity: int = 300):
         self.prev_kline = {}
@@ -39,42 +71,11 @@ class CBADVLive:
         self.tconfig = tconfig
         self.granularity = granularity
         self.running = True
-        self._last_ts = 0
-
-    def fetch_preload_klines(self, symbol: str, granularity: int):
-        klines = []
-        max_klines = self.market.market_get_max_kline_count(granularity)
-
-        minutes = 0
-        hours = 0
-
-        if granularity == 60:
-            minutes = max_klines
-        elif granularity == 300: # 5 minutes
-            minutes = max_klines * 5
-        elif granularity == 900: # 15 minutes
-            minutes = max_klines * 15
-        elif granularity == 3600: # 1 hour
-            hours = max_klines
-
-        end = datetime.now() #- timedelta(seconds=granularity)
-        start = int((end - timedelta(hours=hours, minutes=minutes)).timestamp())
-        end = int(end.timestamp())
-
-        candles = self.market.market_get_klines_range(symbol, start, end, granularity)
-
-        for candle in reversed(candles):
-            kline = Kline()
-            kline.set_dict_names(ts='start')
-            kline.from_dict(candle)
-            kline.granularity = granularity
-            klines.append(kline)
-            #self.mtrader.market_preload(symbol, kline)
-        return klines
+        self.last_ts = 0
+        self.lock = Lock()
+        self.kline_queue = deque(maxlen=100)
 
     def on_message(self, msg):
-        kline = Kline()
-        kline.set_dict_names(ts='start', symbol='product_id')
         ws_object = WebsocketResponse(json.loads(msg))
         #print(f"Channel: {ws_object.channel}")
         if ws_object.channel == "subscriptions":
@@ -86,43 +87,18 @@ class CBADVLive:
         elif ws_object.channel == "candles":
             for event in ws_object.events:
                 for candle in event.candles:
+                    kline = Kline()
+                    kline.set_dict_names(ts='start', symbol='product_id')
                     kline.from_dict(dict(candle.__dict__))
                     kline.granularity = self.granularity
 
-                    # skip any old klines which may come in when first starting
-                    #if abs(int(datetime.now().timestamp()) - kline.ts) > self.granularity * 2:
-                    #    continue
-                    #print(f"{int(datetime.now().timestamp()) - kline.ts} {kline.symbol}")
-                    if kline.symbol not in self.prev_kline:
-                        print(f"Pre-loading klines for {kline.symbol}")
-                        klines = self.fetch_preload_klines(kline.symbol, self.granularity)
-                        self.prev_kline[kline.symbol] = klines[-1]
-                        self.mtrader.market_preload(kline.symbol, klines)
-                        # if we already fetched the kline, skip it
-                        if klines[-1].ts >= kline.ts:
-                            self._last_ts = klines[-1].ts
-                            continue
-                        else:
-                            self.prev_kline[kline.symbol] = kline
-                    else:
-                        prev_kline = self.prev_kline[kline.symbol]
-                        # skip any old klines or duplicates
-                        if kline.ts <= prev_kline.ts:
-                            self._last_ts = prev_kline.ts
-                            continue
-                        self.prev_kline[kline.symbol] = kline
                     # print only once every 15 minutes
-                    if kline.ts != self._last_ts and kline.ts % 900 == 0:
-                        self._last_ts = kline.ts
-                        pd.to_datetime(kline.ts, unit='s')
-                        print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
-                    try:
-                        self.mtrader.market_update(kline, current_price=kline.close, current_ts=kline.ts, granularity=self.granularity)
-                    except Exception as e:
-                        print(f"Error: {e}")
-                        self.running = False
-                        return
-                    self._last_ts = kline.ts
+                    #if kline.ts != self._last_ts and kline.ts % 900 == 0:
+                    #pd.to_datetime(kline.ts, unit='s')
+                    #print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
+
+                    with self.lock:
+                        self.kline_queue.append(kline)
 
 
 def main(name):
@@ -132,16 +108,13 @@ def main(name):
     top_crypto = [
         "BTC-USD",  # Bitcoin
         "ETH-USD",  # Ethereum
-        "BNB-USD",  # Binance Coin
         "XRP-USD",  # XRP
         "SOL-USD",  # Solana
         "DOGE-USD", # Dogecoin
         "ADA-USD",  # Cardano
-        "TRX-USD",  # TRON
         "AVAX-USD", # Avalanche
         "LINK-USD", # Chainlink
         "SHIB-USD", # Shiba Inu
-        "TON-USD",  # Toncoin
         "SUI-USD",  # Sui
         "DOT-USD",  # Polkadot
         "XLM-USD",  # Stellar
@@ -150,20 +123,17 @@ def main(name):
         "UNI-USD",  # Uniswap
         "PEPE-USD", # Pepe
         "LTC-USD",  # Litecoin
-        "LEO-USD",  # UNUS SED LEO
         "NEAR-USD", # NEAR Protocol
         "APT-USD",  # Aptos
         "ICP-USD",  # Internet Computer
         "AAVE-USD", # Aave
         "ETC-USD",  # Ethereum Classic
         "POL-USD",  # POL (ex-MATIC)
-        "BGB-USD",  # Bitget Token
         "RNDR-USD", # Render
         "CRO-USD",  # Cronos
         "VET-USD",  # VeChain
         "FET-USD",  # Fetch.ai
         "ARB-USD",  # Arbitrum
-        "TAO-USD",  # Bittensor
         "FIL-USD"   # Filecoin
     ]
 
@@ -200,6 +170,22 @@ def main(name):
 
     channels = ['heartbeats', 'user', 'candles']
 
+    symbols = account.get_symbol_list()
+
+    prev_kline = {}
+    rt.last_ts = 0
+
+    # preload klines
+    for symbol in top_crypto:
+        if symbol not in symbols:
+            print(f"Symbol {symbol} not in list of symbols")
+            continue
+        print(f"Pre-loading klines for {symbol}")
+        klines = fetch_preload_klines(market, symbol, GRANULARITY)
+        prev_kline[symbol] = klines[-1]
+        mtrader.market_preload(symbol, klines)
+        time.sleep(1)
+
     #product_ids = ["BTC-USD", "SOL-USD", "ETH-USD"]
     ws_client.open()
     ws_client.subscribe(product_ids=top_crypto, channels=channels) #, 'matches'])
@@ -216,12 +202,24 @@ def main(name):
                 if input_char == 'q':
                     running = False
                     print("Exiting...")
+            
+            with rt.lock:
+                while len(rt.kline_queue) > 0:
+                    kline = rt.kline_queue.popleft()
+                    if kline.ts <= prev_kline[kline.symbol].ts:
+                        continue
+                    #print(kline)
+                    pd.to_datetime(kline.ts, unit='s')
+                    print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
+                    mtrader.market_update(kline, current_price=kline.close, current_ts=kline.ts, granularity=GRANULARITY)
+                    prev_kline[kline.symbol] = kline
+
         except (KeyboardInterrupt, SystemExit):
             running = False
             print("Exiting...")
-        except Exception as e:
-            print(f"Error: {e}")
-            running = False
+        #except Exception as e:
+        #    print(f"Error: {e}")
+        #    running = False
 
     ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
     ws_client.close()

@@ -71,6 +71,10 @@ class SymbolInfoConfig:
             return False
         return True
 
+
+    def get_symbol_list(self) -> list[str]:
+        return self._symbol_info_all.keys()
+
     def get_symbol_info(self, symbol) -> SymbolInfo:
         if symbol not in self._symbol_info_all.keys():
             return None

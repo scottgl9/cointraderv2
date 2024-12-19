@@ -194,6 +194,9 @@ class AccountSimulate(AccountBase):
             hold = self.round_asset(asset, hold)
         self._balances[asset] = tuple([available, hold])
 
+    def get_symbol_list(self):
+        return self._symbol_info.get_symbol_list()
+
     def load_symbol_info(self):
         """
         Load the information for all symbols

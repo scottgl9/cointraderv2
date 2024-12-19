@@ -90,7 +90,13 @@ class AccountBase(object):
     
     def save_symbol_info(self) -> bool:
         raise NotImplementedError
-    
+
+    def get_symbol_list(self) -> list[str]:
+        """
+        Get the list of all tradable symbols
+        """
+        raise NotImplementedError
+
     def get_symbol_info(self, symbol) -> SymbolInfo:
         raise NotImplementedError
 

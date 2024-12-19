@@ -203,6 +203,9 @@ class Account(AccountBase):
         self._balances[asset] = {'available': available, 'hold': hold}
         return self._exchange.balance_set(asset, available, hold)
 
+    def get_symbol_list(self):
+        return self._symbol_info.get_symbol_list()
+
     def load_symbol_info(self) -> bool:
         """
         Load the information for all symbols
