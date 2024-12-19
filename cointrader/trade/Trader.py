@@ -9,12 +9,12 @@ from .position.TraderPosition import TraderPosition
 from cointrader.order.Orders import Orders
 from cointrader.order.OrderStatus import OrderStatus
 from cointrader.order.OrderSide import OrderSide
-import importlib
 from cointrader.signals.EMACross import EMACross
 from cointrader.signals.SupertrendSignal import SupertrendSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
 from cointrader.common.TradeLossBase import TradeLossBase
 from cointrader.common.TradeSizeBase import TradeSizeBase
+import importlib
 from colorama import Fore, Back, Style
 import time
 from datetime import datetime

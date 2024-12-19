@@ -6,7 +6,7 @@ from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.account.Account import Account
 from cointrader.market.Market import Market
 
-CLIENT_NAME = "cbadv"
+CLIENT_NAME = "ccxt"
 
 def main(name):
     exchange = TraderSelectExchange(name).get_exchange()
