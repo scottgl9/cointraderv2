@@ -182,7 +182,7 @@ class Trader(object):
                 self.remove_position(position, current_ts)
 
         # handle long strategy
-        if kline.granularity == self._long_granularity:
+        if kline is not None and kline.granularity == self._long_granularity:
             self._long_strategy.update(kline)
             if self._long_strategy.buy_signal():
                 self._disable_new_positions = False
