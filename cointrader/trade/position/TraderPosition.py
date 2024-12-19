@@ -117,7 +117,7 @@ class TraderPosition(PositionBase):
             self._opened_position_completed = True
             return
         elif self._buy_order.status == OrderStatus.CANCELLED:
-            self.open_position(current_price, size, current_ts, current_price)
+            self.open_position(size=size, current_price=current_price, current_ts=current_ts)
             return
         elif self._buy_order.status == OrderStatus.PLACED:
             #print(f"Updating buy order for {self._symbol} current price: {current_price} limit price: {self._buy_order.limit_price}")

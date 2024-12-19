@@ -7,7 +7,7 @@ from cointrader.common.Kline import Kline
 class Fixed(TradeSizeBase):
     def __init__(self, name='trade_size_fixed', symbol=None, account=None, config=None):
         super().__init__(name=name, symbol=symbol, account=account, config=config)
-        self._max_position_quote_size = self._config.max_position_quote_size
+        self._max_position_quote_size = self._config.max_position_quote_size()
 
     def reset(self):
         pass
@@ -25,7 +25,12 @@ class Fixed(TradeSizeBase):
         return None
 
     def get_quote_trade_size(self, current_price: float, current_ts: int) -> float:
-        return self._max_position_quote_size
+        quote_size = self._account.round_quote(self._symbol, self._max_position_quote_size)
+        #quote_size = self._max_position_quote_size
+        if quote_size < self._account.get_quote_min_size(self._symbol):
+            print(f"{self._symbol} Quote size too small: {quote_size}")
+            return None
+        return quote_size
 
     def update(self, kline: Kline, current_price: float, current_ts: int):
         pass

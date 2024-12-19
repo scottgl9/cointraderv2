@@ -202,7 +202,8 @@ class Trader(object):
                 print(f"{self._symbol} Size strategy not ready")
                 return
             size = self._size_strategy.get_base_trade_size(current_price=current_price, current_ts=current_ts)
-            if not size:
+            quote_size = self._size_strategy.get_quote_trade_size(current_price=current_price, current_ts=current_ts)
+            if not size or not quote_size:
                 print(f"{self._symbol} Size too small: {size}")
                 return
             
@@ -213,8 +214,8 @@ class Trader(object):
             quote_name = self._account.get_quote_name(self._symbol)
             balance, _ = self._account.get_asset_balance(quote_name, round=False)
             balance = self._account.round_quote(self._symbol, balance)
-            if balance < size:
-                print(f"{self._symbol} {quote_name} Insufficient balance {balance} to open position at price {current_price}")
+            if balance < quote_size:
+                print(f"{self._symbol} {quote_name} Insufficient balance {balance} to open position at price {current_price} quote_size={quote_size}")
                 return
 
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
