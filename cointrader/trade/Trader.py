@@ -41,15 +41,15 @@ class Trader(object):
         self._buys = []
         self._sells = []
         # configuration for strategies
-        self._strategies_config = config.strategies()
-        self._strategies: dict[int, Strategy] = {}
+        self._strategies_other_config = config.strategies_other_timeframes()
+        self._strategies_other_timeframes: dict[int, Strategy] = {}
         self._strategy_name = config.strategy()
 
         # load the strategies for each granularity
-        for s in self._strategies_config:
+        for s in self._strategies_other_config:
             strategy_name, strategy_granularity = s.split(':')
             strategy_module = importlib.import_module(f'cointrader.strategies.{strategy_name}')
-            self._strategies[strategy_granularity] = getattr(strategy_module, strategy_name)(symbol=symbol, granularity=int(strategy_granularity))
+            self._strategies_other_timeframes[strategy_granularity] = getattr(strategy_module, strategy_name)(symbol=symbol, granularity=int(strategy_granularity))
 
         # load the main strategy
         strategy_module = importlib.import_module(f'cointrader.strategies.{self._strategy_name}')
@@ -157,6 +157,23 @@ class Trader(object):
             self._size_strategy.update(kline, current_price=kline.close, current_ts=kline.ts)
 
 
+    def market_update_other_timeframe(self, kline: Kline, granularity: int):
+        """
+        Update the strategy for a different timeframe
+        """
+        if str(granularity) not in self._strategies_other_timeframes.keys():
+            raise ValueError(f"Granularity {granularity} not found in strategies: {self._strategies_other_timeframes.keys()}")
+
+        strategy = self._strategies_other_timeframes[str(granularity)]
+        strategy.update(kline)
+        if strategy.buy_signal():
+            self._disable_new_positions = False
+            print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
+        elif strategy.sell_signal():
+            self._disable_new_positions = True
+            print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
+
+
     def market_update(self, kline: Kline, current_price: float, current_ts: int, granularity: int = 0):
         # if position has been closed, remove it from the list
         for position in self._positions:
@@ -187,21 +204,21 @@ class Trader(object):
                 self._strategy.update(kline)
                 self._loss_strategy.update(kline, current_price, current_ts)
                 self._size_strategy.update(kline, current_price, current_ts)
-            else:
-                # handle updating the longer timeframe strategies
-                if str(granularity) not in self._strategies.keys():
-                    raise ValueError(f"Granularity {granularity} not found in strategies: {self._strategies.keys()}")
+            # else:
+            #     # handle updating the longer timeframe strategies
+            #     if str(granularity) not in self._strategies_other_timeframes.keys():
+            #         raise ValueError(f"Granularity {granularity} not found in strategies: {self._strategies_other_timeframes.keys()}")
 
-                strategy = self._strategies[str(granularity)]
-                strategy.update(kline)
-                # disable/enable new positions based on the longer timeframe strategy
-                if strategy.buy_signal():
-                    self._disable_new_positions = False
-                    print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
-                elif strategy.sell_signal():
-                    self._disable_new_positions = True
-                    print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
-                return
+            #     strategy = self._strategies_other_timeframes[str(granularity)]
+            #     strategy.update(kline)
+            #     # disable/enable new positions based on the longer timeframe strategy
+            #     if strategy.buy_signal():
+            #         self._disable_new_positions = False
+            #         print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
+            #     elif strategy.sell_signal():
+            #         self._disable_new_positions = True
+            #         print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
+            #     return
 
         # Disable opening new positions for a period of time after a loss
         if self._disable_until_ts != 0 and current_ts >= self._disable_until_ts:

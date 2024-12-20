@@ -137,8 +137,9 @@ def main(args):
                 kline = kline_emitter.emit()
                 if kline:
                     kline.symbol = symbol
-                    kline.granularity = 86400
-                    mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=kline_emitter.granularity())
+                    kline.granularity = kline_emitter.granularity()
+                    #mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=kline_emitter.granularity())
+                    mtrader.market_update_other_timeframe(symbol=symbol, kline=kline, granularity=kline_emitter.granularity())
 
     orders.commit()
 

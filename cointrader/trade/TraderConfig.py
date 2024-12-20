@@ -11,11 +11,10 @@ DEFAULT_TRADE_CONFIG = {
     'max_positions': 5,                       # Maximum number of positions to hold
     'quote_currency': 'USD',                  # Currency to use for trading
     'max_position_quote_size': 100.0,         # Maximum size of a position in quote currency
-    'strategies': [                           # Strategies to use for trading
-        'SignalStrength:3600',
+    'strategies_other_timeframes': [          # Strategies to use for trading on other timeframes (ex. 1 day)
         'SignalStrength:86400'
     ],
-    'strategy': 'SignalStrength',             # Strategy to use for trading (ex. 1 hour)
+    'strategy': 'SignalStrength',             # Strategy to use for trading with the main timeframe (ex. 1 hour)
     'granularity': 3600,                      # Granularity of the klines to use
     'loss_strategy': 'ChandelierExit',        # Strategy to use for setting stop loss
     'size_strategy': 'Fixed',                 # Strategy to use for setting trade size
@@ -142,14 +141,14 @@ class TraderConfig(object):
     def set_strategy(self, strategy: str):
         self.set('strategy', strategy)
 
-    def strategies(self) -> list[str]:
+    def strategies_other_timeframes(self) -> list[str]:
         """
-        Strategies to use for trading, which consist of a time frame/granularity (in seconds) and a strategy
+        Strategies to use for other timeframes, which consist of a time frame/granularity (in seconds) and a strategy
         """
-        return self.get('strategies')
+        return self.get('strategies_other_timeframes')
 
-    def set_strategies(self, strategies: list[str]):
-        self.set('strategies', strategies)
+    def set_strategies_other_timeframes(self, strategies: list[str]):
+        self.set('strategies_other_timeframes', strategies)
 
     def granularity(self) -> int:
         return self.get('granularity')

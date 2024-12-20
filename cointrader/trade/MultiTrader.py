@@ -21,7 +21,7 @@ class MultiTrader(object):
             self._orders = orders
         self._symbols = self._config.trade_symbols()
 
-        print(f"MultiTrader: strategies: {self._config.strategies()} trade_quote_size: {self._config.max_position_quote_size()} max_positions: {self._config.max_positions()} symbols: {self._symbols} ")
+        print(f"MultiTrader: strategy: {self._config.strategy()} trade_quote_size: {self._config.max_position_quote_size()} max_positions: {self._config.max_positions()} symbols: {self._symbols} ")
 
         for symbol in self._symbols:
             if symbol not in self._traders.keys():
@@ -40,6 +40,17 @@ class MultiTrader(object):
 
         trader = self._traders[symbol]
         trader.market_preload(klines)
+
+    def market_update_other_timeframe(self, symbol: str, kline: Kline, granularity: int):
+        """
+        Update the trader with a kline from another timeframe
+        """
+        if symbol not in self._traders.keys():
+            print(f"Symbol {symbol} not found in traders: {self._traders.keys()}")
+            return
+        
+        trader = self._traders[symbol]
+        trader.market_update_other_timeframe(kline=kline, granularity=granularity)
 
     def market_update(self, symbol: str, kline: Kline, current_price: float, current_ts: int, granularity: int):
         if symbol not in self._traders.keys():
