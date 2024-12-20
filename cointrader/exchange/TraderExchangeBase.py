@@ -17,6 +17,10 @@ class TraderExchangeBase(object):
         """Return exchange client"""
         raise NotImplementedError
 
+    def reconnect(self):
+        """Reconnect to exchange"""
+        raise NotImplementedError
+
     def info_get_stable_currencies(self) -> list[str]:
         """Return list of stable currencies"""
         raise NotImplementedError

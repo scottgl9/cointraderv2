@@ -18,8 +18,12 @@ class CBADVTraderExchange(TraderExchangeBase):
     STOP_DIRECTION_UP = "STOP_DIRECTION_STOP_UP"
     def __init__(self, api_key, api_secret, logger=None):
         self._name = "cbadv"
+        self._api_key = api_key
+        self._api_secret = api_secret
         self.client = RESTClient(api_key=api_key, api_secret=api_secret)
         self.logger = logger
+        self._reconnect_count = 0
+        self._max_reconnect_count = 5
         self._quote_currency_list = ['BTC', 'ETH', 'USDC', 'USD', 'USDT']
         self._excluded_currency_list = ['EUR', 'GBP', 'CDE', 'INTX']
         self._stable_currency_list = ['USD', 'USDC', 'USDT']
@@ -36,6 +40,9 @@ class CBADVTraderExchange(TraderExchangeBase):
 
     def get_client(self) -> RESTClient:
         return self.client
+
+    def reconnect(self):
+        self.client = RESTClient(api_key=self._api_key, api_secret=self._api_secret)
 
     def _info_get_products(self):
         products = []
@@ -381,6 +388,12 @@ class CBADVTraderExchange(TraderExchangeBase):
                     order_result.error_reason = OrderErrorReason.UNKNOWN
                     if 'message' in response:
                         order_result.error_msg = response['message']
+                        if '404 client error: not found' in str(response['message']).lower():
+                            order_result.error_reason = OrderErrorReason.CLIENT_ERROR
+                            self._reconnect_count += 1
+                            if self._reconnect_count < self._max_reconnect_count:
+                                print('Attempting to reconnect client...')
+                                self.reconnect()
                     return order_result
                 elif response['error'] == "INSUFFICIENT_FUND":
                     order_result.status = OrderStatus.REJECTED
@@ -397,6 +410,9 @@ class CBADVTraderExchange(TraderExchangeBase):
                     return order_result
             elif 'success_response' in result:
                 sub_result = result['success_response']
+
+        # reset reconnect counter
+        self._reconnect_count = 0
 
         if 'response' in result:
             if 'success' not in result['response']:
