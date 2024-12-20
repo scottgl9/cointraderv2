@@ -63,6 +63,7 @@ class Trader(object):
 
         self._max_positions_per_symbol = config.max_positions_per_symbol()
         self._disable_new_positions = False
+        self._prev_disable_new_positions = False
         self._net_profit_percent = 0.0
         self._positive_profit_percent = 0.0
         self._negative_profit_percent = 0.0
@@ -152,12 +153,12 @@ class Trader(object):
         Preload klines for the strategy
         """
         for kline in klines:
-            self._strategy.update(kline)
-            self._loss_strategy.update(kline=kline, current_price=kline.close, current_ts=kline.ts)
-            self._size_strategy.update(kline, current_price=kline.close, current_ts=kline.ts)
+            self._strategy.update(kline=kline)
+            self._loss_strategy.update(kline=kline)
+            self._size_strategy.update(kline=kline)
 
 
-    def market_update_other_timeframe(self, kline: Kline, granularity: int):
+    def market_update_kline_other_timeframe(self, kline: Kline, granularity: int, preload: bool = False):
         """
         Update the strategy for a different timeframe
         """
@@ -166,15 +167,36 @@ class Trader(object):
 
         strategy = self._strategies_other_timeframes[str(granularity)]
         strategy.update(kline)
+
         if strategy.buy_signal():
             self._disable_new_positions = False
-            print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
+            if not preload and self._prev_disable_new_positions != self._disable_new_positions:
+                print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
         elif strategy.sell_signal():
             self._disable_new_positions = True
-            print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
+            if not preload and self._prev_disable_new_positions != self._disable_new_positions:
+                print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
+
+        self._prev_disable_new_positions = self._disable_new_positions
 
 
-    def market_update(self, kline: Kline, current_price: float, current_ts: int, granularity: int = 0):
+    def market_update_kline(self, kline: Kline, granularity: int):
+        """
+        Update the strategy for the symbol with the kline
+        """
+        if not kline:
+            return
+        if granularity == self._granularity:
+            # update the main strategy
+            self._strategy.update(kline=kline)
+            self._loss_strategy.update(kline=kline)
+            self._size_strategy.update(kline=kline)
+
+
+    def market_update_price(self, current_price: float, current_ts: int, granularity: int = 0):
+        """
+        Update the market price for the symbol
+        """
         # if position has been closed, remove it from the list
         for position in self._positions:
             if granularity == self._granularity:
@@ -198,28 +220,6 @@ class Trader(object):
                     self._orders.update_order_active(self._symbol, stop_loss_order.id, False)
                 self.remove_position(position, current_ts)
 
-        if kline is not None:
-            if granularity == self._granularity:
-                # update the main strategy
-                self._strategy.update(kline)
-                self._loss_strategy.update(kline, current_price, current_ts)
-                self._size_strategy.update(kline, current_price, current_ts)
-            # else:
-            #     # handle updating the longer timeframe strategies
-            #     if str(granularity) not in self._strategies_other_timeframes.keys():
-            #         raise ValueError(f"Granularity {granularity} not found in strategies: {self._strategies_other_timeframes.keys()}")
-
-            #     strategy = self._strategies_other_timeframes[str(granularity)]
-            #     strategy.update(kline)
-            #     # disable/enable new positions based on the longer timeframe strategy
-            #     if strategy.buy_signal():
-            #         self._disable_new_positions = False
-            #         print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
-            #     elif strategy.sell_signal():
-            #         self._disable_new_positions = True
-            #         print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
-            #     return
-
         # Disable opening new positions for a period of time after a loss
         if self._disable_until_ts != 0 and current_ts >= self._disable_until_ts:
             self._disable_until_ts = 0
@@ -239,16 +239,18 @@ class Trader(object):
                 print(f"{self._symbol} Size too small: {size}")
                 return
             
-            if not self._config.simulate():
-                print(f"{self._symbol} Buy signal {self._strategy.buy_signal_name()} for {self._symbol} size={size}")
-
             # check if we have sufficient balance to open the position
             quote_name = self._account.get_quote_name(self._symbol)
             balance, _ = self._account.get_asset_balance(quote_name, round=False)
             balance = self._account.round_quote(self._symbol, balance)
             if balance < quote_size:
-                print(f"{self._symbol} {quote_name} Insufficient balance {balance} to open position at price {current_price} quote_size={quote_size}")
+                # prevent spamming the console with insufficient balance messages in live trading
+                if self._config.simulate():
+                    print(f"{self._symbol} {quote_name} Insufficient balance {balance} to open position at price {current_price} quote_size={quote_size}")
                 return
+
+            if not self._config.simulate():
+                print(f"{self._symbol} Buy signal {self._strategy.buy_signal_name()} for {self._symbol} size={size}")
 
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)

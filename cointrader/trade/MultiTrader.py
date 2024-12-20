@@ -41,7 +41,7 @@ class MultiTrader(object):
         trader = self._traders[symbol]
         trader.market_preload(klines)
 
-    def market_update_other_timeframe(self, symbol: str, kline: Kline, granularity: int):
+    def market_update_kline_other_timeframe(self, symbol: str, kline: Kline, granularity: int, preload: bool = False):
         """
         Update the trader with a kline from another timeframe
         """
@@ -50,9 +50,12 @@ class MultiTrader(object):
             return
         
         trader = self._traders[symbol]
-        trader.market_update_other_timeframe(kline=kline, granularity=granularity)
+        trader.market_update_kline_other_timeframe(kline=kline, granularity=granularity, preload=preload)
 
-    def market_update(self, symbol: str, kline: Kline, current_price: float, current_ts: int, granularity: int):
+    def market_update_price(self, symbol: str, current_price: float, current_ts: int, granularity: int):
+        """
+        Update the trader with the current price
+        """
         if symbol not in self._traders.keys():
             print(f"Symbol {symbol} not found in traders: {self._traders.keys()}")
             return
@@ -72,9 +75,19 @@ class MultiTrader(object):
         else:
             trader.disable_new_positions(False)
 
-        trader.market_update(kline, current_price=current_price, current_ts=current_ts, granularity=granularity)
+        trader.market_update_price(current_price=current_price, current_ts=current_ts, granularity=granularity)
         self._position_count_per_symbol[symbol] = trader.position_count()
 
+    def market_update_kline(self, symbol: str, kline: Kline, granularity: int):
+        """
+        Update the trader strategy with the current kline
+        """
+        if symbol not in self._traders.keys():
+            print(f"Symbol {symbol} not found in traders: {self._traders.keys()}")
+            return
+
+        trader = self._traders[symbol]
+        trader.market_update_kline(kline=kline, granularity=granularity)
 
     def net_profit_percent(self, symbol: str):
         if symbol not in self._traders.keys():

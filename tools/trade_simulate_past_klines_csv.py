@@ -142,9 +142,10 @@ def main(args):
                     kline_daily.symbol = symbol
                     kline_daily.granularity = kline_emitter.granularity()
                     #mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=kline_emitter.granularity())
-                    mtrader.market_update_other_timeframe(symbol=symbol, kline=kline_daily, granularity=kline_emitter.granularity())
+                    mtrader.market_update_kline_other_timeframe(symbol=symbol, kline=kline_daily, granularity=kline_emitter.granularity())
 
-            mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=granularity)
+            mtrader.market_update_kline(symbol=symbol, kline=kline, granularity=granularity)
+            mtrader.market_update_price(symbol=symbol, current_price=kline.close, current_ts=kline.ts, granularity=granularity)
             last_prices[symbol] = kline_data['close']
 
     orders.commit()

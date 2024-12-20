@@ -35,7 +35,7 @@ class ATRSize(TradeSizeBase):
     def get_quote_trade_size(self, current_price: float, current_ts: int) -> float:
         return self._get_scaled_trade_size_quote(current_price)
 
-    def update(self, kline: Kline, current_price: float, current_ts: int):
+    def update(self, kline: Kline):
         self._atr.update(kline)
 
     def _get_scaled_trade_size_quote(self, current_price: float) -> float:

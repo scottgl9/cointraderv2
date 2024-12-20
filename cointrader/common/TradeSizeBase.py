@@ -30,5 +30,5 @@ class TradeSizeBase(object):
     def get_quote_trade_size(self, current_price: float, current_ts: int) -> float:
         raise NotImplementedError
 
-    def update(self, kline: Kline, current_price: float, current_ts: int):
+    def update(self, kline: Kline):
         raise NotImplementedError

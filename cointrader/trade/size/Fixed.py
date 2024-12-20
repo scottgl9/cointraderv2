@@ -32,5 +32,5 @@ class Fixed(TradeSizeBase):
             return None
         return quote_size
 
-    def update(self, kline: Kline, current_price: float, current_ts: int):
+    def update(self, kline: Kline):
         pass

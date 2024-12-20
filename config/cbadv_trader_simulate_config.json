@@ -8,7 +8,7 @@
     "quote_currency": "USD",
     "max_position_quote_size": 100.0,
     "strategies_other_timeframes": [
-        "SignalStrength:3600"
+        "SignalStrength:900"
     ],
     "strategy": "SignalStrength",
     "granularity": 300,

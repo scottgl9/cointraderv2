@@ -359,13 +359,17 @@ class CBADVTraderExchange(TraderExchangeBase):
         # handle error case
         if 'success' in result:
             if not result['success']:
-                if 'response' not in result:
+                if 'response' not in result and 'error_response' not in result:
                     print("Unknown error: ", result)
                     order_result.status = OrderStatus.UNKNOWN
                     order_result.error_reason = OrderErrorReason.UNKNOWN
                     order_result.error_msg = "Unknown error"
                     return order_result
-                response = result['response']
+                if 'error_response' in result:
+                    response = result['error_response']
+                elif 'response' in result:
+                    response = result['response']
+
                 if 'error' not in response:
                     print("Unknown error: ", response)
                     order_result.status = OrderStatus.UNKNOWN

@@ -36,7 +36,7 @@ class ChandelierExit(TradeLossBase):
         stop_limit_price = self._account.round_quote(self._symbol, highest_high - self._multiplier * self._atr.get_last_value())
         return stop_limit_price
 
-    def update(self, kline: Kline, current_price: float, current_ts: int):
+    def update(self, kline: Kline):
         self._atr.update(kline)
         self._highs.append(kline.high)
         self._lows.append(kline.low)

@@ -26,5 +26,5 @@ class Static(TradeLossBase):
         limit_price = self._account.round_quote(self._symbol, (1 - (self._stop_loss_percent / 100.0)) * price)
         return limit_price
 
-    def update(self, kline: Kline, current_price: float, current_ts: int):
+    def update(self, kline: Kline):
         pass

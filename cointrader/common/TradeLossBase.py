@@ -30,5 +30,5 @@ class TradeLossBase(object):
     def get_stop_limit_price(self, price: float, current_ts: int) -> float:
         raise NotImplementedError
 
-    def update(self, kline: Kline, current_price: float, current_ts: int):
+    def update(self, kline: Kline):
         raise NotImplementedError

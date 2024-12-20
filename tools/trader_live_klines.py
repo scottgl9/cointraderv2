@@ -198,7 +198,7 @@ def main(name):
             kline_emitters[symbol].update(kline)
             if kline_emitters[symbol].ready():
                 kline_15m = kline_emitters[symbol].emit()
-                mtrader.market_update_other_timeframe(symbol, kline_15m, 900)
+                mtrader.market_update_kline_other_timeframe(symbol, kline_15m, 900, preload=True)
         time.sleep(1)
 
     #product_ids = ["BTC-USD", "SOL-USD", "ETH-USD"]
@@ -227,7 +227,7 @@ def main(name):
 
                 for symbol in trading_symbol_list:
                     if symbol in prices:
-                        mtrader.market_update(symbol=symbol, kline=None, current_price=prices[symbol], current_ts=current_ts, granularity=GRANULARITY)
+                        mtrader.market_update_price(symbol=symbol, current_price=prices[symbol], current_ts=current_ts, granularity=GRANULARITY)
                     else:
                         print(f"Symbol {symbol} not in prices")
 
@@ -245,12 +245,13 @@ def main(name):
                         kline_15m = kline_emitter.emit()
                         kline_15m.symbol = kline.symbol
                         kline_15m.granularity = kline_emitter.granularity()
-                        mtrader.market_update_other_timeframe(kline.symbol, kline_15m, kline_emitter.granularity())
+                        mtrader.market_update_kline_other_timeframe(kline.symbol, kline_15m, kline_emitter.granularity(), preload=False)
 
-                    if kline.ts != last_ts:
+                    # print only once every 15 minutes
+                    if kline.ts != last_ts and kline.ts % 900 == 0:
                         pd.to_datetime(kline.ts, unit='s')
                         print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
-                    mtrader.market_update(symbol=kline.symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=GRANULARITY)
+                    mtrader.market_update_kline(symbol=kline.symbol, kline=kline, granularity=GRANULARITY)
                     prev_kline[kline.symbol] = kline
                     last_ts = kline.ts
 

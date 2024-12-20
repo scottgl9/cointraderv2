@@ -25,6 +25,7 @@ from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
 from cointrader.order.Orders import Orders
 from cointrader.common.Kline import Kline
+from cointrader.common.KlineEmitter import KlineEmitter
 from cointrader.config import *
 from cointrader.indicators.EMA import EMA
 
@@ -78,8 +79,11 @@ def main(args):
 
     print(f"Getting klines for {args.start_date} to {args.end_date}")
 
+    kline_emitters: dict[str, KlineEmitter] = {}
+
     # get all klines for each symbol stored in the market db
     for symbol in symbols:
+        kline_emitters[symbol] = KlineEmitter(src_granularity=args.granularity, dst_granularity=900)
         all_klines[symbol] = market.market_get_stored_klines_range(symbol, start_ts=start_ts, end_ts=end_ts, granularity=args.granularity)
         kline_count = len(all_klines[symbol])
         if lowest_kline_count == 0 or kline_count < lowest_kline_count:
@@ -99,7 +103,13 @@ def main(args):
             kline.from_dict(k)
             kline.symbol = symbol
             kline.granularity = args.granularity
-            mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=args.granularity)
+            kline_emitters[symbol].update(kline)
+            if kline_emitters[symbol].ready():
+                kline_15m = kline_emitters[symbol].emit()
+                mtrader.market_update_kline_other_timeframe(symbol, kline_15m, 900)
+
+            mtrader.market_update_kline(symbol=symbol, kline=kline, granularity=args.granularity)
+            mtrader.market_update_price(symbol=symbol, current_price=kline.close, current_ts=kline.ts, granularity=args.granularity)
             value = emas[symbol].update(kline)
             ema_values[symbol].append(value)
 
