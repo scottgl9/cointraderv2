@@ -42,6 +42,9 @@ class TraderPosition(PositionBase):
         self._stop_loss_order.pid = self._pid
         self._orders.update_order(self._symbol, self._stop_loss_order)
 
+        if self._stop_loss_order.rejected() or self._stop_loss_order.unknown():
+            print(f"update_stop_loss_position() Stop loss order rejected or unknown: {self._stop_loss_order.msg}")
+
         return self._stop_loss_order
 
 
@@ -93,6 +96,10 @@ class TraderPosition(PositionBase):
 
         self._buy_order = Order(symbol=self._symbol)
         self._buy_order.update_order(result)
+
+        if self._buy_order.rejected() or self._buy_order.unknown():
+            print(f"open_position() Buy order rejected or unknown: {self._buy_order.msg}")
+
         self._buy_order.pid = self._pid
         self._orders.add_order(self._symbol, self._buy_order)
 
@@ -136,6 +143,8 @@ class TraderPosition(PositionBase):
                 # cancel buy order so we can replace it
                 result = self._execute.cancel(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
                 self._buy_order.update_order(result)
+                if self._buy_order.rejected() or self._buy_order.unknown():
+                    print(f"update_buy_position() Cancel Buy order rejected or unknown: {self._buy_order.msg}")
                 self._buy_order.pid = self._pid
                 self._buy_order.active = False
                 self._orders.update_order(self._symbol, self._buy_order)
@@ -173,6 +182,10 @@ class TraderPosition(PositionBase):
                 # cancel sell order so we can replace it
                 result = self._execute.cancel(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
                 self._sell_order.update_order(result)
+
+                if self._sell_order.rejected() or self._sell_order.unknown():
+                    print(f"update_sell_position() Cancel sell order rejected or unknown: {self._sell_order.msg}")
+
                 self._sell_order.pid = self._pid
                 self._sell_order.active = False
                 self._orders.update_order(self._symbol, self._sell_order)
@@ -236,6 +249,10 @@ class TraderPosition(PositionBase):
 
         self._sell_order = Order(symbol=self._symbol)
         self._sell_order.update_order(result)
+
+        if self._sell_order.rejected() or self._sell_order.unknown():
+            print(f"close_position() sell order rejected or unknown: {self._sell_order.msg}")
+
         self._sell_order.pid = self._pid
         self._orders.add_order(self._symbol, self._sell_order)
 
@@ -267,6 +284,8 @@ class TraderPosition(PositionBase):
                     print(f"Buy order cancelled for {self._symbol} current price: {current_price}")
                 self._buy_order.active = False
                 self._orders.update_order_active(symbol=self._symbol, order_id=self._buy_order.id, active=False)
+            elif self._buy_order.rejected() or self._buy_order.unknown():
+                print(f"market_update() buy order rejected or unknown: {self._buy_order.msg}")
 
         if not self._closed_position_completed and self._sell_order and not self._sell_order.completed() and not self._sell_order.cancelled():
             result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
@@ -287,6 +306,8 @@ class TraderPosition(PositionBase):
                     print(f"Sell order cancelled for {self._symbol} current price: {current_price}")
                 self._sell_order.active = False
                 self._orders.update_order_active(symbol=self._symbol, order_id=self._sell_order.id, active=False)
+            elif self._sell_order.rejected() or self._sell_order.unknown():
+                print(f"market_update() sell order rejected or unknown: {self._sell_order.msg}")
 
         if not self._closed_position_completed and self._stop_loss_order and not self.stop_loss_is_cancelled() and not self._stop_loss_order.completed():
             #print(f"stop loss order: {self._stop_loss_order}")
@@ -308,4 +329,6 @@ class TraderPosition(PositionBase):
                     print(f"Stop loss order cancelled for {self._symbol} current price: {current_price}")
                 self._stop_loss_order.active = False
                 self._orders.update_order_active(symbol=self._symbol, order_id=self._stop_loss_order.id, active=False)
+            elif self._stop_loss_order.rejected() or self._stop_loss_order.unknown():
+                print(f"market_update() stop loss order rejected or unknown: {self._stop_loss_order.msg}")
 

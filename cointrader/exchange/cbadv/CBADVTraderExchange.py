@@ -353,25 +353,53 @@ class CBADVTraderExchange(TraderExchangeBase):
         if not isinstance(result, dict):
             result = result.to_dict()
 
+        # store raw result
+        order_result.msg = str(result)
+
         # handle error case
         if 'success' in result:
             if not result['success']:
+                if 'response' not in result:
+                    print("Unknown error: ", result)
+                    order_result.status = OrderStatus.UNKNOWN
+                    order_result.error_reason = OrderErrorReason.UNKNOWN
+                    order_result.error_msg = "Unknown error"
+                    return order_result
                 response = result['response']
-                if 'error' in response:
-                    if response['error'] == "UNKNOWN":
-                        order_result.status = OrderStatus.REJECTED
-                        order_result.error_reason = OrderErrorReason.UNKNOWN
+                if 'error' not in response:
+                    print("Unknown error: ", response)
+                    order_result.status = OrderStatus.UNKNOWN
+                    order_result.error_reason = OrderErrorReason.UNKNOWN
+                    order_result.error_msg = "Unknown error"
+                    return order_result
+                if response['error'] == "UNKNOWN":
+                    order_result.status = OrderStatus.REJECTED
+                    order_result.error_reason = OrderErrorReason.UNKNOWN
+                    if 'message' in response:
                         order_result.error_msg = response['message']
-                        return order_result
-                    elif response['error'] == "INSUFFICIENT_FUND":
-                        order_result.status = OrderStatus.REJECTED
-                        order_result.error_reason = OrderErrorReason.INSUFFIENT_BALANCE
+                    return order_result
+                elif response['error'] == "INSUFFICIENT_FUND":
+                    order_result.status = OrderStatus.REJECTED
+                    order_result.error_reason = OrderErrorReason.INSUFFIENT_BALANCE
+                    if 'message' in response:
                         order_result.error_msg = response['message']
-                        return order_result
+                    return order_result
+                else:
+                    print("Unknown error: ", response['error'])
+                    order_result.status = OrderStatus.UNKNOWN
+                    order_result.error_reason = OrderErrorReason.UNKNOWN
+                    if 'message' in response:
+                        order_result.error_msg = response['message']
+                    return order_result
             elif 'success_response' in result:
                 sub_result = result['success_response']
 
         if 'response' in result:
+            if 'success' not in result['response']:
+                    order_result.status = OrderStatus.UNKNOWN
+                    order_result.error_reason = OrderErrorReason.UNKNOWN
+                    order_result.error_msg = "Unknown error"
+                    return order_result
             if not result['success']:
                 response = result['response']
                 order_result.status = OrderStatus.REJECTED
@@ -384,13 +412,21 @@ class CBADVTraderExchange(TraderExchangeBase):
                     print("Unknown error: ", response['error'])
                 order_result.error_msg = response['message']
             else:
-                order_result.id = result['response']['order_id']
-                order_result.symbol = result['response']['product_id']
-                if result['response']['side'] == 'BUY':
-                    order_result.side = OrderSide.BUY
-                elif result['response']['side'] == 'SELL':
-                    order_result.side = OrderSide.SELL
+                if 'order_id' in result['response']:
+                    order_result.id = result['response']['order_id']
+                if 'product_id' in result['response']:
+                    order_result.symbol = result['response']['product_id']
+                if 'side' in result['response']:
+                    if result['response']['side'] == 'BUY':
+                        order_result.side = OrderSide.BUY
+                    elif result['response']['side'] == 'SELL':
+                        order_result.side = OrderSide.SELL
 
+                if not order_result.id or not order_result.symbol:
+                    order_result.status = OrderStatus.UNKNOWN
+                    order_result.error_reason = OrderErrorReason.UNKNOWN
+                    order_result.error_msg = "Unknown error"
+                    return order_result
                 order_result.status = OrderStatus.PLACED
                 order_result.error_reason = OrderErrorReason.NONE
 

@@ -56,6 +56,12 @@ class Order(OrderResult):
         self.error_msg = result.error_msg
 
 
+    def unknown(self) -> bool:
+        """
+        Check if the order is unknown
+        """
+        return self.status == OrderStatus.UNKNOWN
+
     def filled(self) -> bool:
         """
         Check if the order has been filled
