@@ -26,6 +26,7 @@ from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
 from cointrader.common.Kline import Kline
 from cointrader.order.Orders import Orders
+from cointrader.common.KlineEmitter import KlineEmitter
 from cointrader.config import *
 import sys
 import select
@@ -177,16 +178,27 @@ def main(name):
     last_price_check_ts = 0
     trading_symbol_list = top_crypto
 
+    kline_emitters: dict[str, KlineEmitter] = {}
+
     # preload klines
     for symbol in trading_symbol_list:
         if symbol not in symbols:
             print(f"Symbol {symbol} not in list of symbols")
             continue
+
         print(f"Pre-loading klines for {symbol}")
         klines = fetch_preload_klines(market, symbol, GRANULARITY)
         prev_kline[symbol] = klines[-1]
         last_ts = prev_kline[symbol].ts
         mtrader.market_preload(symbol, klines)
+
+        # emitter takes in 5m klines, and emits 15m klines
+        kline_emitters[symbol] = KlineEmitter(src_granularity=GRANULARITY, dst_granularity=900)
+        for kline in klines:
+            kline_emitters[symbol].update(kline)
+            if kline_emitters[symbol].ready():
+                kline_15m = kline_emitters[symbol].emit()
+                mtrader.market_update_other_timeframe(symbol, kline_15m, 900)
         time.sleep(1)
 
     #product_ids = ["BTC-USD", "SOL-USD", "ETH-USD"]
@@ -225,6 +237,16 @@ def main(name):
                     if kline.ts <= prev_kline[kline.symbol].ts:
                         continue
                     #print(kline)
+
+                    # emit 15m klines for other timeframe strategies
+                    kline_emitter = kline_emitters[kline.symbol]
+                    kline_emitter.update(kline)
+                    if kline_emitter.ready():
+                        kline_15m = kline_emitter.emit()
+                        kline_15m.symbol = kline.symbol
+                        kline_15m.granularity = kline_emitter.granularity()
+                        mtrader.market_update_other_timeframe(kline.symbol, kline_15m, kline_emitter.granularity())
+
                     if kline.ts != last_ts:
                         pd.to_datetime(kline.ts, unit='s')
                         print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")

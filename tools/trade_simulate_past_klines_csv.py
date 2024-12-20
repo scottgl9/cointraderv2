@@ -104,8 +104,13 @@ def main(args):
     first_prices = {}
     last_prices = {}
 
+    kline_emitters: dict[str, KlineEmitter] = {}
+
     # emitter takes in hourly klines, and emits daily klines
-    kline_emitter = KlineEmitter(src_granularity=granularity, dst_granularity=86400)
+    for symbol in symbols:
+        kline_emitters[symbol] = KlineEmitter(src_granularity=granularity, dst_granularity=86400)
+
+    #kline_emitter = KlineEmitter(src_granularity=granularity, dst_granularity=86400)
 
     # iterate through all rows in the DataFrame
     for index, row in df.iterrows():
@@ -128,18 +133,19 @@ def main(args):
             kline.symbol = symbol
             kline.granularity = granularity
 
-            mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=granularity)
-            last_prices[symbol] = kline_data['close']
-
             # emit daily klines
+            kline_emitter = kline_emitters[symbol]
             kline_emitter.update(kline)
             if kline_emitter.ready():
-                kline = kline_emitter.emit()
+                kline_daily = kline_emitter.emit()
                 if kline:
-                    kline.symbol = symbol
-                    kline.granularity = kline_emitter.granularity()
+                    kline_daily.symbol = symbol
+                    kline_daily.granularity = kline_emitter.granularity()
                     #mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=kline_emitter.granularity())
-                    mtrader.market_update_other_timeframe(symbol=symbol, kline=kline, granularity=kline_emitter.granularity())
+                    mtrader.market_update_other_timeframe(symbol=symbol, kline=kline_daily, granularity=kline_emitter.granularity())
+
+            mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=granularity)
+            last_prices[symbol] = kline_data['close']
 
     orders.commit()
 
