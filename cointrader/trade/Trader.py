@@ -89,6 +89,13 @@ class Trader(object):
         """
         return len(self._positions)
     
+
+    # def disable_new_positions(self, disable: bool):
+    #     """
+    #     Disable opening new positions
+    #     """
+    #     self._local_disable_new_positions = disable
+
     
     def restore_positions(self, current_price: float, current_ts: int) -> bool:
         """
@@ -245,8 +252,8 @@ class Trader(object):
             
             # check if we have sufficient balance to open the position
             quote_name = self._account.get_quote_name(self._symbol)
-            balance, _ = self._account.get_asset_balance(quote_name, round=False)
-            #balance = self._config.global_current_balance_quote()
+            #balance, _ = self._account.get_asset_balance(quote_name, round=False)
+            balance = self._config.global_current_balance_quote()
             #print("balance", balance, self._config.quote_currency())
             balance = self._account.round_quote(self._symbol, balance)
             if balance < quote_size:
@@ -298,8 +305,8 @@ class Trader(object):
 
                     # check if we have sufficient balance to update the buy position
                     quote_name = self._account.get_quote_name(self._symbol)
-                    balance, _ = self._account.get_asset_balance(quote_name, round=False)
-                    #balance = self._config.global_current_balance_quote()
+                    #balance, _ = self._account.get_asset_balance(quote_name, round=False)
+                    balance = self._config.global_current_balance_quote()
                     #print("balance", balance, self._config.quote_currency())
                     balance = self._account.round_quote(self._symbol, balance)
                     if balance >= size:

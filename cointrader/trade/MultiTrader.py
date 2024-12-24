@@ -41,6 +41,10 @@ class MultiTrader(object):
         """
         balance, _ = self._account.get_asset_balance(quote_name, round=False)
         self._config.set_global_current_balance_quote(balance)
+        global_balance = self._config.global_current_balance_quote()
+        if global_balance != balance:
+            print(f"{balance} != {global_balance}")
+
 
 
     def market_preload(self, symbol: str, klines: list[Kline]):
@@ -85,8 +89,10 @@ class MultiTrader(object):
         if total_position_count >= self._max_positions:
             #print(f"Max positions reached: {total_position_count} >= {self._max_positions}")
             self._config.set_global_disable_new_positions(True)
+            #trader.disable_new_positions(True)
         else:
             self._config.set_global_disable_new_positions(False)
+            #trader.disable_new_positions(False)
 
         trader.market_update_price(current_price=current_price, current_ts=current_ts, granularity=granularity)
         self._position_count_per_symbol[symbol] = trader.position_count()

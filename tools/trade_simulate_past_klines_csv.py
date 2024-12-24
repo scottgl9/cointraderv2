@@ -61,6 +61,7 @@ def main(args):
     all_klines = {}
 
     account.update_asset_balance("USDT", available=initial_usdt, hold=0.0)
+    tconfig.set_global_current_balance_quote(balance=initial_usdt)
 
     print(account.get_account_balances())
     print("Start Total USDT Balance:")

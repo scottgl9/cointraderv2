@@ -38,8 +38,8 @@ DEFAULT_TRADE_CONFIG = {
     'sell_all_on_stop': False,                # sell all open positions when the bot stops
 
     # temporary global configuration options used across all traders
-    #'tmp_global_disable_new_positions': False,
-    #'tmp_global_current_balance_quote': 0.0,
+    'tmp_global_disable_new_positions': False,
+    'tmp_global_current_balance_quote': 0.0,
 }
 
 class TraderConfig(object):
@@ -280,13 +280,13 @@ class TraderConfig(object):
 
 # temporary global configuration options used across all traders
     def global_disable_new_positions(self) -> bool:
-        self.get('tmp_global_disable_new_positions')
+        return self.get('tmp_global_disable_new_positions')
     
     def set_global_disable_new_positions(self, disable: bool):
         self.set('tmp_global_disable_new_positions', disable)
 
     def global_current_balance_quote(self) -> float:
-        self.get('tmp_global_current_balance_quote')
+        return self.get('tmp_global_current_balance_quote')
     
     def set_global_current_balance_quote(self, balance: float):
         self.set('tmp_global_current_balance_quote', balance)
