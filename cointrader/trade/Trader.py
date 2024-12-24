@@ -62,8 +62,11 @@ class Trader(object):
         self._size_strategy = getattr(size_module, self._config.size_strategy())(symbol=symbol, account=account, config=config)
 
         self._max_positions_per_symbol = config.max_positions_per_symbol()
-        self._disable_new_positions = False
-        self._prev_disable_new_positions = False
+
+        # control disabling new positions from this specific trader
+        self._local_disable_new_positions = False
+        self._prev_local_disable_new_positions = False
+
         self._net_profit_percent = 0.0
         self._positive_profit_percent = 0.0
         self._negative_profit_percent = 0.0
@@ -86,13 +89,6 @@ class Trader(object):
         return len(self._positions)
     
     
-    def disable_new_positions(self, disable: bool):
-        """
-        Disable opening new positions
-        """
-        self._disable_new_positions = disable
-
-
     def restore_positions(self, current_price: float, current_ts: int) -> bool:
         """
         Restore positions from the database. Used if trading bot exits prematurely, and we need to restore the positions from the order database
@@ -101,8 +97,9 @@ class Trader(object):
         order_by_pid = {}
         # reorganize orders by pid
         for order in orders:
-            # if the order is cancelled, skip it
+            # if the order is cancelled, skip it and set inactive
             if order.cancelled():
+                self._orders.update_order_active(symbol=self._symbol, order_id=order.id, active=False)
                 continue
             if order.pid not in order_by_pid.keys():
                 if order.side == OrderSide.BUY:
@@ -169,15 +166,15 @@ class Trader(object):
         strategy.update(kline)
 
         if strategy.buy_signal():
-            self._disable_new_positions = False
-            if not preload and self._prev_disable_new_positions != self._disable_new_positions:
+            self._local_disable_new_positions = False
+            if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
                 print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
         elif strategy.sell_signal():
-            self._disable_new_positions = True
-            if not preload and self._prev_disable_new_positions != self._disable_new_positions:
+            self._local_disable_new_positions = True
+            if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
                 print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
 
-        self._prev_disable_new_positions = self._disable_new_positions
+        self._prev_local_disable_new_positions = self._local_disable_new_positions
 
 
     def market_update_kline(self, kline: Kline, granularity: int):
@@ -228,8 +225,11 @@ class Trader(object):
         opened_position_id = -1
         buy_signal = self._strategy.buy_signal()
 
+        # global disable new positions
+        disable_new_positions = self._config.global_disable_new_positions()
+
         # Open a position on a buy signal
-        if not self._disabled and not self._disable_new_positions and buy_signal and len(self._positions) < self._max_positions_per_symbol:
+        if not self._disabled and not self._local_disable_new_positions and not disable_new_positions and buy_signal and len(self._positions) < self._max_positions_per_symbol:
             if not self._size_strategy.ready():
                 print(f"{self._symbol} Size strategy not ready")
                 return
@@ -242,6 +242,8 @@ class Trader(object):
             # check if we have sufficient balance to open the position
             quote_name = self._account.get_quote_name(self._symbol)
             balance, _ = self._account.get_asset_balance(quote_name, round=False)
+            #balance = self._config.global_current_balance_quote()
+            #print("balance", balance, self._config.quote_currency())
             balance = self._account.round_quote(self._symbol, balance)
             if balance < quote_size:
                 # prevent spamming the console with insufficient balance messages in live trading
@@ -293,6 +295,8 @@ class Trader(object):
                     # check if we have sufficient balance to update the buy position
                     quote_name = self._account.get_quote_name(self._symbol)
                     balance, _ = self._account.get_asset_balance(quote_name, round=False)
+                    #balance = self._config.global_current_balance_quote()
+                    #print("balance", balance, self._config.quote_currency())
                     balance = self._account.round_quote(self._symbol, balance)
                     if balance >= size:
                         position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)

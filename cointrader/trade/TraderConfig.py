@@ -3,6 +3,7 @@ import json
 
 # Example of a trade config
 DEFAULT_TRADE_CONFIG = {
+    # Configuration options set on start
     'simulate': True,                         # Simulate trading without making real trades
     'verbose': False,                         # Print verbose output
     'orders_db_path': 'orders.db',            # Path to the order database
@@ -28,11 +29,17 @@ DEFAULT_TRADE_CONFIG = {
     'min_take_profit_percent': 0.5,           # minimum percent profit to take
     'stop_on_loss': True,                     # Stop trading bot after a loss
     'max_total_loss_percent': 10.0,           # Maximum total loss percent before stopping the bot
-    'cooldown_period_seconds': 3600,          # cooldown period after entering a position before opening another
-    'disable_after_loss_seconds': 86400,      # Disable trading for this many seconds after a loss
+    'global_cooldown_period_seconds': 3600,   # Global configuration across all traders, which sets a specific time in seconds between opening new positions
+    'cooldown_period_seconds': 3600,          # Local cooldown period after entering a position before opening another (local to each trader)
+    'global_disable_after_loss_seconds': 86400,      # Global config to disable trading after a loss for this many seconds
+    'diable_after_loss_seconds': 3600,        # local config per trader to disable trading after a loss for this many seconds
     'start_position_type': 'STOP_LOSS_LIMIT', # Type of order to open a position (MARKET, LIMIT, STOP_LOSS_LIMIT)
     'end_position_type': 'STOP_LOSS_LIMIT',   # Type of order to open a position (MARKET, LIMIT, STOP_LOSS_LIMIT)
-    'sell_all_on_stop': False                 # sell all open positions when the bot stops
+    'sell_all_on_stop': False,                # sell all open positions when the bot stops
+
+    # temporary global configuration options used across all traders
+    #'tmp_global_disable_new_positions': False,
+    #'tmp_global_current_balance_quote': 0.0,
 }
 
 class TraderConfig(object):
@@ -68,7 +75,6 @@ class TraderConfig(object):
     def save_config(self) -> bool:
         try:
             with open(self._path, 'w') as f:
-                print(self._config)
                 json.dump(self._config, f, indent=4)
         except Exception as e:
             print(f"Error saving config to {self.path}: {e}")
@@ -231,6 +237,18 @@ class TraderConfig(object):
     def set_cooldown_period_seconds(self, cooldown_period_seconds: int):
         self.set('cooldown_period_seconds', cooldown_period_seconds)
 
+    def global_cooldown_period_seconds(self) -> int:
+        return self.get('global_cooldown_period_seconds')
+    
+    def set_global_cooldown_period_seconds(self, global_cooldown_period_seconds: int):
+        self.set('global_cooldown_period_seconds', global_cooldown_period_seconds)
+
+    def global_disable_after_loss_seconds(self) -> int:
+        return self.get('global_disable_after_loss_seconds')
+    
+    def set_global_disable_after_loss_seconds(self, global_disable_after_loss_seconds: int):
+        self.set('global_disable_after_loss_seconds', global_disable_after_loss_seconds)
+
     def disable_after_loss_seconds(self) -> int:
         return self.get('disable_after_loss_seconds')
     
@@ -254,3 +272,16 @@ class TraderConfig(object):
     
     def set_sell_all_on_stop(self, sell_all_on_stop: bool):
         self.set('sell_all_on_stop', sell_all_on_stop)
+
+# temporary global configuration options used across all traders
+    def global_disable_new_positions(self) -> bool:
+        self.get('tmp_global_disable_new_positions')
+    
+    def set_global_disable_new_positions(self, disable: bool):
+        self.set('tmp_global_disable_new_positions', disable)
+
+    def global_current_balance_quote(self) -> float:
+        self.get('tmp_global_current_balance_quote')
+    
+    def set_global_current_balance_quote(self, balance: float):
+        self.set('tmp_global_current_balance_quote', balance)

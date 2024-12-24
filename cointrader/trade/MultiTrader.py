@@ -15,6 +15,10 @@ class MultiTrader(object):
         self._max_positions = self._config.max_positions()
         self._position_count_per_symbol = {}
 
+        # set default temporary global settings
+        self._config.set_global_disable_new_positions(False)
+        self._config.set_global_current_balance_quote(0.0)
+
         if not orders:
             self._orders = Orders(config=self._config)
         else:
@@ -29,6 +33,15 @@ class MultiTrader(object):
                 # restore previously open positions if needed
                 if restore_positions:
                     self._traders[symbol].restore_positions(current_price=0.0, current_ts=0)
+
+    def market_update_quote_balance(self, quote_name: str):
+        """
+        Update the current unrounded quote balance before running market_update_price()
+        The purpose is to prevent checking quote balance too many times during live trading (so we don't get blocked by the API)
+        """
+        balance, _ = self._account.get_asset_balance(quote_name, round=False)
+        self._config.set_global_current_balance_quote(balance)
+
 
     def market_preload(self, symbol: str, klines: list[Kline]):
         """
@@ -71,9 +84,9 @@ class MultiTrader(object):
         # enforce max position count
         if total_position_count >= self._max_positions:
             #print(f"Max positions reached: {total_position_count} >= {self._max_positions}")
-            trader.disable_new_positions(True)
+            self._config.set_global_disable_new_positions(True)
         else:
-            trader.disable_new_positions(False)
+            self._config.set_global_disable_new_positions(False)
 
         trader.market_update_price(current_price=current_price, current_ts=current_ts, granularity=granularity)
         self._position_count_per_symbol[symbol] = trader.position_count()

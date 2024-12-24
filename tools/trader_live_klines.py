@@ -163,6 +163,10 @@ def main(name):
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=False)
 
     mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, restore_positions=True, granularity=GRANULARITY)
+
+    # update quote balance before trying to open positions
+    mtrader.market_update_quote_balance(quote_name=tconfig.quote_currency())
+
     rt = CBADVLive(mtrader=mtrader, market=market, tconfig=tconfig)
     ws_client = WSClient(api_key=CBADV_KEY, api_secret=CBADV_SECRET, on_message=rt.on_message)
     #accnt = AccountCoinbaseAdvanced(exchange=exchange, simulate=False, live=False, logger=logger)
@@ -224,6 +228,9 @@ def main(name):
                 last_price_check_ts = current_ts
                 prices = account.get_all_prices()
                 #print(f"Prices: {prices}")
+
+                # update quote balance before trying to open positions (only do this once every 60 seconds)
+                mtrader.market_update_quote_balance(quote_name=tconfig.quote_currency())
 
                 for symbol in trading_symbol_list:
                     if symbol in prices:

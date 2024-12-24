@@ -62,6 +62,9 @@ def main(args):
 
     mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, restore_positions=False, granularity=args.granularity)
 
+    # update quote balance before trying to open positions
+    mtrader.market_update_quote_balance(quote_name=tconfig.quote_currency())
+
     start_ts = int(datetime.fromisoformat(args.start_date).timestamp())
     if args.end_date == 'now':
         end_ts = int(datetime.now().timestamp())
@@ -109,6 +112,10 @@ def main(args):
                 mtrader.market_update_kline_other_timeframe(symbol, kline_15m, 900)
 
             mtrader.market_update_kline(symbol=symbol, kline=kline, granularity=args.granularity)
+
+            # update quote balance before trying to open positions
+            mtrader.market_update_quote_balance(quote_name=tconfig.quote_currency())
+
             mtrader.market_update_price(symbol=symbol, current_price=kline.close, current_ts=kline.ts, granularity=args.granularity)
             value = emas[symbol].update(kline)
             ema_values[symbol].append(value)
