@@ -66,6 +66,7 @@ class Trader(object):
         # control disabling new positions from this specific trader
         self._local_disable_new_positions = False
         self._prev_local_disable_new_positions = False
+        self._global_prev_disable_new_positions = False
 
         self._net_profit_percent = 0.0
         self._positive_profit_percent = 0.0
@@ -227,6 +228,9 @@ class Trader(object):
 
         # global disable new positions
         disable_new_positions = self._config.global_disable_new_positions()
+        if disable_new_positions != self._global_prev_disable_new_positions:
+            print(f"{self._symbol} global_disable_positions: {disable_new_positions}")
+        self._global_prev_disable_new_positions = disable_new_positions
 
         # Open a position on a buy signal
         if not self._disabled and not self._local_disable_new_positions and not disable_new_positions and buy_signal and len(self._positions) < self._max_positions_per_symbol:

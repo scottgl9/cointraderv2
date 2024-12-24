@@ -75,7 +75,13 @@ class TraderConfig(object):
     def save_config(self) -> bool:
         try:
             with open(self._path, 'w') as f:
-                json.dump(self._config, f, indent=4)
+                config = {}
+                # do not save temporary keys to the config file
+                for name in self._config.keys():
+                    if name.startswith('tmp_'):
+                        continue
+                    config[name] = self._config[name]
+                json.dump(config, f, indent=4)
         except Exception as e:
             print(f"Error saving config to {self.path}: {e}")
             return False
@@ -91,7 +97,6 @@ class TraderConfig(object):
 
     def set(self, key, value):
         self._config[key] = value
-        self.save_config()
 
     def __getitem__(self, key):
         return self.get(key)
