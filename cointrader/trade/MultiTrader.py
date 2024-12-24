@@ -15,9 +15,10 @@ class MultiTrader(object):
         self._max_positions = self._config.max_positions()
         self._position_count_per_symbol = {}
 
-        # set default temporary global settings
+        # set default temporary global config
         self._config.set_global_disable_new_positions(False)
         self._config.set_global_current_balance_quote(0.0)
+        self._config.set_global_last_closed_position_profit(0.0)
 
         if not orders:
             self._orders = Orders(config=self._config)
@@ -96,6 +97,12 @@ class MultiTrader(object):
 
         trader.market_update_price(current_price=current_price, current_ts=current_ts, granularity=granularity)
         self._position_count_per_symbol[symbol] = trader.position_count()
+
+        last_closed_profit = self._config.global_last_closed_position_profit()
+        # for the last profit on close, check if we exceeded the maximum loss
+        if last_closed_profit <= self._config.global_disable_after_loss_percent():
+            print(f"Disable after loss of {last_closed_profit}")
+            pass
 
     def market_update_kline(self, symbol: str, kline: Kline, granularity: int):
         """

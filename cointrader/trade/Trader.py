@@ -173,6 +173,8 @@ class Trader(object):
         strategy = self._strategies_other_timeframes[str(granularity)]
         strategy.update(kline)
 
+        # disable opening new positions on a sell signal from another timeframe
+        # re-enable opening new positions on a buy signal from another timeframe
         if strategy.buy_signal():
             self._local_disable_new_positions = False
             if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
@@ -405,6 +407,7 @@ class Trader(object):
         sell_price = position.sell_price()
         buy_date = datetime.fromtimestamp(position.buy_ts())
         sell_date = datetime.fromtimestamp(position.sell_ts())
+        self._config.set_global_last_closed_position_profit(profit=profit_percent)
         if profit_percent >= 0:
             self._positive_profit_percent += profit_percent
             msg = f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}"

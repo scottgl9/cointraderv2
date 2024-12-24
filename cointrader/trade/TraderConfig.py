@@ -31,15 +31,18 @@ DEFAULT_TRADE_CONFIG = {
     'max_total_loss_percent': 10.0,           # Maximum total loss percent before stopping the bot
     'global_cooldown_period_seconds': 3600,   # Global configuration across all traders, which sets a specific time in seconds between opening new positions
     'cooldown_period_seconds': 3600,          # Local cooldown period after entering a position before opening another (local to each trader)
-    'global_disable_after_loss_seconds': 86400,      # Global config to disable trading after a loss for this many seconds
+    'global_disable_after_loss_percent': -3.0,# Percent loss where we disable trading globally with global_disable_after_loss_seconds
+    'global_disable_after_loss_seconds': 86400,      # Global config to disable trading after a certain loss percent for this many seconds
     'diable_after_loss_seconds': 3600,        # local config per trader to disable trading after a loss for this many seconds
     'start_position_type': 'STOP_LOSS_LIMIT', # Type of order to open a position (MARKET, LIMIT, STOP_LOSS_LIMIT)
     'end_position_type': 'STOP_LOSS_LIMIT',   # Type of order to open a position (MARKET, LIMIT, STOP_LOSS_LIMIT)
     'sell_all_on_stop': False,                # sell all open positions when the bot stops
 
     # temporary global configuration options used across all traders
-    'tmp_global_disable_new_positions': False,
-    'tmp_global_current_balance_quote': 0.0,
+    'tmp_global_disable_new_positions': False,      # global flag to enable/disable opening new positions
+    'tmp_global_disable_new_positions_until_ts': 0, # wait until timestamp to globally re-enable opening new positions. Value of zero means it needs to be manually re-enabled
+    'tmp_global_current_balance_quote': 0.0,        # global variable to store the current quote balance
+    'tmp_global_last_closed_position_profit': 0.0,  # global variable to track the last profit percent of the last position closed
 }
 
 class TraderConfig(object):
@@ -248,6 +251,12 @@ class TraderConfig(object):
     def set_global_cooldown_period_seconds(self, global_cooldown_period_seconds: int):
         self.set('global_cooldown_period_seconds', global_cooldown_period_seconds)
 
+    def global_disable_after_loss_percent(self) -> float:
+        return self.get('global_disable_after_loss_percent')
+
+    def set_global_disable_after_loss_percent(self, loss: float):
+        self.set('global_disable_after_loss_percent', loss)
+
     def global_disable_after_loss_seconds(self) -> int:
         return self.get('global_disable_after_loss_seconds')
     
@@ -285,8 +294,20 @@ class TraderConfig(object):
     def set_global_disable_new_positions(self, disable: bool):
         self.set('tmp_global_disable_new_positions', disable)
 
+    def global_disable_new_positions_until_ts(self) -> int:
+        return self.get('tmp_global_disable_new_positions_until_ts')
+    
+    def set_global_disable_new_positions_until_ts(self, ts: int):
+        self.set('tmp_global_disable_new_positions_until_ts', ts)
+
     def global_current_balance_quote(self) -> float:
         return self.get('tmp_global_current_balance_quote')
     
     def set_global_current_balance_quote(self, balance: float):
         self.set('tmp_global_current_balance_quote', balance)
+
+    def global_last_closed_position_profit(self):
+        return self.get('tmp_global_last_closed_position_profit')
+
+    def set_global_last_closed_position_profit(self, profit: float):
+        self.set('tmp_global_last_closed_position_profit', profit)
