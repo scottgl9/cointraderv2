@@ -16,6 +16,7 @@ from cointrader.signals.ROCSignal import ROCSignal
 from cointrader.signals.PSARSignal import PSARSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
 from cointrader.signals.PPOSignal import PPOSignal
+from cointrader.signals.IchimokuSignal import IchimokuSignal
 
 class SignalStrength(Strategy):
     def __init__(self, symbol: str, name='signal_strength', granularity=0, signal_weights=None):
@@ -38,6 +39,7 @@ class SignalStrength(Strategy):
         self.signals['psar'] = PSARSignal(symbol=self._symbol, af=0.02, max_af=0.2)
         self.signals['vwap'] = VWAPSignal(symbol=self._symbol, period=14)
         self.signals['ppo'] = PPOSignal(symbol=self._symbol, short_period=12, long_period=26, signal_period=9, overbought=100, oversold=-100)
+        #self.signals['ichimoku'] = IchimokuSignal(symbol=self._symbol, win_short=9, win_med=26, win_long=52)
 
         if signal_weights is not None:
             self._signal_weights = signal_weights
@@ -57,6 +59,7 @@ class SignalStrength(Strategy):
                 'psar': 1.1,
                 'vwap': 1.2,
                 'ppo': 1.1,
+                #'ichimoku': 1.0,
                 # minor signal weights
                 'macd_change': 0.5,
                 #'zlema_change': 0.2,
@@ -229,6 +232,12 @@ class SignalStrength(Strategy):
                 self.signal_states['ppo'] = OrderSide.BUY
             elif self.signals['ppo'].cross_down():
                 self.signal_states['ppo'] = OrderSide.SELL
+        
+        #if self.signals['ichimoku'].ready():
+        #    if self.signals['ichimoku'].cross_up():
+        #        self.signal_states['ichimoku'] = OrderSide.BUY
+        #    elif self.signals['ichimoku'].cross_down():
+        #        self.signal_states['ichimoku'] = OrderSide.SELL
 
     def buy_signal_name(self):
         result = self._buy_signal_name

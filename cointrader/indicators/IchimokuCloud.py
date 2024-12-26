@@ -10,8 +10,15 @@ class IchimokuCloud(Indicator):
         self.win_long = win_long
         self.highs = deque(maxlen=win_long)
         self.lows = deque(maxlen=win_long)
-        self.closes = deque()
+        self.closes = deque(maxlen=win_long+1)
 
+        self._last_value = None
+        self._last_kline = None
+
+    def reset(self):
+        self.highs.clear()
+        self.lows.clear()
+        self.closes.clear()
         self._last_value = None
         self._last_kline = None
 

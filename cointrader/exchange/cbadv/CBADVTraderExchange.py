@@ -46,7 +46,12 @@ class CBADVTraderExchange(TraderExchangeBase):
 
     def _info_get_products(self):
         products = []
-        result = self.client.get_products(get_all_products=True).products
+        try:
+            result = self.client.get_products(get_all_products=True).products
+        except Exception as e:
+            print(f"_info_get_products(): Failed to get products information: {e}")
+            result = None
+
         for product in result:
             excluded = False
             for exclude in self._excluded_currency_list:
@@ -59,9 +64,12 @@ class CBADVTraderExchange(TraderExchangeBase):
         return products
 
     def _info_get_accounts(self):
-        accounts = self.client.get_accounts(limit=self.LIMIT).accounts
-        for account in accounts:
-            print(account.currency)
+        try:
+            accounts = self.client.get_accounts(limit=self.LIMIT).accounts
+        except Exception as e:
+            print(f"_info_get_accounts(): Failed to get accounts information: {e}")
+            accounts = None
+
         return accounts
 
     def info_get_stable_currencies(self) -> list[str]:
@@ -179,7 +187,8 @@ class CBADVTraderExchange(TraderExchangeBase):
 
     def balance_get(self, currency: str) -> tuple[float, float]:
         """Get balance of currency"""
-        accounts = self.client.get_accounts(limit=250).accounts
+        #accounts = self.client.get_accounts(limit=250).accounts
+        accounts = self._info_get_accounts()
         for account in accounts:
             if account.currency == currency:
                 available_balance = float(account.available_balance['value'])
@@ -192,7 +201,8 @@ class CBADVTraderExchange(TraderExchangeBase):
 
     def balance_all_get(self) -> dict[str, tuple[float, float]]:
         """Get all balances"""
-        accounts = self.client.get_accounts(limit=250).accounts
+        #accounts = self.client.get_accounts(limit=250).accounts
+        accounts = self._info_get_accounts()
         result = {}
         for account in accounts:
             available_balance = float(account.available_balance['value'])

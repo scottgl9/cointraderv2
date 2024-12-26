@@ -4,7 +4,7 @@ from cointrader.common.Kline import Kline
 from cointrader.indicators.IchimokuCloud import IchimokuCloud
 
 class IchimokuSignal(Signal):
-    def __init__(self, name, symbol, win_short=9, win_med=26, win_long=52):
+    def __init__(self, name='ichimoku', symbol=None, win_short=9, win_med=26, win_long=52):
         super().__init__(name, symbol)
         self.win_short = win_short
         self.win_med = win_med

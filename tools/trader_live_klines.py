@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import logging
-from coinbase.websocket import WSClient, WebsocketResponse
+from coinbase.websocket import WSClient, WebsocketResponse, WSClientConnectionClosedException, WSClientException
 #from coinbase.rest import RESTExchange
 
 import json
@@ -207,7 +207,8 @@ def main(name):
 
     #product_ids = ["BTC-USD", "SOL-USD", "ETH-USD"]
     ws_client.open()
-    ws_client.subscribe(product_ids=top_crypto, channels=channels) #, 'matches'])
+    ws_client.subscribe(product_ids=top_crypto, channels=channels)
+    #ws_client.run_forever_with_exception_check()
 
     while running:
         try:
@@ -265,12 +266,28 @@ def main(name):
         except (KeyboardInterrupt, SystemExit):
             running = False
             print("Exiting...")
-        #except Exception as e:
-        #    print(f"Error: {e}")
-        #    running = False
+        except (WSClientConnectionClosedException, WSClientException) as e:
+            # may need to restart websocket connection
+            print(f"Error exception: {e}")
+            print("Restarting websocket client...")
+            # try to close feed, ignore any errors
+            try:
+                ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
+                ws_client.close()
+            except:
+                pass
+            time.sleep(1)
+            ws_client = WSClient(api_key=CBADV_KEY, api_secret=CBADV_SECRET, on_message=rt.on_message)
+            if not ws_client:
+                running = False
+            else:
+                ws_client.open()
+                ws_client.subscribe(product_ids=top_crypto, channels=channels)
 
-    ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
-    ws_client.close()
+
+    if ws_client:
+        ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
+        ws_client.close()
 
 if __name__ == '__main__':
     main("cbadv")
