@@ -2,9 +2,10 @@ from collections import deque
 from cointrader.common.Signal import Signal
 from cointrader.common.Kline import Kline
 from cointrader.indicators.CMF import ChaikinMoneyFlow
+from cointrader.indicators.SMA import SMA
 
 class CMFSignal(Signal):
-    def __init__(self, name, symbol, period=20, signal_period=9, overbought=0.05, oversold=-0.05):
+    def __init__(self, name='cmf', symbol=None, period=20, signal_period=9, overbought=0.05, oversold=-0.05):
         """
         Initialize the CMF Signal.
 
@@ -25,7 +26,7 @@ class CMFSignal(Signal):
         self.cmf = ChaikinMoneyFlow(name='chaikin_money_flow_indicator', period=self.period)
 
         # Initialize Signal Line SMA
-        self.signal_sma = SimpleMovingAverage(name='cmf_signal_sma', period=self.signal_period)
+        self.signal_sma = SMA(name='cmf_signal_sma', period=self.signal_period)
 
         # Initialize deque to track CMF values for cross detection
         self.cmf_values = deque(maxlen=2)
@@ -89,6 +90,12 @@ class CMFSignal(Signal):
 
         return None
 
+    def cross_up(self):
+        return self._cross_up
+    
+    def cross_down(self):
+        return self._cross_down
+
     def ready(self):
         """
         Check if the CMF Signal is ready to provide trading actions.
@@ -109,66 +116,3 @@ class CMFSignal(Signal):
                 'signal_line': self.signal_sma.get_last_value()
             }
         return None
-
-# SimpleMovingAverage Helper Class
-class SimpleMovingAverage:
-    """Simple Moving Average (SMA) calculator."""
-    def __init__(self, name='sma', period=9):
-        """
-        Initialize the SMA calculator.
-
-        :param name: Name of the SMA indicator.
-        :param period: The number of periods over which to calculate the SMA.
-        """
-        self.name = name
-        self.period = period
-        self.values = deque(maxlen=period)
-        self.sum = 0.0
-        self.current_sma = None
-
-    def update_with_value(self, new_value):
-        """
-        Update the SMA with a new value.
-
-        :param new_value: The new data point (float).
-        :return: The updated SMA value or None if not enough data.
-        """
-        if len(self.values) == self.period:
-            # Remove the oldest value from the sum
-            oldest = self.values.popleft()
-            self.sum -= oldest
-
-        # Add the new value
-        self.values.append(new_value)
-        self.sum += new_value
-
-        if len(self.values) == self.period:
-            self.current_sma = self.sum / self.period
-            return self.current_sma
-        else:
-            self.current_sma = None
-            return None
-
-    def get_last_value(self):
-        """
-        Get the current SMA value.
-
-        :return: The latest SMA value or None.
-        """
-        return self.current_sma
-
-    def ready(self):
-        """
-        Check if the SMA is ready (i.e., has received enough data).
-
-        :return: True if ready, False otherwise.
-        """
-        return len(self.values) == self.period
-
-    def reset(self):
-        """
-        Reset the SMA calculator to its initial state.
-        """
-        self.values.clear()
-        self.sum = 0.0
-        self.current_sma = None
