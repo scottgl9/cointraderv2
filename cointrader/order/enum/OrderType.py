@@ -8,3 +8,5 @@ class OrderType(Enum):
     STOP_LOSS = "STOP_LOSS"
     STOP_LOSS_LIMIT = "STOP_LOSS_LIMIT"
     TAKE_PROFIT = "TAKE_PROFIT"
+    STATUS = "STATUS"
+    CANCEL = "CANCEL"
