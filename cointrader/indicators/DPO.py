@@ -55,7 +55,7 @@ class DetrendedPriceOscillator(Indicator):
 
         # Once SMA is ready, append it to sma_values deque
         if self.sma.ready():
-            self.sma_values.append(self.sma.get_last_value())
+            self.sma_values.append(sma_val) #self.sma.get_last_value())
 
         # Once we have enough SMA values to cover the shift, compute DPO
         if len(self.sma_values) == self.shift:

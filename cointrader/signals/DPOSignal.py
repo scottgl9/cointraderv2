@@ -4,7 +4,7 @@ from cointrader.common.Kline import Kline
 from cointrader.indicators.DPO import DetrendedPriceOscillator
 
 class DPOSignal(Signal):
-    def __init__(self, name, symbol, period=20, overbought=50, oversold=-50):
+    def __init__(self, name='dpo', symbol=None, period=20, overbought=50, oversold=-50):
         """
         Initialize the DPO Signal.
 
@@ -68,6 +68,12 @@ class DPOSignal(Signal):
             self._cross_down = False
 
         return signal
+    
+    def cross_up(self):
+        return self._cross_up
+    
+    def cross_down(self):
+        return self._cross_down
 
     def ready(self):
         """

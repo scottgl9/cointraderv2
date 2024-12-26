@@ -16,8 +16,9 @@ from cointrader.signals.ROCSignal import ROCSignal
 from cointrader.signals.PSARSignal import PSARSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
 from cointrader.signals.PPOSignal import PPOSignal
-from cointrader.signals.IchimokuSignal import IchimokuSignal
+#from cointrader.signals.IchimokuSignal import IchimokuSignal
 from cointrader.signals.CMFSignal import CMFSignal
+#from cointrader.signals.DPOSignal import DPOSignal
 
 class SignalStrength(Strategy):
     def __init__(self, symbol: str, name='signal_strength', granularity=0, signal_weights=None):
@@ -42,6 +43,7 @@ class SignalStrength(Strategy):
         self.signals['ppo'] = PPOSignal(symbol=self._symbol, short_period=12, long_period=26, signal_period=9, overbought=100, oversold=-100)
         #self.signals['ichimoku'] = IchimokuSignal(symbol=self._symbol, win_short=9, win_med=26, win_long=52)
         self.signals['cmf'] = CMFSignal(symbol=self._symbol, period=20, signal_period=9, overbought=0.05, oversold=-0.05)
+        #self.signals['dpo'] = DPOSignal(symbol=self._symbol, period=20, overbought=50, oversold=-50)
 
         if signal_weights is not None:
             self._signal_weights = signal_weights
@@ -62,6 +64,7 @@ class SignalStrength(Strategy):
                 'vwap': 1.2,
                 'ppo': 1.1,
                 'cmf': 1.3,
+                #'dpo': 1.0,
                 #'ichimoku': 1.0,
                 # minor signal weights
                 'macd_change': 0.5,
@@ -241,6 +244,12 @@ class SignalStrength(Strategy):
                self.signal_states['cmf'] = OrderSide.BUY
            elif self.signals['cmf'].cross_down():
                self.signal_states['cmf'] = OrderSide.SELL  
+
+        #if self.signals['dpo'].ready():
+        #   if self.signals['dpo'].cross_up():
+        #       self.signal_states['dpo'] = OrderSide.BUY
+        #   elif self.signals['dpo'].cross_down():
+        #       self.signal_states['dpo'] = OrderSide.SELL  
 
         #if self.signals['ichimoku'].ready():
         #    if self.signals['ichimoku'].cross_up():
