@@ -17,7 +17,7 @@ from cointrader.signals.PSARSignal import PSARSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
 
 class SignalStrength(Strategy):
-    def __init__(self, symbol: str, name='signal_strength', granularity=0):
+    def __init__(self, symbol: str, name='signal_strength', granularity=0, signal_weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
         self._buy_signal_name = None
         self._sell_signal_name = None
@@ -37,21 +37,33 @@ class SignalStrength(Strategy):
         self.signals['psar'] = PSARSignal(symbol=self._symbol, af=0.02, max_af=0.2)
         self.signals['vwap'] = VWAPSignal(symbol=self._symbol, period=14)
 
-        self._signal_weights = {
-            'macd': 1.5,
-            'sama': 1.0,
-            'zlema': 1.2,
-            'rsi': 1.3,
-            'stochastic': 1.3,
-            'ema': 1.1,
-            'sma': 1.0,
-            'supertrend': 1.4,
-            'adx': 1.3,
-            'squeeze': 1.2,
-            'roc': 1.0,
-            'psar': 1.1,
-            'vwap': 1.2
-        }
+        if signal_weights is not None:
+            self._signal_weights = signal_weights
+        else:
+            self._signal_weights = {
+                'macd': 1.5,
+                'sama': 1.0,
+                'zlema': 1.2,
+                'rsi': 1.3,
+                'stochastic': 1.3,
+                'ema': 1.1,
+                'sma': 1.0,
+                'supertrend': 1.4,
+                'adx': 1.3,
+                'squeeze': 1.2,
+                'roc': 1.0,
+                'psar': 1.1,
+                'vwap': 1.2,
+                # minor signal weights
+                'macd_change': 0.5,
+                #'zlema_change': 0.2,
+                'rsi_change': 0.5,
+                'stoch_change': 0.5,
+                #'ema_change': 0.3,
+                'adx_change': 0.3,
+                'roc_change': 0.5,
+                'vwap_change': 0.5
+            }
 
         self._total_weight = sum(self._signal_weights.values())
 
@@ -68,6 +80,15 @@ class SignalStrength(Strategy):
                 self.signal_states['macd'] = OrderSide.BUY
             elif self.signals['macd'].cross_down():
                 self.signal_states['macd'] = OrderSide.SELL
+            if self.signals['macd'].increasing():
+                if 'macd_change' in self._signal_weights.keys():
+                    self._signal_weights['macd_change'] = OrderSide.BUY
+            elif self.signals['macd'].decreasing():
+                if 'macd_change' in self._signal_weights.keys():
+                    self._signal_weights['macd_change'] = OrderSide.SELL
+            else:
+                if 'macd_change' in self._signal_weights.keys():
+                    self._signal_weights['macd_change'] = OrderSide.NONE
 
         if self.signals['sama'].ready():
             if self.signals['sama'].cross_up():
@@ -80,6 +101,12 @@ class SignalStrength(Strategy):
                 self.signal_states['zlema'] = OrderSide.BUY
             elif self.signals['zlema'].cross_down():
                 self.signal_states['zlema'] = OrderSide.SELL
+            #if self.signals['zlema'].increasing():
+            #    self.signal_states['zlema_change'] = OrderSide.BUY
+            #elif self.signals['zlema'].decreasing():
+            #    self.signal_states['zlema_change'] = OrderSide.SELL
+            #else:
+            #    self.signal_states['zlema_change'] = OrderSide.NONE
 
         if self.signals['rsi'].ready():
             if self.signals['rsi'].above():
@@ -88,18 +115,42 @@ class SignalStrength(Strategy):
                 self.signal_states['rsi'] = OrderSide.BUY
             else:
                 self.signal_states['rsi'] = OrderSide.NONE
+            if self.signals['rsi'].increasing():
+                if 'rsi_change' in self._signal_weights.keys():
+                    self.signal_states['rsi_change'] = OrderSide.BUY
+            elif self.signals['rsi'].decreasing():
+                if 'rsi_change' in self._signal_weights.keys():
+                    self.signal_states['rsi_change'] = OrderSide.SELL
+            else:
+                if 'rsi_change' in self._signal_weights.keys():
+                    self.signal_states['rsi_change'] = OrderSide.NONE
 
         if self.signals['stochastic'].ready():
             if self.signals['stochastic'].cross_up():
                 self.signal_states['stochastic'] = OrderSide.BUY
             elif self.signals['stochastic'].cross_down():
                 self.signal_states['stochastic'] = OrderSide.SELL
+            if self.signals['stochastic'].increasing():
+                if 'stoch_change' in self._signal_weights.keys():
+                    self.signal_states['stoch_change'] = OrderSide.BUY
+            elif self.signals['stochastic'].decreasing():
+                if 'stoch_change' in self._signal_weights.keys():
+                    self.signal_states['stoch_change'] = OrderSide.SELL
+            else:
+                if 'stoch_change' in self._signal_weights.keys():
+                    self.signal_states['stoch_change'] = OrderSide.NONE
 
         if self.signals['ema'].ready():
             if self.signals['ema'].cross_up():
                 self.signal_states['ema'] = OrderSide.BUY
             elif self.signals['ema'].cross_down():
                 self.signal_states['ema'] = OrderSide.SELL
+            #if self.signals['ema'].increasing():
+            #    self.signal_states['ema_change'] = OrderSide.BUY
+            #elif self.signals['ema'].decreasing():
+            #    self.signal_states['ema_change'] = OrderSide.SELL
+            #else:
+            #    self.signal_states['ema_change'] = OrderSide.NONE
 
         if self.signals['sma'].ready():
             if self.signals['sma'].cross_up():
@@ -121,6 +172,15 @@ class SignalStrength(Strategy):
                     self.signal_states['adx'] = OrderSide.SELL
             elif self.signals['adx'].below():
                 self.signal_states['adx'] = OrderSide.NONE
+            if self.signals['adx'].increasing():
+                if 'adx_change' in self._signal_weights.keys():
+                    self.signal_states['adx_change'] = OrderSide.BUY
+            elif self.signals['adx'].decreasing():
+                if 'adx_change' in self._signal_weights.keys():
+                    self.signal_states['adx_change'] = OrderSide.SELL
+            else:
+                if 'adx_change' in self._signal_weights.keys():
+                    self.signal_states['adx_change'] = OrderSide.NONE
 
         if self.signals['squeeze'].ready():
             if self.signals['squeeze'].cross_up():
@@ -133,6 +193,15 @@ class SignalStrength(Strategy):
                 self.signal_states['roc'] = OrderSide.BUY
             elif self.signals['roc'].cross_down():
                 self.signal_states['roc'] = OrderSide.SELL
+            if self.signals['roc'].increasing():
+                if 'roc_change' in self._signal_weights.keys():
+                    self.signal_states['roc_change'] = OrderSide.BUY
+            elif self.signals['roc'].decreasing():
+                if 'roc_change' in self._signal_weights.keys():
+                    self.signal_states['roc_change'] = OrderSide.BUY
+            else:
+                if 'roc_change' in self._signal_weights.keys():
+                    self.signal_states['roc_change'] = OrderSide.NONE
 
         if self.signals['psar'].ready():
             if self.signals['psar'].cross_up():
@@ -145,6 +214,12 @@ class SignalStrength(Strategy):
                 self.signal_states['vwap'] = OrderSide.BUY
             elif self.signals['vwap'].below():
                 self.signal_states['vwap'] = OrderSide.SELL
+            if self.signals['vwap'].increasing():
+                self.signal_states['vwap_change'] = OrderSide.BUY
+            elif self.signals['vwap'].decreasing():
+                self.signal_states['vwap_change'] = OrderSide.SELL
+            else:
+                self.signal_states['vwap_change'] = OrderSide.NONE
 
     def buy_signal_name(self):
         result = self._buy_signal_name
@@ -203,5 +278,27 @@ class SignalStrength(Strategy):
         if buy_signal_weight + sell_signal_weight < self._total_weight / 2:
             return False
         if sell_signal_weight > buy_signal_weight:
+            return True
+        return False
+
+    def strong_buy_signal(self):
+        buy_signal_weight, sell_signal_weight = self._weighted_count_signals()
+        if buy_signal_weight == 0 or sell_signal_weight == 0:
+            return False
+        # make sure we have enough signals to make a decision
+        if buy_signal_weight + sell_signal_weight < self._total_weight / 2:
+            return False
+        if buy_signal_weight >= 2.0 * sell_signal_weight:
+            return True
+        return False
+
+    def strong_sell_signal(self):
+        buy_signal_weight, sell_signal_weight = self._weighted_count_signals()
+        if buy_signal_weight == 0 or sell_signal_weight == 0:
+            return False
+        # make sure we have enough signals to make a decision
+        if buy_signal_weight + sell_signal_weight < self._total_weight / 2:
+            return False
+        if sell_signal_weight >= 2.0 * buy_signal_weight:
             return True
         return False

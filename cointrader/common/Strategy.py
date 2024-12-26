@@ -36,3 +36,9 @@ class Strategy:
     
     def sell_signal(self):
         raise NotImplementedError
+
+    def strong_buy_signal(self):
+        raise NotImplementedError
+    
+    def strong_sell_signal(self):
+        raise NotImplementedError

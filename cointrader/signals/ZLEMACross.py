@@ -50,6 +50,12 @@ class ZLEMACross(Signal):
     def below(self):
         return self.short_zlema < self.long_zlema
 
+    def increasing(self):
+        return self._long_zlema_values[-1] > self._long_zlema_values[-2]
+    
+    def decreasing(self):
+        return self._long_zlema_values[-1] < self._long_zlema_values[-2]
+
     def ready(self):
         return self.short_zlema.ready() and self.long_zlema.ready()
 
