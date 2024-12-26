@@ -15,6 +15,7 @@ from cointrader.signals.ADXSignal import ADXSignal
 from cointrader.signals.ROCSignal import ROCSignal
 from cointrader.signals.PSARSignal import PSARSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
+from cointrader.signals.PPOSignal import PPOSignal
 
 class SignalStrength(Strategy):
     def __init__(self, symbol: str, name='signal_strength', granularity=0, signal_weights=None):
@@ -36,6 +37,7 @@ class SignalStrength(Strategy):
         self.signals['roc'] = ROCSignal(symbol=self._symbol, period=14)
         self.signals['psar'] = PSARSignal(symbol=self._symbol, af=0.02, max_af=0.2)
         self.signals['vwap'] = VWAPSignal(symbol=self._symbol, period=14)
+        self.signals['ppo'] = PPOSignal(symbol=self._symbol, short_period=12, long_period=26, signal_period=9, overbought=100, oversold=-100)
 
         if signal_weights is not None:
             self._signal_weights = signal_weights
@@ -54,6 +56,7 @@ class SignalStrength(Strategy):
                 'roc': 1.0,
                 'psar': 1.1,
                 'vwap': 1.2,
+                'ppo': 1.1,
                 # minor signal weights
                 'macd_change': 0.5,
                 #'zlema_change': 0.2,
@@ -220,6 +223,12 @@ class SignalStrength(Strategy):
                 self.signal_states['vwap_change'] = OrderSide.SELL
             else:
                 self.signal_states['vwap_change'] = OrderSide.NONE
+
+        if self.signals['ppo'].ready():
+            if self.signals['ppo'].cross_up():
+                self.signal_states['ppo'] = OrderSide.BUY
+            elif self.signals['ppo'].cross_down():
+                self.signal_states['ppo'] = OrderSide.SELL
 
     def buy_signal_name(self):
         result = self._buy_signal_name

@@ -4,7 +4,7 @@ from cointrader.common.Kline import Kline
 from cointrader.indicators.PPO import PPO
 
 class PPOSignal(Signal):
-    def __init__(self, name, symbol, short_period=12, long_period=26, signal_period=9, overbought=100, oversold=-100):
+    def __init__(self, name='ppo', symbol=None, short_period=12, long_period=26, signal_period=9, overbought=100, oversold=-100):
         """
         Initialize the PPO Signal.
         
@@ -86,6 +86,12 @@ class PPOSignal(Signal):
             self._cross_down = False
 
         return signal_action
+
+    def cross_up(self):
+        return self._cross_up
+    
+    def cross_down(self):
+        return self._cross_down
 
     def ready(self):
         """
