@@ -2,6 +2,7 @@
 from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.order.OrderResult import OrderResult
 from cointrader.order.Order import Order
+from cointrader.order.OrderRequest import OrderRequest
 from cointrader.order.enum.OrderType import OrderType
 from cointrader.order.enum.OrderSide import OrderSide
 from cointrader.account.AccountBase import AccountBase
@@ -16,29 +17,29 @@ class ExecuteBase(object):
     def account(self) -> AccountBase:
         raise NotImplementedError
 
-    def execute_order(self, order: Order) -> OrderResult:
+    def execute_order(self, order_request: OrderRequest) -> OrderResult:
         """
         Execute an order (buy, sell, status, cancel)
         """
-        if order.type == OrderType.MARKET:
-            if order.side == OrderSide.BUY:
-                return self.market_buy(symbol=order.symbol, amount=order.size, current_price=order.current_price, current_ts=order.current_ts)
-            elif order.side == OrderSide.SELL:
-                return self.market_sell(symbol=order.symbol, amount=order.size, current_price=order.current_price, current_ts=order.current_ts)
-        elif order.type == OrderType.LIMIT:
-            if order.side == OrderSide.BUY:
-                return self.limit_buy(symbol=order.symbol, limit_price=order.limit_price, amount=order.size)
-            elif order.side == OrderSide.SELL:
-                return self.limit_sell(symbol=order.symbol, limit_price=order.limit_price, amount=order.size)
-        elif order.type == OrderType.STOP_LOSS_LIMIT:
-            if order.side == OrderSide.BUY:
-                return self.stop_loss_limit_buy(symbol=order.symbol, limit_price=order.limit_price, stop_price=order.stop_price, amount=order.size)
-            elif order.side == OrderSide.SELL:
-                return self.stop_loss_limit_sell(symbol=order.symbol, limit_price=order.limit_price, stop_price=order.stop_price, amount=order.size)
-        elif order.type == OrderType.STATUS:
-            return self.status(symbol=order.symbol, order_id=order.id, current_price=order.current_price, current_ts=order.current_ts)
-        elif order.type == OrderType.CANCEL:
-            return self.cancel(symbol=order.symbol, order_id=order.id, current_price=order.current_price, current_ts=order.current_ts)
+        if order_request.type == OrderType.MARKET:
+            if order_request.side == OrderSide.BUY:
+                return self.market_buy(symbol=order_request.symbol, amount=order_request.size, current_price=order_request.current_price, current_ts=order_request.current_ts)
+            elif order_request.side == OrderSide.SELL:
+                return self.market_sell(symbol=order_request.symbol, amount=order_request.size, current_price=order_request.current_price, current_ts=order_request.current_ts)
+        elif order_request.type == OrderType.LIMIT:
+            if order_request.side == OrderSide.BUY:
+                return self.limit_buy(symbol=order_request.symbol, limit_price=order_request.limit_price, amount=order_request.size)
+            elif order_request.side == OrderSide.SELL:
+                return self.limit_sell(symbol=order_request.symbol, limit_price=order_request.limit_price, amount=order_request.size)
+        elif order_request.type == OrderType.STOP_LOSS_LIMIT:
+            if order_request.side == OrderSide.BUY:
+                return self.stop_loss_limit_buy(symbol=order_request.symbol, limit_price=order_request.limit_price, stop_price=order_request.stop_price, amount=order_request.size)
+            elif order_request.side == OrderSide.SELL:
+                return self.stop_loss_limit_sell(symbol=order_request.symbol, limit_price=order_request.limit_price, stop_price=order_request.stop_price, amount=order_request.size)
+        elif order_request.type == OrderType.STATUS:
+            return self.status(symbol=order_request.symbol, order_request_id=order_request.id, current_price=order_request.current_price, current_ts=order_request.current_ts)
+        elif order_request.type == OrderType.CANCEL:
+            return self.cancel(symbol=order_request.symbol, order_request_id=order_request.id, current_price=order_request.current_price, current_ts=order_request.current_ts)
         else:
             raise ValueError("execute_order(): Invalid order type")
 

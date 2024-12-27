@@ -8,12 +8,19 @@ from .enum.OrderStopDirection import OrderStopDirection
 from .enum.OrderStatus import OrderStatus
 
 class Order(OrderResult):
+    current_price: float                # Current price (used for simulation only)
+    current_ts: int                     # Current timestamp (used for simulation only)
+
     def __init__(self, symbol: str, data: dict = None):
         super().__init__(symbol)
         self.symbol = symbol
         self._last_order_result = None
         if data:
             self.from_dict(data)
+
+        # used for simulation only
+        self.current_price = 0.0
+        self.current_ts = 0
 
     def update_order(self, result: OrderResult):
         """

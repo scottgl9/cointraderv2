@@ -5,55 +5,55 @@ from threading import Lock
 from cointrader.execute.ExecuteBase import ExecuteBase
 from cointrader.order.Order import Order
 from cointrader.order.OrderResult import OrderResult
+from cointrader.order.OrderRequest import OrderRequest
 
 class ExecutePipeline(object):
-    _placed_orders: Queue[Order]
-    _processed_orders: dict[str, Order]
+    _placed_orders_requests: Queue[OrderRequest]
+    _processed_orders_results: dict[str, OrderResult]
     def __init__(self, execute: ExecuteBase, max_orders: int = 100):
         self._execute = execute
         self._max_orders = max_orders
-        self._placed_orders = Queue(maxsize=max_orders)
-        self._processed_orders = {}
+        self._placed_orders_requests = Queue(maxsize=max_orders)
+        self._processed_orders_results = {}
         self._lock = Lock()
 
-    def add_order(self, order: Order) -> OrderResult:
+    def add_order_request(self, order_request: OrderRequest):
         """
         Add order to the placed orders pipeline
         """
-        self._placed_orders.put(order)
+        self._placed_orders_requests.put(order_request)
 
-    def get_order(self, order_id: str) -> Order:
+    def get_order_result(self, request_id: str) -> OrderResult:
         """
-        Get processed order by order id
+        Get processed order by request id
         """
         result = None
         with self._lock:
-            result = self._processed_orders.get(order_id)
+            result = self._processed_orders_results.get(request_id)
         return result
 
-    def completed(self, order_id: str) -> bool:
+    def completed(self, request_id: str) -> bool:
         """
-        Indicate that the order has been completed, so remove from processed orders
+        Indicate that the order result has been completed, so remove from processed order results
         """
-        if order_id not in self._processed_orders:
+        if request_id not in self._processed_orders_results:
             return False
         with self._lock:
-            del self._processed_orders[order_id]
+            del self._processed_orders_results[request_id]
         return True
 
-    def process_orders(self) -> int:
+    def process_order_requests(self) -> int:
         """
         Process all placed orders, and move to processed orders. Returns number of orders processed
         """
         count = 0
 
-        while not self._placed_orders.empty():
-            order = self._placed_orders.get()
-            result = self._execute.execute_order(order=order)
-            order.update_order(result)
-            # moved order from placed to processed orders
+        while not self._placed_orders_requests.empty():
+            order_request = self._placed_orders_requests.get()
+            result = self._execute.execute_order(order=order_request)
+            # provide results in processed orders
             with self._lock:
-                self._processed_orders[order.id] = order
+                self._processed_orders_results[order_request.rid] = result
             count += 1
 
         return count

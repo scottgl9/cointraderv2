@@ -29,8 +29,6 @@ class OrderResult(object):
     status: OrderStatus                 # Order status
     error_reason: OrderErrorReason      # Order error reason
     error_msg: str                      # Error message
-    current_price: float                # Current price (used for simulation only)
-    current_ts: int                     # Current timestamp (used for simulation only)
 
     def __init__(self, symbol: str):
         self.id = ""
@@ -54,9 +52,6 @@ class OrderResult(object):
         self.status = OrderStatus.UNKNOWN
         self.error_reason = OrderErrorReason.NONE
         self.error_msg = ""
-        # used for simulation only
-        self.current_price = 0.0
-        self.current_ts = 0
 
     def from_dict(self, data: dict):
         self.id = data['id']
