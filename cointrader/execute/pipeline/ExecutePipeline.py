@@ -2,6 +2,7 @@
 from collections import deque
 from queue import Queue
 from threading import Lock
+import time
 from cointrader.execute.ExecuteBase import ExecuteBase
 from cointrader.order.Order import Order
 from cointrader.order.OrderResult import OrderResult
@@ -10,24 +11,40 @@ from cointrader.order.OrderRequest import OrderRequest
 class ExecutePipeline(object):
     _placed_orders_requests: Queue[OrderRequest]
     _processed_orders_results: dict[str, OrderResult]
-    def __init__(self, execute: ExecuteBase, max_orders: int = 100):
+
+    def __init__(self, execute: ExecuteBase, max_orders: int = 100, threaded: bool = False):
         self._execute = execute
         self._max_orders = max_orders
+        self._threaded = threaded
         self._placed_orders_requests = Queue(maxsize=max_orders)
         self._processed_orders_results = {}
         self._lock = Lock()
 
-    def add_order_request(self, order_request: OrderRequest):
+    def process_order_request(self, order_request: OrderRequest):
         """
         Add order to the placed orders pipeline
         """
         self._placed_orders_requests.put(order_request)
 
-    def get_order_result(self, request_id: str) -> OrderResult:
+    def wait_order_result(self, request_id: str) -> OrderResult:
         """
-        Get processed order by request id
+        Wait for processed order result by request id
         """
         result = None
+
+        # handle non-threaded case
+        if not self._threaded:
+            self.process_order_requests()
+            result = self._processed_orders_results.get(request_id)
+            return result
+
+        while True:
+            with self._lock:
+                keys = self._processed_orders_results.keys()
+            if request_id in keys:
+                break
+            time.sleep(5 / 1000) # sleep for 5ms
+
         with self._lock:
             result = self._processed_orders_results.get(request_id)
         return result

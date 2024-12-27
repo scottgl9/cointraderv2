@@ -2,7 +2,9 @@ from cointrader.common.Strategy import Strategy
 from cointrader.common.Kline import Kline
 from cointrader.order.Order import Order, OrderSide, OrderType, OrderStatus
 from cointrader.order.Orders import Orders
+from cointrader.order.OrderRequest import OrderRequest
 from cointrader.execute.ExecuteBase import ExecuteBase
+from cointrader.execute.pipeline.ExecutePipeline import ExecutePipeline
 from cointrader.trade.TraderConfig import TraderConfig
 from .PositionBase import PositionBase
 import time
@@ -22,7 +24,14 @@ class TraderPosition(PositionBase):
 
         #print(f"Creating stop loss order for {self._symbol} stop price: {stop_price} limit price: {limit_price}")
         buy_amount = self._buy_order.filled_size
-        result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=limit_price, stop_price=stop_price, amount=buy_amount)
+        #result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=limit_price, stop_price=stop_price, amount=buy_amount)
+        oreq = OrderRequest(symbol=self._symbol, side=OrderSide.SELL, size=buy_amount, current_price=self._current_price, current_ts=current_ts)
+        oreq.type = OrderType.STOP_LOSS_LIMIT
+        oreq.limit_price = limit_price
+        oreq.stop_price = stop_price
+
+        # TODO: replace with order pipeline
+        result = self._execute.execute_order(oreq)
 
         self._stop_loss_order = Order(symbol=self._symbol)
         self._stop_loss_order.update_order(result)
@@ -37,7 +46,13 @@ class TraderPosition(PositionBase):
         if not self._stop_loss_order:
             return None
         
-        result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=self._current_price, current_ts=self._current_ts)
+        #result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=self._current_price, current_ts=self._current_ts)
+        oreq = OrderRequest(symbol=self._symbol, type=OrderType.STATUS, current_price=self._current_price, current_ts=self._current_ts)
+        oreq.order_id = self._stop_loss_order.id
+
+        # TODO: replace with order pipeline
+        result = self._execute.execute_order(oreq)
+
         self._stop_loss_order.update_order(result)
         self._stop_loss_order.pid = self._pid
         self._orders.update_order(self._symbol, self._stop_loss_order)
@@ -56,7 +71,13 @@ class TraderPosition(PositionBase):
             return
 
         #print(f" stop loss order for {self._symbol} {self._current_price}")
-        result = self._execute.cancel(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=self._current_price, current_ts=self._current_ts)
+        #result = self._execute.cancel(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=self._current_price, current_ts=self._current_ts)
+        oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=self._current_price, current_ts=self._current_ts)
+        oreq.order_id = self._stop_loss_order.id
+
+        # TODO: replace with order pipeline
+        result = self._execute.execute_order(oreq)
+
         self._last_stop_loss_order = Order(symbol=self._symbol)
         self._last_stop_loss_order.update_order(result)
         self._last_stop_loss_order.pid = self._pid
@@ -76,23 +97,34 @@ class TraderPosition(PositionBase):
         self._opened_position = True
         self._entry_price = current_price
 
+        oreq = OrderRequest(symbol=self._symbol, side=OrderSide.BUY, size=size, current_price=current_price, current_ts=current_ts)
+
         if self._config.start_position_type() == OrderType.MARKET.name:
-            result = self._execute.market_buy(symbol=self._symbol, amount=size, current_price=current_price, current_ts=current_ts)
+            oreq.type = OrderType.MARKET
+            #result = self._execute.market_buy(symbol=self._symbol, amount=size, current_price=current_price, current_ts=current_ts)
         elif self._config.start_position_type() == OrderType.LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price - current_price * limit_order_percent / 100)
-            result = self._execute.limit_buy(symbol=self._symbol, limit_price=limit_price, amount=size)
+            oreq.type = OrderType.LIMIT
+            oreq.limit_price = limit_price
+            #result = self._execute.limit_buy(symbol=self._symbol, limit_price=limit_price, amount=size)
         elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price + current_price * limit_order_percent / 100)
             stop_loss_percent = self._config.stop_loss_percent()
             stop_loss = self._account.round_quote(self._symbol, current_price + current_price * stop_loss_percent / 100)
-            result = self._execute.stop_loss_limit_buy(symbol=self._symbol, limit_price=limit_price, stop_price=stop_loss, amount=size)
+            oreq.type = OrderType.STOP_LOSS_LIMIT
+            oreq.limit_price = limit_price
+            oreq.stop_price = stop_loss
+            #result = self._execute.stop_loss_limit_buy(symbol=self._symbol, limit_price=limit_price, stop_price=stop_loss, amount=size)
         else:
             raise ValueError(f"Invalid start position type: {self._config.start_position_type()}")
 
         if not self._config.simulate():
             time.sleep(1)
+
+        # TODO: replace with order pipeline
+        result = self._execute.execute_order(oreq)
 
         self._buy_order = Order(symbol=self._symbol)
         self._buy_order.update_order(result)
@@ -141,7 +173,13 @@ class TraderPosition(PositionBase):
             if replace_buy_order:
                 print(f"Replacing buy order for {self._symbol} current price: {current_price} limit price: {self._buy_order.limit_price}")
                 # cancel buy order so we can replace it
-                result = self._execute.cancel(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
+                #result = self._execute.cancel(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
+                oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
+                oreq.order_id = self._buy_order.id
+
+                # TODO: replace with order pipeline
+                result = self._execute.execute_order(oreq)
+
                 self._buy_order.update_order(result)
                 if self._buy_order.rejected() or self._buy_order.unknown():
                     print(f"update_buy_position() Cancel Buy order rejected or unknown: {self._buy_order.msg}")
@@ -180,7 +218,14 @@ class TraderPosition(PositionBase):
             if replace_sell_order:
                 print(f"Replacing sell order for {self._symbol} current price: {current_price} limit price: {self._sell_order.limit_price}")
                 # cancel sell order so we can replace it
-                result = self._execute.cancel(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
+                #result = self._execute.cancel(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
+
+                oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
+                oreq.order_id = self._sell_order.id
+
+                # TODO: replace with order pipeline
+                result = self._execute.execute_order(oreq)
+
                 self._sell_order.update_order(result)
 
                 if self._sell_order.rejected() or self._sell_order.unknown():
@@ -229,20 +274,31 @@ class TraderPosition(PositionBase):
 
         buy_amount = self._buy_order.filled_size
 
+        oreq = OrderRequest(symbol=self._symbol, side=OrderSide.SELL, size=buy_amount, current_price=current_price, current_ts=current_ts)
+
         if self._config.end_position_type() == OrderType.MARKET.name:
-            result = self._execute.market_sell(self._symbol, amount=buy_amount, current_price=current_price, current_ts=current_ts)
+            oreq.type = OrderType.MARKET
+            #result = self._execute.market_sell(self._symbol, amount=buy_amount, current_price=current_price, current_ts=current_ts)
         elif self._config.end_position_type() == OrderType.LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price + current_price * limit_order_percent / 100)
-            result = self._execute.limit_sell(self._symbol, limit_price=limit_price, amount=buy_amount)
+            oreq.type = OrderType.LIMIT
+            oreq.limit_price = limit_price
+            #result = self._execute.limit_sell(self._symbol, limit_price=limit_price, amount=buy_amount)
         elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price - current_price * limit_order_percent / 100)
             stop_loss_percent = self._config.stop_loss_percent()
             stop_loss = self._account.round_quote(self._symbol, current_price - current_price * stop_loss_percent / 100)
-            result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=current_price, stop_price=stop_loss, amount=buy_amount)
+            oreq.type = OrderType.STOP_LOSS_LIMIT
+            oreq.limit_price = limit_price
+            oreq.stop_price = stop_loss
+            #result = self._execute.stop_loss_limit_sell(self._symbol, limit_price=current_price, stop_price=stop_loss, amount=buy_amount)
         else:
             raise ValueError(f"Invalid end position type: {self._config.end_position_type()}")
+
+        # TODO: replace with order pipeline
+        result = self._execute.execute_order(oreq)
 
         if not self._config.simulate():
             time.sleep(1)
@@ -271,7 +327,13 @@ class TraderPosition(PositionBase):
         self._current_ts = current_ts
 
         if self._buy_order and not self._buy_order.completed() and not self._buy_order.cancelled():
-            result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
+            #result = self._execute.status(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
+            oreq = OrderRequest(symbol=self._symbol, type=OrderType.STATUS, current_price=current_price, current_ts=current_ts)
+            oreq.order_id = self._buy_order.id
+
+            # TODO: replace with order pipeline
+            result = self._execute.execute_order(oreq)
+
             self._buy_order.update_order(result)
             self._buy_order.pid = self._pid
             self._orders.update_order(self._symbol, self._buy_order)
@@ -288,7 +350,13 @@ class TraderPosition(PositionBase):
                 print(f"market_update() buy order rejected or unknown: {self._buy_order.msg}")
 
         if not self._closed_position_completed and self._sell_order and not self._sell_order.completed() and not self._sell_order.cancelled():
-            result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
+            #result = self._execute.status(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
+            oreq = OrderRequest(symbol=self._symbol, type=OrderType.STATUS, current_price=current_price, current_ts=current_ts)
+            oreq.order_id = self._sell_order.id
+
+            # TODO: replace with order pipeline
+            result = self._execute.execute_order(oreq)
+
             self._sell_order.update_order(result)
             self._buy_order.pid = self._pid
             self._orders.update_order(self._symbol, self._sell_order)
@@ -311,7 +379,13 @@ class TraderPosition(PositionBase):
 
         if not self._closed_position_completed and self._stop_loss_order and not self.stop_loss_is_cancelled() and not self._stop_loss_order.completed():
             #print(f"stop loss order: {self._stop_loss_order}")
-            result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=current_price, current_ts=current_ts)
+            #result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=current_price, current_ts=current_ts)
+            oreq = OrderRequest(symbol=self._symbol, type=OrderType.STATUS, current_price=current_price, current_ts=current_ts)
+            oreq.order_id = self._stop_loss_order.id
+
+            # TODO: replace with order pipeline
+            result = self._execute.execute_order(oreq)
+
             self._stop_loss_order.update_order(result)
             self._stop_loss_order.pid = self._pid
             self._orders.update_order(self._symbol, self._stop_loss_order)

@@ -2,6 +2,7 @@ from .Trader import Trader
 from .TraderConfig import TraderConfig
 from cointrader.order.Orders import Orders
 from cointrader.execute.ExecuteBase import ExecuteBase
+from cointrader.execute.pipeline.ExecutePipeline import ExecutePipeline
 from cointrader.account.AccountBase import AccountBase
 from cointrader.common.Kline import Kline
 

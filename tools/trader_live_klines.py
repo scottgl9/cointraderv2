@@ -22,6 +22,7 @@ from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.account.Account import Account
 from cointrader.market.Market import Market
 from cointrader.execute.TradeExecute import TraderExecute
+from cointrader.execute.pipeline.ExecutePipeline import ExecutePipeline
 from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
 from cointrader.common.Kline import Kline
@@ -159,6 +160,8 @@ def main(name):
     print(account.get_total_balance("USD"))
 
     ex = TraderExecute(exchange=exchange, account=account, config=tconfig)
+
+    ep = ExecutePipeline(execute=ex, max_orders=100, threaded=False)
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=False)
 

@@ -5,8 +5,11 @@ from cointrader.common.Strategy import Strategy
 from cointrader.account.Account import Account
 from .TraderConfig import TraderConfig
 from cointrader.execute.ExecuteBase import ExecuteBase
+from cointrader.execute.pipeline.ExecutePipeline import ExecutePipeline
 from .position.TraderPosition import TraderPosition
 from cointrader.order.Orders import Orders
+from cointrader.order.OrderRequest import OrderRequest
+from cointrader.order.enum.OrderType import OrderType
 from cointrader.order.enum.OrderStatus import OrderStatus
 from cointrader.order.enum.OrderSide import OrderSide
 from cointrader.common.TradeLossBase import TradeLossBase
@@ -111,12 +114,24 @@ class Trader(object):
                 continue
             if order.pid not in order_by_pid.keys():
                 if order.side == OrderSide.BUY:
-                    result = self._execute.status(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                    #result = self._execute.status(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                    oreq = OrderRequest(symbol=self._symbol, type=OrderType.STATUS, current_price=current_price, current_ts=current_ts)
+                    oreq.order_id = order.id
+
+                    # TODO: replace with order pipeline
+                    result = self._execute.execute_order(oreq)
+
                     order.update_order(result)
                     if order.placed():
                         # for simplicity, just cancel the open order
                         print(f"{self._symbol} Cancelling buy order {order}")
-                        result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                        #result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                        oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
+                        oreq.order_id = order.id
+
+                        # TODO: replace with order pipeline
+                        result = self._execute.execute_order(oreq)
+
                         if not self._config.simulate():
                             time.sleep(1)
                         order.update_order(result)
@@ -128,7 +143,13 @@ class Trader(object):
                 elif order.side == OrderSide.SELL and order.placed():
                     # to keep things simple, just cancel the order
                     print(f"{self._symbol} Cancelling sell order {order}")
-                    result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                    #result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                    oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
+                    oreq.order_id = order.id
+
+                    # TODO: replace with order pipeline
+                    result = self._execute.execute_order(oreq)
+
                     if not self._config.simulate():
                         time.sleep(1)
                     order.update_order(result)
@@ -137,7 +158,13 @@ class Trader(object):
             else:
                 if order.side == OrderSide.BUY and order.placed():
                     print(f"Error: Duplicate buy order found, cancelling order: {order}")
-                    result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                    #result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
+                    oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
+                    oreq.order_id = order.id
+
+                    # TODO: replace with order pipeline
+                    result = self._execute.execute_order(oreq)
+
                     if not self._config.simulate():
                         time.sleep(1)
                     order.update_order(result)
@@ -316,6 +343,7 @@ class Trader(object):
                     else:
                         print(f"{self._symbol} {quote_name} Insufficient balance {balance} to update buy position at price {current_price}")
 
+                # skip checking for sell signal if position has not been opened
                 if not position.opened():
                     continue
 

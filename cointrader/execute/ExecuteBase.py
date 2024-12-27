@@ -37,9 +37,9 @@ class ExecuteBase(object):
             elif order_request.side == OrderSide.SELL:
                 return self.stop_loss_limit_sell(symbol=order_request.symbol, limit_price=order_request.limit_price, stop_price=order_request.stop_price, amount=order_request.size)
         elif order_request.type == OrderType.STATUS:
-            return self.status(symbol=order_request.symbol, order_request_id=order_request.id, current_price=order_request.current_price, current_ts=order_request.current_ts)
+            return self.status(symbol=order_request.symbol, order_id=order_request.order_id, current_price=order_request.current_price, current_ts=order_request.current_ts)
         elif order_request.type == OrderType.CANCEL:
-            return self.cancel(symbol=order_request.symbol, order_request_id=order_request.id, current_price=order_request.current_price, current_ts=order_request.current_ts)
+            return self.cancel(symbol=order_request.symbol, order_id=order_request.order_id, current_price=order_request.current_price, current_ts=order_request.current_ts)
         else:
             raise ValueError("execute_order(): Invalid order type")
 

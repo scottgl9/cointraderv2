@@ -20,6 +20,7 @@ import pandas as pd
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.account.AccountSimulate import AccountSimulate
 from cointrader.execute.TradeExecuteSimulate import TraderExecuteSimulate
+from cointrader.execute.pipeline.ExecutePipeline import ExecutePipeline
 from cointrader.market.Market import Market
 from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
@@ -57,6 +58,8 @@ def main(args):
     print(account.get_total_balance("USD"))
 
     ex = TraderExecuteSimulate(exchange=exchange, account=account, config=tconfig)
+
+    ep = ExecutePipeline(execute=ex, max_orders=100, threaded=False)
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
 
