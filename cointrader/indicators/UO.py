@@ -18,6 +18,13 @@ class UltimateOscillator(Indicator):
         self._last_kline = None
         self._prev_close = None
 
+    def reset(self):
+        self.bp_values.clear()
+        self.tr_values.clear()
+        self._last_value = None
+        self._last_kline = None
+        self._prev_close = None
+
     def update(self, kline: Kline):
         if self._prev_close is None:
             # Can't calculate BP and TR on the first bar, just store close

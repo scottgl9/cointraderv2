@@ -81,7 +81,7 @@ def main(args):
 
     ex = TraderExecuteSimulate(exchange=exchange, account=account, config=tconfig)
 
-    exec_pipe_threaded = True
+    exec_pipe_threaded = False
     ep = ExecutePipeline(execute=ex, max_orders=100, threaded=exec_pipe_threaded)
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
