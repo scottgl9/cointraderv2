@@ -219,6 +219,7 @@ def main(name):
         time.sleep(1)
 
     exec_pipe_thread = PipelineExecutionThread(exec_pipe=ep)
+    exec_pipe_thread.daemon = True
     exec_pipe_thread.start()
 
     #product_ids = ["BTC-USD", "SOL-USD", "ETH-USD"]
@@ -231,6 +232,11 @@ def main(name):
             if not rt.running:
                 running = False
                 break
+            if not exec_pipe_thread.is_alive():
+                print("Pipeline execution thread is not alive, restarting...")
+                exec_pipe_thread = PipelineExecutionThread(exec_pipe=ep)
+                exec_pipe_thread.start()
+
             # Wait for 1 second or until input is available
             i, _, _ = select.select([sys.stdin], [], [], 1)
             if i:
@@ -308,7 +314,7 @@ def main(name):
         ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
         ws_client.close()
     
-    exec_pipe_thread.join()
+    #exec_pipe_thread.join(timeout=5)
 
 if __name__ == '__main__':
     main("cbadv")

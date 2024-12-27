@@ -134,6 +134,7 @@ def main(args):
     # create thread
     if exec_pipe_threaded:
         exec_pipe_thread = PipelineExecutionThread(exec_pipe=ep)
+        exec_pipe_thread.daemon = True
         exec_pipe_thread.start()
 
     # iterate through all rows in the DataFrame
@@ -178,8 +179,8 @@ def main(args):
 
     orders.commit()
 
-    if exec_pipe_threaded:
-        exec_pipe_thread.join()
+    #if exec_pipe_threaded:
+    #    exec_pipe_thread.join(timeout=5)
 
     print(orders.get_active_orders(symbol=None))
 

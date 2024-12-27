@@ -46,6 +46,8 @@ class ExecutePipeline(object):
             result = self._processed_orders_results.get(request_id)
             return result
 
+        counter = 0
+
         # wait to receive the processed order result
         while True:
             with self._lock:
@@ -53,6 +55,11 @@ class ExecutePipeline(object):
             if request_id in keys:
                 break
             time.sleep(1 / 1000) # sleep for 1ms
+            counter += 1
+            # wait for 30 seconds, then timeout
+            if counter > 30000:
+                print(f"ExecutePipeline: Waited too long for order result {request_id}")
+                return None
 
         with self._lock:
             result = self._processed_orders_results.get(request_id)
@@ -79,8 +86,12 @@ class ExecutePipeline(object):
         """
         count = 0
 
+        order_requests = []
+
         while not self._placed_orders_requests.empty():
-            order_request = self._placed_orders_requests.get()
+            order_requests.append(self._placed_orders_requests.get())
+
+        for order_request in order_requests:
             result = self._execute.execute_order(order_request=order_request)
             # provide results in processed orders
             if self._threaded:

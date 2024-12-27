@@ -34,6 +34,9 @@ class TraderPosition(PositionBase):
         #result = self._execute.execute_order(oreq)
         self._exec_pipe.process_order_request(order_request=oreq)
         result = self._exec_pipe.wait_order_result(oreq.rid)
+        if result is None:
+            print(f"create_stop_loss_position() Stop loss order failed: {self._symbol} {stop_price} {limit_price}")
+            return
         self._exec_pipe.completed(oreq.rid)
 
         self._stop_loss_order = Order(symbol=self._symbol)
@@ -57,6 +60,9 @@ class TraderPosition(PositionBase):
         #result = self._execute.execute_order(oreq)
         self._exec_pipe.process_order_request(order_request=oreq)
         result = self._exec_pipe.wait_order_result(oreq.rid)
+        if result is None:
+            print(f"update_stop_loss_position() Stop loss order failed: {self._symbol} {self._current_price}")
+            return None
         self._exec_pipe.completed(oreq.rid)
 
         self._stop_loss_order.update_order(result)
@@ -136,6 +142,9 @@ class TraderPosition(PositionBase):
         #result = self._execute.execute_order(oreq)
         self._exec_pipe.process_order_request(order_request=oreq)
         result = self._exec_pipe.wait_order_result(oreq.rid)
+        if result is None:
+            print(f"open_position() Buy order failed: {self._symbol} {current_price}")
+            return
         self._exec_pipe.completed(oreq.rid)
 
         self._buy_order = Order(symbol=self._symbol)
@@ -193,6 +202,9 @@ class TraderPosition(PositionBase):
                 #result = self._execute.execute_order(oreq)
                 self._exec_pipe.process_order_request(order_request=oreq)
                 result = self._exec_pipe.wait_order_result(oreq.rid)
+                if result is None:
+                    print(f"update_buy_position() Cancel Buy order failed: {self._symbol} {current_price}")
+                    return
                 self._exec_pipe.completed(oreq.rid)
 
                 self._buy_order.update_order(result)
@@ -242,6 +254,9 @@ class TraderPosition(PositionBase):
                 #result = self._execute.execute_order(oreq)
                 self._exec_pipe.process_order_request(order_request=oreq)
                 result = self._exec_pipe.wait_order_result(oreq.rid)
+                if result is None:
+                    print(f"update_sell_position() Cancel sell order failed: {self._symbol} {current_price}")
+                    return
                 self._exec_pipe.completed(oreq.rid)
 
                 self._sell_order.update_order(result)
@@ -319,6 +334,9 @@ class TraderPosition(PositionBase):
         #result = self._execute.execute_order(oreq)
         self._exec_pipe.process_order_request(order_request=oreq)
         result = self._exec_pipe.wait_order_result(oreq.rid)
+        if result is None:
+            print(f"close_position() Sell order failed: {self._symbol} {current_price}")
+            return
         self._exec_pipe.completed(oreq.rid)
 
         if not self._config.simulate():
@@ -356,6 +374,9 @@ class TraderPosition(PositionBase):
             #result = self._execute.execute_order(oreq)
             self._exec_pipe.process_order_request(order_request=oreq)
             result = self._exec_pipe.wait_order_result(oreq.rid)
+            if result is None:
+                print(f"market_update() Buy order failed: {self._symbol} {current_price}")
+                return
             self._exec_pipe.completed(oreq.rid)
 
             self._buy_order.update_order(result)
@@ -382,6 +403,9 @@ class TraderPosition(PositionBase):
             #result = self._execute.execute_order(oreq)
             self._exec_pipe.process_order_request(order_request=oreq)
             result = self._exec_pipe.wait_order_result(oreq.rid)
+            if result is None:
+                print(f"market_update() Sell order failed: {self._symbol} {current_price}")
+                return
             self._exec_pipe.completed(oreq.rid)
 
             self._sell_order.update_order(result)
@@ -414,6 +438,9 @@ class TraderPosition(PositionBase):
             #result = self._execute.execute_order(oreq)
             self._exec_pipe.process_order_request(order_request=oreq)
             result = self._exec_pipe.wait_order_result(oreq.rid)
+            if result is None:
+                print(f"market_update() Stop loss order failed: {self._symbol} {current_price}")
+                return
             self._exec_pipe.completed(oreq.rid)
 
             self._stop_loss_order.update_order(result)
