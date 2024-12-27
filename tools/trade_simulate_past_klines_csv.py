@@ -4,6 +4,7 @@ from coinbase.websocket import WSClient, WebsocketResponse
 #from coinbase.rest import RESTExchange
 from datetime import datetime, timedelta
 from matplotlib import pyplot as plt
+from threading import Thread
 
 import json
 import sys
@@ -29,6 +30,16 @@ from cointrader.common.Kline import Kline
 from cointrader.config import *
 from cointrader.indicators.EMA import EMA
 from cointrader.common.KlineEmitter import KlineEmitter
+
+class PipelineExecutionThread(Thread):
+    def __init__(self, exec_pipe: ExecutePipeline):
+        Thread.__init__(self)
+        self._exec_pipe = exec_pipe
+
+    def run(self):
+        while True:
+            self._exec_pipe.process_order_requests()
+            time.sleep(1 / 1000) # sleep for 1ms
 
 def main(args):
     name = args.exchange
@@ -70,7 +81,8 @@ def main(args):
 
     ex = TraderExecuteSimulate(exchange=exchange, account=account, config=tconfig)
 
-    ep = ExecutePipeline(execute=ex, max_orders=100, threaded=False)
+    exec_pipe_threaded = True
+    ep = ExecutePipeline(execute=ex, max_orders=100, threaded=exec_pipe_threaded)
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
 
@@ -119,6 +131,11 @@ def main(args):
 
     #kline_emitter = KlineEmitter(src_granularity=granularity, dst_granularity=86400)
 
+    # create thread
+    if exec_pipe_threaded:
+        exec_pipe_thread = PipelineExecutionThread(exec_pipe=ep)
+        exec_pipe_thread.start()
+
     # iterate through all rows in the DataFrame
     for index, row in df.iterrows():
         symbol = row['Symbol']
@@ -160,6 +177,9 @@ def main(args):
             last_prices[symbol] = kline_data['close']
 
     orders.commit()
+
+    if exec_pipe_threaded:
+        exec_pipe_thread.join()
 
     print(orders.get_active_orders(symbol=None))
 

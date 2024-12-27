@@ -16,7 +16,7 @@ except ImportError:
 import pandas as pd
 
 from collections import deque
-from threading import Lock, Thread
+from threading import RLock, Thread
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.exchange.TraderExchangeBase import TraderExchangeBase
 from cointrader.account.Account import Account
@@ -65,6 +65,16 @@ def fetch_preload_klines(market: Market, symbol: str, granularity: int):
         #self.mtrader.market_preload(symbol, kline)
     return klines
 
+class PipelineExecutionThread(Thread):
+    def __init__(self, exec_pipe: ExecutePipeline):
+        Thread.__init__(self)
+        self._exec_pipe = exec_pipe
+
+    def run(self):
+        while True:
+            self._exec_pipe.process_order_requests()
+            time.sleep(10 / 1000) # sleep for 10ms
+
 class CBADVLive:
     def __init__(self, mtrader: MultiTrader, market: Market, tconfig: TraderConfig, granularity: int = 300):
         self.prev_kline = {}
@@ -74,7 +84,7 @@ class CBADVLive:
         self.granularity = granularity
         self.running = True
         self.last_ts = 0
-        self.lock = Lock()
+        self.lock = RLock()
         self.kline_queue = deque(maxlen=100)
 
     def on_message(self, msg):
@@ -161,7 +171,7 @@ def main(name):
 
     ex = TraderExecute(exchange=exchange, account=account, config=tconfig)
 
-    ep = ExecutePipeline(execute=ex, max_orders=100, threaded=False)
+    ep = ExecutePipeline(execute=ex, max_orders=100, threaded=True)
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=False)
 
@@ -208,6 +218,9 @@ def main(name):
                 mtrader.market_update_kline_other_timeframe(symbol, kline_15m, 900, preload=True)
         time.sleep(1)
 
+    exec_pipe_thread = PipelineExecutionThread(exec_pipe=ep)
+    exec_pipe_thread.start()
+
     #product_ids = ["BTC-USD", "SOL-USD", "ETH-USD"]
     ws_client.open()
     ws_client.subscribe(product_ids=top_crypto, channels=channels)
@@ -243,28 +256,31 @@ def main(name):
                         print(f"Symbol {symbol} not in prices")
 
             with rt.lock:
+                klines = []
                 while len(rt.kline_queue) > 0:
                     kline = rt.kline_queue.popleft()
                     if kline.ts <= prev_kline[kline.symbol].ts:
                         continue
+                    klines.append(kline)
                     #print(kline)
 
-                    # emit 15m klines for other timeframe strategies
-                    kline_emitter = kline_emitters[kline.symbol]
-                    kline_emitter.update(kline)
-                    if kline_emitter.ready():
-                        kline_15m = kline_emitter.emit()
-                        kline_15m.symbol = kline.symbol
-                        kline_15m.granularity = kline_emitter.granularity()
-                        mtrader.market_update_kline_other_timeframe(kline.symbol, kline_15m, kline_emitter.granularity(), preload=False)
+            for kline in klines:
+                # emit 15m klines for other timeframe strategies
+                kline_emitter = kline_emitters[kline.symbol]
+                kline_emitter.update(kline)
+                if kline_emitter.ready():
+                    kline_15m = kline_emitter.emit()
+                    kline_15m.symbol = kline.symbol
+                    kline_15m.granularity = kline_emitter.granularity()
+                    mtrader.market_update_kline_other_timeframe(kline.symbol, kline_15m, kline_emitter.granularity(), preload=False)
 
-                    # print only once every 15 minutes
-                    if kline.ts != last_ts and kline.ts % 900 == 0:
-                        pd.to_datetime(kline.ts, unit='s')
-                        print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
-                    mtrader.market_update_kline(symbol=kline.symbol, kline=kline, granularity=GRANULARITY)
-                    prev_kline[kline.symbol] = kline
-                    last_ts = kline.ts
+                # print only once every 15 minutes
+                if kline.ts != last_ts and kline.ts % 900 == 0:
+                    pd.to_datetime(kline.ts, unit='s')
+                    print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
+                mtrader.market_update_kline(symbol=kline.symbol, kline=kline, granularity=GRANULARITY)
+                prev_kline[kline.symbol] = kline
+                last_ts = kline.ts
 
         except (KeyboardInterrupt, SystemExit):
             running = False
@@ -291,6 +307,8 @@ def main(name):
     if ws_client:
         ws_client.unsubscribe(product_ids=top_crypto, channels=channels)
         ws_client.close()
+    
+    exec_pipe_thread.join()
 
 if __name__ == '__main__':
     main("cbadv")

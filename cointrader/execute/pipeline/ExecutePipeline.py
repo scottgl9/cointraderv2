@@ -1,7 +1,7 @@
 # This file contains the ExecutePipeline class, which is responsible for managing the pipeline of orders to be executed, and retrieving the results of those orders.
 from collections import deque
 from queue import Queue
-from threading import Lock
+from threading import RLock
 import time
 from cointrader.execute.ExecuteBase import ExecuteBase
 from cointrader.order.Order import Order
@@ -18,7 +18,7 @@ class ExecutePipeline(object):
         self._threaded = threaded
         self._placed_orders_requests = Queue(maxsize=max_orders)
         self._processed_orders_results = {}
-        self._lock = Lock()
+        self._lock = RLock()
 
     def execute(self):
         return self._execute
