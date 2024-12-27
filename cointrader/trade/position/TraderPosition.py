@@ -10,8 +10,8 @@ from .PositionBase import PositionBase
 import time
 
 class TraderPosition(PositionBase):
-    def __init__(self, symbol: str, pid: int, strategy: Strategy, execute: ExecuteBase, config: TraderConfig, orders: Orders):
-        super().__init__(symbol=symbol, pid=pid, strategy=strategy, execute=execute, config=config, orders=orders)
+    def __init__(self, symbol: str, pid: int, strategy: Strategy, exec_pipe: ExecutePipeline, config: TraderConfig, orders: Orders):
+        super().__init__(symbol=symbol, pid=pid, strategy=strategy, exec_pipe=exec_pipe, config=config, orders=orders)
 
 
     def create_stop_loss_position(self, stop_price: float, limit_price: float, current_ts: int):
@@ -31,7 +31,10 @@ class TraderPosition(PositionBase):
         oreq.stop_price = stop_price
 
         # TODO: replace with order pipeline
-        result = self._execute.execute_order(oreq)
+        #result = self._execute.execute_order(oreq)
+        self._exec_pipe.process_order_request(order_request=oreq)
+        result = self._exec_pipe.wait_order_result(oreq.rid)
+        self._exec_pipe.completed(oreq.rid)
 
         self._stop_loss_order = Order(symbol=self._symbol)
         self._stop_loss_order.update_order(result)
@@ -51,7 +54,10 @@ class TraderPosition(PositionBase):
         oreq.order_id = self._stop_loss_order.id
 
         # TODO: replace with order pipeline
-        result = self._execute.execute_order(oreq)
+        #result = self._execute.execute_order(oreq)
+        self._exec_pipe.process_order_request(order_request=oreq)
+        result = self._exec_pipe.wait_order_result(oreq.rid)
+        self._exec_pipe.completed(oreq.rid)
 
         self._stop_loss_order.update_order(result)
         self._stop_loss_order.pid = self._pid
@@ -76,7 +82,10 @@ class TraderPosition(PositionBase):
         oreq.order_id = self._stop_loss_order.id
 
         # TODO: replace with order pipeline
-        result = self._execute.execute_order(oreq)
+        #result = self._execute.execute_order(oreq)
+        self._exec_pipe.process_order_request(order_request=oreq)
+        result = self._exec_pipe.wait_order_result(oreq.rid)
+        self._exec_pipe.completed(oreq.rid)
 
         self._last_stop_loss_order = Order(symbol=self._symbol)
         self._last_stop_loss_order.update_order(result)
@@ -124,7 +133,10 @@ class TraderPosition(PositionBase):
             time.sleep(1)
 
         # TODO: replace with order pipeline
-        result = self._execute.execute_order(oreq)
+        #result = self._execute.execute_order(oreq)
+        self._exec_pipe.process_order_request(order_request=oreq)
+        result = self._exec_pipe.wait_order_result(oreq.rid)
+        self._exec_pipe.completed(oreq.rid)
 
         self._buy_order = Order(symbol=self._symbol)
         self._buy_order.update_order(result)
@@ -178,7 +190,10 @@ class TraderPosition(PositionBase):
                 oreq.order_id = self._buy_order.id
 
                 # TODO: replace with order pipeline
-                result = self._execute.execute_order(oreq)
+                #result = self._execute.execute_order(oreq)
+                self._exec_pipe.process_order_request(order_request=oreq)
+                result = self._exec_pipe.wait_order_result(oreq.rid)
+                self._exec_pipe.completed(oreq.rid)
 
                 self._buy_order.update_order(result)
                 if self._buy_order.rejected() or self._buy_order.unknown():
@@ -224,7 +239,10 @@ class TraderPosition(PositionBase):
                 oreq.order_id = self._sell_order.id
 
                 # TODO: replace with order pipeline
-                result = self._execute.execute_order(oreq)
+                #result = self._execute.execute_order(oreq)
+                self._exec_pipe.process_order_request(order_request=oreq)
+                result = self._exec_pipe.wait_order_result(oreq.rid)
+                self._exec_pipe.completed(oreq.rid)
 
                 self._sell_order.update_order(result)
 
@@ -298,7 +316,10 @@ class TraderPosition(PositionBase):
             raise ValueError(f"Invalid end position type: {self._config.end_position_type()}")
 
         # TODO: replace with order pipeline
-        result = self._execute.execute_order(oreq)
+        #result = self._execute.execute_order(oreq)
+        self._exec_pipe.process_order_request(order_request=oreq)
+        result = self._exec_pipe.wait_order_result(oreq.rid)
+        self._exec_pipe.completed(oreq.rid)
 
         if not self._config.simulate():
             time.sleep(1)
@@ -332,7 +353,10 @@ class TraderPosition(PositionBase):
             oreq.order_id = self._buy_order.id
 
             # TODO: replace with order pipeline
-            result = self._execute.execute_order(oreq)
+            #result = self._execute.execute_order(oreq)
+            self._exec_pipe.process_order_request(order_request=oreq)
+            result = self._exec_pipe.wait_order_result(oreq.rid)
+            self._exec_pipe.completed(oreq.rid)
 
             self._buy_order.update_order(result)
             self._buy_order.pid = self._pid
@@ -355,7 +379,10 @@ class TraderPosition(PositionBase):
             oreq.order_id = self._sell_order.id
 
             # TODO: replace with order pipeline
-            result = self._execute.execute_order(oreq)
+            #result = self._execute.execute_order(oreq)
+            self._exec_pipe.process_order_request(order_request=oreq)
+            result = self._exec_pipe.wait_order_result(oreq.rid)
+            self._exec_pipe.completed(oreq.rid)
 
             self._sell_order.update_order(result)
             self._buy_order.pid = self._pid
@@ -384,7 +411,10 @@ class TraderPosition(PositionBase):
             oreq.order_id = self._stop_loss_order.id
 
             # TODO: replace with order pipeline
-            result = self._execute.execute_order(oreq)
+            #result = self._execute.execute_order(oreq)
+            self._exec_pipe.process_order_request(order_request=oreq)
+            result = self._exec_pipe.wait_order_result(oreq.rid)
+            self._exec_pipe.completed(oreq.rid)
 
             self._stop_loss_order.update_order(result)
             self._stop_loss_order.pid = self._pid

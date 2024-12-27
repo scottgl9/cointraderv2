@@ -7,11 +7,11 @@ from cointrader.account.AccountBase import AccountBase
 from cointrader.common.Kline import Kline
 
 class MultiTrader(object):
-    def __init__(self, account: AccountBase, execute: ExecuteBase, config: TraderConfig, orders: Orders = None, restore_positions = False, granularity: int = 0):
+    def __init__(self, account: AccountBase, exec_pipe: ExecutePipeline, config: TraderConfig, orders: Orders = None, restore_positions = False, granularity: int = 0):
         self._traders: dict[str, Trader] = {}
         self._account = account
         self._config = config
-        self._execute = execute
+        self._exec_pipe = exec_pipe
         self._granularity = granularity
         self._max_positions = self._config.max_positions()
         self._position_count_per_symbol = {}
@@ -31,7 +31,7 @@ class MultiTrader(object):
 
         for symbol in self._symbols:
             if symbol not in self._traders.keys():
-                self._traders[symbol] = Trader(account=account, symbol=symbol, execute=self._execute, config=self._config, orders=self._orders, granularity=self._granularity)
+                self._traders[symbol] = Trader(account=account, symbol=symbol, exec_pipe=self._exec_pipe, config=self._config, orders=self._orders, granularity=self._granularity)
                 # restore previously open positions if needed
                 if restore_positions:
                     self._traders[symbol].restore_positions(current_price=0.0, current_ts=0)

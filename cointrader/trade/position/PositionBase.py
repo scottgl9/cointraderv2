@@ -3,18 +3,20 @@ from cointrader.common.Kline import Kline
 from cointrader.order.Order import Order, OrderSide, OrderType, OrderStatus
 from cointrader.order.Orders import Orders
 from cointrader.execute.ExecuteBase import ExecuteBase
+from cointrader.execute.pipeline.ExecutePipeline import ExecutePipeline
 from cointrader.trade.TraderConfig import TraderConfig
 import time
 
 class PositionBase(object):
     _symbol = None
     _config: TraderConfig = None
+    _exec_pipe: ExecutePipeline = None
     _buy_order: Order = None
     _sell_order: Order = None
     _stop_loss_order: Order = None
     _last_stop_loss_order: Order = None
 
-    def __init__(self, symbol: str, pid: int, strategy: Strategy, execute: ExecuteBase, config: TraderConfig, orders: Orders):
+    def __init__(self, symbol: str, pid: int, strategy: Strategy,  exec_pipe: ExecutePipeline, config: TraderConfig, orders: Orders):
         self._pid = pid
         self._symbol = symbol
         self._config = config
@@ -24,8 +26,9 @@ class PositionBase(object):
         self._last_stop_loss_order = None
         self._stop_loss_order = None
         self._strategy = strategy
-        self._execute = execute
-        self._account = execute.account()
+        self._execute = exec_pipe.execute()
+        self._exec_pipe = exec_pipe
+        self._account = exec_pipe.account()
         self._opened_position = False
         self._opened_position_completed = False
         self._closed_position = False

@@ -21,7 +21,8 @@ from datetime import datetime
 
 class Trader(object):
     _symbol = None
-    _account = None
+    _account: Account = None
+    _exec_pipe: ExecutePipeline = None
     _positions: list[TraderPosition] = []
     _strategy_name = None
     _strategy: Strategy = None
@@ -31,10 +32,11 @@ class Trader(object):
     _orders: Orders = None
     _max_positions_per_symbol = 0
 
-    def __init__(self, account: Account, symbol: str, execute: ExecuteBase, config: TraderConfig, orders: Orders, granularity: int = 0):
+    def __init__(self, account: Account, symbol: str, exec_pipe: ExecutePipeline, config: TraderConfig, orders: Orders, granularity: int = 0):
         self._symbol = symbol
         self._account = account
-        self._execute = execute
+        self._execute = exec_pipe.execute()
+        self._exec_pipe = exec_pipe
         self._config = config
         self._orders = orders
         self._granularity = granularity
@@ -174,7 +176,7 @@ class Trader(object):
         # restore the positions with buy orders
         for _, order in order_by_pid.items():
             print(f"{self._symbol} Restoring position from order: {order}")
-            position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
+            position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, exec_pipe=self._exec_pipe, config=self._config, orders=self._orders)
             position.restore_buy_order(order=order, current_price=current_price, current_ts=current_ts)
             self._positions.append(position)
             self._cur_id += 1
@@ -295,7 +297,7 @@ class Trader(object):
                 print(f"{self._symbol} Buy signal {self._strategy.buy_signal_name()} for {self._symbol} size={size}")
 
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
-            position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, execute=self._execute, config=self._config, orders=self._orders)
+            position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, exec_pipe=self._exec_pipe, config=self._config, orders=self._orders)
             position.open_position(size=size, current_price=current_price, current_ts=current_ts)
             opened_position_id = self._cur_id
             self._positions.append(position)

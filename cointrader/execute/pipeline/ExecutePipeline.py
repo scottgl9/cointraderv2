@@ -20,6 +20,14 @@ class ExecutePipeline(object):
         self._processed_orders_results = {}
         self._lock = Lock()
 
+    def execute(self):
+        return self._execute
+    
+    def account(self):
+        if not self._execute:
+            return None
+        return self._execute.account()
+
     def process_order_request(self, order_request: OrderRequest):
         """
         Add order to the placed orders pipeline
@@ -38,12 +46,13 @@ class ExecutePipeline(object):
             result = self._processed_orders_results.get(request_id)
             return result
 
+        # wait to receive the processed order result
         while True:
             with self._lock:
                 keys = self._processed_orders_results.keys()
             if request_id in keys:
                 break
-            time.sleep(5 / 1000) # sleep for 5ms
+            time.sleep(1 / 1000) # sleep for 1ms
 
         with self._lock:
             result = self._processed_orders_results.get(request_id)
@@ -55,8 +64,13 @@ class ExecutePipeline(object):
         """
         if request_id not in self._processed_orders_results:
             return False
-        with self._lock:
+
+        if self._threaded:
+            with self._lock:
+                del self._processed_orders_results[request_id]
+        else:
             del self._processed_orders_results[request_id]
+
         return True
 
     def process_order_requests(self) -> int:
@@ -67,9 +81,12 @@ class ExecutePipeline(object):
 
         while not self._placed_orders_requests.empty():
             order_request = self._placed_orders_requests.get()
-            result = self._execute.execute_order(order=order_request)
+            result = self._execute.execute_order(order_request=order_request)
             # provide results in processed orders
-            with self._lock:
+            if self._threaded:
+                with self._lock:
+                    self._processed_orders_results[order_request.rid] = result
+            else:
                 self._processed_orders_results[order_request.rid] = result
             count += 1
 

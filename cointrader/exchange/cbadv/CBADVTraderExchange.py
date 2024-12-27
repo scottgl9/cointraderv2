@@ -50,7 +50,7 @@ class CBADVTraderExchange(TraderExchangeBase):
             result = self.client.get_products(get_all_products=True).products
         except Exception as e:
             print(f"_info_get_products(): Failed to get products information: {e}")
-            result = None
+            result = []
 
         for product in result:
             excluded = False
@@ -68,7 +68,7 @@ class CBADVTraderExchange(TraderExchangeBase):
             accounts = self.client.get_accounts(limit=self.LIMIT).accounts
         except Exception as e:
             print(f"_info_get_accounts(): Failed to get accounts information: {e}")
-            accounts = None
+            accounts = []
 
         return accounts
 

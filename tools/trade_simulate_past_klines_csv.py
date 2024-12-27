@@ -74,7 +74,7 @@ def main(args):
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
 
-    mtrader = MultiTrader(account=account, execute=ex, config=tconfig, orders=orders, restore_positions=False, granularity=granularity)
+    mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity)
 
     # update quote balance before trying to open positions
     mtrader.market_update_quote_balance(quote_name=tconfig.quote_currency())
