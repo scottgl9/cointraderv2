@@ -11,7 +11,7 @@ class UltimateOscillator(Indicator):
         self.long_period = long_period
 
         # Deques to store BP and TR values
-        self.bp_values = deque(maxlen=self.long_period)  # store at least 28 bars
+        self.bp_values = deque(maxlen=self.long_period)
         self.tr_values = deque(maxlen=self.long_period)
 
         self._last_value = None
