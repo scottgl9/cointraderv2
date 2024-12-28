@@ -46,7 +46,7 @@ class EaseOfMovement(Indicator):
 
         # Avoid division by zero for the high-low range
         high_low_range = kline.high - kline.low
-        if high_low_range == 0:
+        if high_low_range == 0 or kline.volume == 0:
             eom_raw = 0.0
         else:
             # Calculate Ease of Movement (EOM)

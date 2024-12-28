@@ -22,6 +22,9 @@ from cointrader.signals.DPOSignal import DPOSignal
 from cointrader.signals.UltimateOscillatorSignal import UltimateOscillatorSignal
 from cointrader.signals.AwesomeOscillatorSignal import AwesomeOscillatorSignal
 from cointrader.signals.CCISignal import CCISignal
+from cointrader.signals.VOSignal import VOSignal
+from cointrader.signals.KVOSignal import KVOSignal
+from cointrader.signals.EOMSignal import EOMSignal
 
 class SignalStrength(Strategy):
     def __init__(self, symbol: str, name='signal_strength', granularity=0, signal_weights=None):
@@ -53,6 +56,9 @@ class SignalStrength(Strategy):
                 'uo': 0,
                 'dpo': 0,
                 'ichimoku': 0,
+                'vo': 0,
+                'kvo': 1.2,
+                'eom': 0,
                 # minor signal weights
                 'macd_change': 0.5,
                 #'zlema_change': 0.2,
@@ -62,6 +68,8 @@ class SignalStrength(Strategy):
                 'adx_change': 0.3,
                 'roc_change': 0.5,
                 'vwap_change': 0.5,
+                'vo_change': 0,
+                #'kvo_change': 0.5,
                 #'uo_change': 0.3
             }
 
@@ -108,6 +116,12 @@ class SignalStrength(Strategy):
             self.signals['uo'] = UltimateOscillatorSignal(symbol=self._symbol, short_period=7, medium_period=14, long_period=28, overbought=70, oversold=30)
         if self._signal_weights['ichimoku'] > 0:
             self.signals['ichimoku'] = IchimokuSignal(symbol=self._symbol, win_short=9, win_med=26, win_long=52)
+        if self._signal_weights['vo'] > 0:
+            self.signals['vo'] = VOSignal(symbol=self._symbol, short_period=14, long_period=28, threshold=0.0)
+        if self._signal_weights['kvo'] > 0:
+            self.signals['kvo'] = KVOSignal(symbol=self._symbol, short_period=34, long_period=55, signal_period=13, threshold=0.0)
+        if self._signal_weights['eom'] > 0:
+            self.signals['eom'] = EOMSignal(symbol=self._symbol, period=14, threshold=0.0)
 
         self.signal_states: dict[str, OrderSide] = {}
         for name in self.signals.keys():
@@ -319,6 +333,42 @@ class SignalStrength(Strategy):
                self.signal_states['ichimoku'] = OrderSide.BUY
            elif self.signals['ichimoku'].cross_down():
                self.signal_states['ichimoku'] = OrderSide.SELL
+
+        if self._signal_weights['vo'] > 0 and self.signals['vo'].ready():
+            if self.signals['vo'].cross_up():
+                self.signal_states['vo'] = OrderSide.BUY
+            elif self.signals['vo'].cross_down():
+                self.signal_states['vo'] = OrderSide.SELL
+            if self.signals['vo'].increasing():
+               if 'vo_change' in self._signal_weights.keys():
+                   self.signal_states['vo_change'] = OrderSide.BUY
+            elif self.signals['vo'].decreasing():
+               if 'vo_change' in self._signal_weights.keys():
+                   self.signal_states['vo_change'] = OrderSide.SELL
+            else:
+               if 'vo_change' in self._signal_weights.keys():
+                   self.signal_states['vo_change'] = OrderSide.NONE
+        
+        if self._signal_weights['kvo'] > 0 and self.signals['kvo'].ready():
+            if self.signals['kvo'].cross_up():
+                self.signal_states['kvo'] = OrderSide.BUY
+            elif self.signals['kvo'].cross_down():
+                self.signal_states['kvo'] = OrderSide.SELL
+            if self.signals['kvo'].increasing():
+               if 'kvo_change' in self._signal_weights.keys():
+                   self.signal_states['kvo_change'] = OrderSide.BUY
+            elif self.signals['kvo'].decreasing():
+               if 'kvo_change' in self._signal_weights.keys():
+                   self.signal_states['kvo_change'] = OrderSide.SELL
+            else:
+               if 'kvo_change' in self._signal_weights.keys():
+                   self.signal_states['kvo_change'] = OrderSide.NONE
+        
+        if self._signal_weights['eom'] > 0 and self.signals['eom'].ready():
+            if self.signals['eom'].cross_up():
+                self.signal_states['eom'] = OrderSide.BUY
+            elif self.signals['eom'].cross_down():
+                self.signal_states['eom'] = OrderSide.SELL
 
     def buy_signal_name(self):
         result = self._buy_signal_name
