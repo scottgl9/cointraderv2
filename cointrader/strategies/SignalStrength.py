@@ -25,6 +25,7 @@ from cointrader.signals.CCISignal import CCISignal
 from cointrader.signals.VOSignal import VOSignal
 from cointrader.signals.KVOSignal import KVOSignal
 from cointrader.signals.EOMSignal import EOMSignal
+from cointrader.signals.KSTSignal import KSTSignal
 
 class SignalStrength(Strategy):
     def __init__(self, symbol: str, name='signal_strength', granularity=0, signal_weights=None):
@@ -59,6 +60,7 @@ class SignalStrength(Strategy):
                 'vo': 0,
                 'kvo': 1.2,
                 'eom': 0,
+                'kst': 1.8,
                 # minor signal weights
                 'macd_change': 0.5,
                 #'zlema_change': 0.2,
@@ -71,6 +73,7 @@ class SignalStrength(Strategy):
                 'vo_change': 0,
                 #'kvo_change': 0.5,
                 #'uo_change': 0.3
+                #'kst_change': 0.2
             }
 
         self._total_weight = sum(self._signal_weights.values())
@@ -122,6 +125,8 @@ class SignalStrength(Strategy):
             self.signals['kvo'] = KVOSignal(symbol=self._symbol, short_period=34, long_period=55, signal_period=13, threshold=0.0)
         if self._signal_weights['eom'] > 0:
             self.signals['eom'] = EOMSignal(symbol=self._symbol, period=14, threshold=0.0)
+        if self._signal_weights['kst'] > 0:
+            self.signals['kst'] = KSTSignal(symbol=self._symbol, roc_periods=[10, 15, 20, 30], smoothing_periods=[10, 10, 10, 15], weights=[1, 2, 3, 4], signal_period=9, threshold=0.0)
 
         self.signal_states: dict[str, OrderSide] = {}
         for name in self.signals.keys():
@@ -369,6 +374,21 @@ class SignalStrength(Strategy):
                 self.signal_states['eom'] = OrderSide.BUY
             elif self.signals['eom'].cross_down():
                 self.signal_states['eom'] = OrderSide.SELL
+
+        if self._signal_weights['kst'] > 0 and self.signals['kst'].ready():
+            if self.signals['kst'].cross_up():
+                self.signal_states['kst'] = OrderSide.BUY
+            elif self.signals['kst'].cross_down():
+                self.signal_states['kst'] = OrderSide.SELL
+            if self.signals['kst'].increasing():
+               if 'kst_change' in self._signal_weights.keys():
+                   self.signal_states['kst_change'] = OrderSide.BUY
+            elif self.signals['kst'].decreasing():
+               if 'kst_change' in self._signal_weights.keys():
+                   self.signal_states['kst_change'] = OrderSide.SELL
+            else:
+               if 'kst_change' in self._signal_weights.keys():
+                   self.signal_states['kst_change'] = OrderSide.NONE
 
     def buy_signal_name(self):
         result = self._buy_signal_name
