@@ -1,21 +1,15 @@
 from cointrader.common.Strategy import Strategy
 from cointrader.signals.SupertrendSignal import SupertrendSignal
-from cointrader.signals.ADXSignal import ADXSignal
-from cointrader.signals.EMACross import EMACross
 
 class Supertrend(Strategy):
     def __init__(self, symbol: str, name='supertrend', granularity=0):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
         self.supertrend = SupertrendSignal(symbol=self._symbol, period=14, multiplier=3)
-        self.adx = ADXSignal(symbol=self._symbol, period=14, threshold=20)
-        self.ema = EMACross(symbol=self._symbol, short_period=12, long_period=24)
         self._buy_signal_name = None
         self._sell_signal_name = None
 
     def update(self, kline):
         self.supertrend.update(kline)
-        self.adx.update(kline)
-        self.ema.update(kline)
 
     def buy_signal_name(self):
         result = self._buy_signal_name
@@ -26,17 +20,17 @@ class Supertrend(Strategy):
         return result
 
     def buy_signal(self):
-        if not self.supertrend.ready() or not self.adx.ready():
+        if not self.supertrend.ready():
             return False
-        if self.supertrend.increasing() and self.adx.above() and self.ema.cross_up():
+        if self.supertrend.cross_up():
             self._buy_signal_name = self.supertrend.name()
             return True
         return False
 
     def sell_signal(self):
-        if not self.supertrend.ready() or not self.adx.ready():
+        if not self.supertrend.ready():
             return False
-        if self.supertrend.cross_down() or self.ema.cross_down(): # and self.adx.above():
+        if self.supertrend.cross_down():
             self._sell_signal_name = self.supertrend.name()
             return True
         return False
