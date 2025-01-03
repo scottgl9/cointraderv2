@@ -64,7 +64,7 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
 
     granularity = tconfig.granularity()
 
-    market = Market(exchange=exchange, db_path=tconfig.market_db_path())
+    market = Market(exchange=exchange, db_path=None)#tconfig.market_db_path())
     account = AccountSimulate(exchange=exchange, market=market)
     account.load_symbol_info()
     account.load_asset_info()
@@ -82,7 +82,7 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
     exec_pipe_threaded = False
     ep = ExecutePipeline(execute=ex, max_orders=100, threaded=exec_pipe_threaded)
 
-    orders = Orders(config=tconfig, db_path=f"{tconfig.orders_db_path()}{count}", reset=True)
+    orders = Orders(config=tconfig, db_path=None, reset=True) #f"{tconfig.orders_db_path()}{count}", reset=True)
 
     print(f"{count} strategy_weights={strategy_weights}")
     mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity, strategy_weights=strategy_weights)
@@ -286,10 +286,11 @@ def main(args):
             'net_profit': net_profit
         }
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=1) as executor:
         futures = []
         for count, combination in enumerate(all_combinations):
             futures.append(executor.submit(simulate_combination, combination, count))
+            #print("Completed {count}")
 
         for future in futures:
             result = future.result()

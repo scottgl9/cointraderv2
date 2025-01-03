@@ -3,7 +3,10 @@ from cointrader.common.Kline import Kline
 
 class MarketStorage:
     def __init__(self, db_path='market_data.db'):
-        self.connection = sqlite3.connect(db_path)
+        if db_path:
+            self.connection = sqlite3.connect(db_path)
+        else:
+            self.connection = None
         self._header = "(open, high, low, close, volume, ts)"
 
     def table_name(self, symbol, granularity):
