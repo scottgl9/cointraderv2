@@ -6,7 +6,7 @@ from coinbase.websocket import WSClient, WebsocketResponse
 from datetime import datetime, timedelta
 from matplotlib import pyplot as plt
 from threading import Thread
-
+from threading import RLock
 import json
 import sys
 import time
@@ -33,6 +33,7 @@ from cointrader.common.LogLevel import LogLevel
 from cointrader.config import *
 from cointrader.indicators.EMA import EMA
 from cointrader.common.KlineEmitter import KlineEmitter
+from concurrent.futures import ThreadPoolExecutor
 
 class PipelineExecutionThread(Thread):
     def __init__(self, exec_pipe: ExecutePipeline):
@@ -83,7 +84,7 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
 
     orders = Orders(config=tconfig, db_path=f"{tconfig.orders_db_path()}{count}", reset=True)
 
-    print(f"strategy_weights={strategy_weights}")
+    print(f"{count} strategy_weights={strategy_weights}")
     mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity, strategy_weights=strategy_weights)
 
     # update quote balance before trying to open positions
@@ -248,15 +249,14 @@ def main(args):
 
     count = 0
 
-    for combination in all_combinations:
+    def simulate_combination(combination, count):
         strategy_weights = dict(zip(indicators, combination))
         
         # Ensure at least three weights are non-zero
         if sum(weight > 0 for weight in strategy_weights.values()) < 3:
-            continue
+            return None
 
         print(f"Run {count}")
-        count += 1
 
         # Simulate trading with these weights
         mtrader, first_prices, last_prices = run_trader(
@@ -273,29 +273,47 @@ def main(args):
 
         # Ignore cases where any profits are zero or mostly negative profits
         if total_positive_profit == 0 or total_negative_profit == 0 or net_profit <= 0:
-            continue
+            return None
 
-        print(f"Positive profit: {total_positive_profit:.2f}%")
-        print(f"Negative profit: {total_negative_profit:.2f}%")
-        print(f"Net profit: {net_profit:.2f}%")
+        print(f"{count} Positive profit: {total_positive_profit:.2f}%")
+        print(f"{count} Negative profit: {total_negative_profit:.2f}%")
+        print(f"{count} Net profit: {net_profit:.2f}%")
 
-        # Update best profits and weights
-        if net_profit > best_net_profit:
-            best_net_profit = net_profit
-            best_net_profit_weights = strategy_weights
+        return {
+            'combination': combination,
+            'total_positive_profit': total_positive_profit,
+            'total_negative_profit': total_negative_profit,
+            'net_profit': net_profit
+        }
 
-        if total_positive_profit > best_positive_profit:
-            best_positive_profit = total_positive_profit
-            best_positive_profit_weights = strategy_weights
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = []
+        for count, combination in enumerate(all_combinations):
+            futures.append(executor.submit(simulate_combination, combination, count))
 
-        if total_negative_profit < best_negative_profit:
-            best_negative_profit = total_negative_profit
-            best_negative_profit_weights = strategy_weights
+        for future in futures:
+            result = future.result()
+            if result:
+                combination = result['combination']
+                total_positive_profit = result['total_positive_profit']
+                total_negative_profit = result['total_negative_profit']
+                net_profit = result['net_profit']
 
-    # Print results
-    print(f"Best positive profit: {best_positive_profit:.2f}% with weights: {best_positive_profit_weights}")
-    print(f"Best negative profit: {best_negative_profit:.2f}% with weights: {best_negative_profit_weights}")
-    print(f"Best net profit: {best_net_profit:.2f}% with weights: {best_net_profit_weights}")
+                if total_positive_profit > best_positive_profit:
+                    best_positive_profit = total_positive_profit
+                    best_positive_profit_weights = combination
+
+                if total_negative_profit < best_negative_profit:
+                    best_negative_profit = total_negative_profit
+                    best_negative_profit_weights = combination
+
+                if net_profit > best_net_profit:
+                    best_net_profit = net_profit
+                    best_net_profit_weights = combination
+
+    print(f"Best positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
+    print(f"Best negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
+    print(f"Best net profit: {best_net_profit:.2f}% with weights {best_net_profit_weights}")
 
 
 
