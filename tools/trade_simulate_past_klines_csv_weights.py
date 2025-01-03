@@ -51,7 +51,8 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
         print(f"Failed to load config {tconfig.get_config_path()}")
         tconfig.save_config()
     else:
-        print(f"Loaded config {tconfig.get_config_path()}")
+        #print(f"Loaded config {tconfig.get_config_path()}")
+        pass
 
     tconfig.set_trade_symbols(symbols)
 
@@ -84,7 +85,6 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
 
     orders = Orders(config=tconfig, db_path=None, reset=True) #f"{tconfig.orders_db_path()}{count}", reset=True)
 
-    print(f"{count} strategy_weights={strategy_weights}")
     mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity, strategy_weights=strategy_weights)
 
     # update quote balance before trying to open positions
@@ -110,8 +110,22 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
         exec_pipe_thread.daemon = True
         exec_pipe_thread.start()
 
+
+    found = False
+
     # iterate through all rows in the DataFrame
     for index, row in df.iterrows():
+        if index >= 100000:
+            if not found:
+                position_count = 0
+                for symbol in symbols:
+                    position_count += mtrader.total_position_count(symbol)
+                if position_count == 0:
+                    #print(f"Exiting at index {index} with no positions")
+                    break
+                #print(f"{count} strategy_weights={strategy_weights}")
+                found = True
+
         symbol = row['Symbol']
         if symbol in symbols:
             kline_data = {
@@ -150,10 +164,16 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
             mtrader.market_update_price(symbol=symbol, current_price=kline.close, current_ts=kline.ts, granularity=granularity)
             last_prices[symbol] = kline_data['close']
 
-    orders.commit()
+    #orders.commit()
     if tconfig.log_level() >= LogLevel.INFO.value:
         print(orders.get_active_orders(symbol=None))
-    
+
+    position_count = 0
+    for symbol in symbols:
+        position_count += mtrader.total_position_count(symbol)
+    if position_count != 0:
+        print(f"{count} strategy_weights={strategy_weights}")
+
     return mtrader, first_prices, last_prices
 
 
@@ -227,7 +247,7 @@ def main(args):
                 'vo_change': 0,
             }
     # Define possible weights for each indicator
-    weight_values = [0, 0.5, 0.7, 1.0]
+    weight_values = [0, 0.5, 1.0]
     indicators = [
         'macd', 'sama', 'zlema', 'rsi', 'stochastic', 'ema', 'sma', 'supertrend', 
         'adx', 'squeeze', 'roc', 'psar', 'vwap', 'ppo', 'cmf', 'cci', 'ao', 
@@ -255,8 +275,6 @@ def main(args):
         # Ensure at least three weights are non-zero
         if sum(weight > 0 for weight in strategy_weights.values()) < 3:
             return None
-
-        print(f"Run {count}")
 
         # Simulate trading with these weights
         mtrader, first_prices, last_prices = run_trader(
@@ -286,7 +304,7 @@ def main(args):
             'net_profit': net_profit
         }
 
-    with ThreadPoolExecutor(max_workers=1) as executor:
+    with ThreadPoolExecutor(max_workers=8) as executor:
         futures = []
         for count, combination in enumerate(all_combinations):
             futures.append(executor.submit(simulate_combination, combination, count))

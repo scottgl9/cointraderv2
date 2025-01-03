@@ -43,6 +43,7 @@ class Trader(object):
         self._granularity = granularity
         self._disabled = False
         self._cur_id = 0
+        self._total_position_count = 0
         self._positions = []
         self._buys = []
         self._sells = []
@@ -318,6 +319,7 @@ class Trader(object):
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, exec_pipe=self._exec_pipe, config=self._config, orders=self._orders)
             position.open_position(size=size, current_price=current_price, current_ts=current_ts)
+            self._total_position_count += 1
             opened_position_id = self._cur_id
             self._positions.append(position)
             self._cur_id += 1
@@ -528,3 +530,9 @@ class Trader(object):
         Get the list of all sell orders for the symbol (for simulation)
         """
         return self._sells
+
+    def total_position_count(self) -> int:
+        """
+        Get the total number of positions opened
+        """
+        return self._total_position_count

@@ -195,7 +195,7 @@ class AccountSimulate(AccountBase):
         """
         Load the information for all symbols
         """
-        print(f'Loading symbol info from {self._name}')
+        #print(f'Loading symbol info from {self._name}')
         if not self._symbol_info.file_exists():
             print(f'Loading symbol info from {self._name}')
             if not self._symbol_info.fetch():
@@ -221,7 +221,7 @@ class AccountSimulate(AccountBase):
         """
         Load the information for all assets
         """
-        print(f'Loading asset info from {self._name}')
+        #print(f'Loading asset info from {self._name}')
         if not self._asset_info.file_exists():
             print(f'Loading asset info from {self._name}')
             if not self._asset_info.fetch():

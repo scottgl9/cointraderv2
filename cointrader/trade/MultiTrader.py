@@ -147,3 +147,8 @@ class MultiTrader(object):
         if symbol not in self._traders.keys():
             return []
         return self._traders[symbol].sells()
+
+    def total_position_count(self, symbol: str):
+        if symbol not in self._traders.keys():
+            return 0
+        return self._traders[symbol].total_position_count()
