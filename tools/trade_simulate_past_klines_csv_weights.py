@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# This script is to determine the optimal strategy weights for a given set of strategies.
 import logging
 from coinbase.websocket import WSClient, WebsocketResponse
 #from coinbase.rest import RESTExchange
@@ -10,6 +11,7 @@ import json
 import sys
 import time
 import argparse
+import itertools
 
 try:
     import cointrader
@@ -42,7 +44,7 @@ class PipelineExecutionThread(Thread):
             self._exec_pipe.process_order_requests()
             time.sleep(1 / 1000) # sleep for 1ms
 
-def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, symbols: list[str], df: pd.DataFrame, granularity: int, initial_usdt: float):
+def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, symbols: list[str], df: pd.DataFrame, granularity: int, initial_usdt: float, strategy_weights: dict[str, float] = None):
     account.update_asset_balance("USDT", available=initial_usdt, hold=0.0)
     tconfig.set_global_current_balance_quote(balance=initial_usdt)
 
@@ -58,7 +60,8 @@ def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, s
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
 
-    mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity)
+    print(f"strategy_weights={strategy_weights}")
+    mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity, strategy_weights=strategy_weights)
 
     # update quote balance before trying to open positions
     mtrader.market_update_quote_balance(quote_name=tconfig.quote_currency())
@@ -179,6 +182,8 @@ def main(args):
 
     print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
 
+    tconfig.set_log_level(LogLevel.NONE.value)
+
     granularity = tconfig.granularity()
 
     market = Market(exchange=exchange, db_path=tconfig.market_db_path())
@@ -186,71 +191,114 @@ def main(args):
     account.load_symbol_info()
     account.load_asset_info()
 
-    mtrader, first_prices, last_prices = run_trader(tconfig, account, exchange, symbols, df, granularity, initial_usdt)
+    # generate weights for strategies
+    strategy_weights = {
+                'macd': 0,
+                'sama': 0,
+                'zlema': 0,
+                'rsi': 0,
+                'stochastic': 0,
+                'ema': 0,
+                'sma': 0,
+                'supertrend': 0.8,
+                'adx': 0,
+                'squeeze': 0,
+                'roc': 0,
+                'psar': 0,
+                'vwap': 0,
+                'ppo': 0,
+                'cmf': 0,
+                'cci': 0,
+                'ao': 0,
+                'uo': 0,
+                'dpo': 0,
+                'ichimoku': 0,
+                'vo': 0,
+                'kvo': 0,
+                'eom': 0,
+                'kst': 1.0,
+                # minor signal weights
+                'macd_change': 0,
+                'rsi_change': 0,
+                'stoch_change': 0,
+                'adx_change': 0,
+                'roc_change': 0,
+                'vwap_change': 0,
+                'vo_change': 0,
+            }
+    # Define possible weights for each indicator
+    weight_values = [0, 0.5, 0.7, 1.0]
+    indicators = [
+        'macd', 'sama', 'zlema', 'rsi', 'stochastic', 'ema', 'sma', 'supertrend', 
+        'adx', 'squeeze', 'roc', 'psar', 'vwap', 'ppo', 'cmf', 'cci', 'ao', 
+        'uo', 'dpo', 'ichimoku', 'vo', 'kvo', 'eom', 'kst'
+    ]
 
-    #if exec_pipe_threaded:
-    #    exec_pipe_thread.join(timeout=5)
+    # Cartesian product of weights for all indicators
+    all_combinations = itertools.product(weight_values, repeat=len(indicators))
 
-    if tconfig.log_level() >= LogLevel.INFO.value:
-        # calculate what the profit would be if we just bought and held
-        total_hold_profit = 0
-        for symbol in symbols:
-            profit = (last_prices[symbol] - first_prices[symbol]) / first_prices[symbol] * 100
-            total_hold_profit += profit
-            print(f"{symbol} buy and hold profit: {profit:.2f}%")
+    # Initialize variables
+    best_weights = None
+    best_positive_profit = float('-inf')
+    best_negative_profit = float('inf')
+    best_net_profit = float('-inf')
 
-        print(f"\nTotal buy and hold profit: {total_hold_profit:.2f}%")
+    best_positive_profit_weights = None
+    best_negative_profit_weights = None
+    best_net_profit_weights = None
 
-        print(account.get_account_balances())
-        print("\nFinal Total USDT Balance:")
-        print(account.get_total_balance("USDT", prices=last_prices))
+    count = 0
 
-        print("\nRemaining open positions:")
-        for symbol in symbols:
-            position = mtrader.position_count(symbol)
-            print(f"{symbol} position_count: {position}")
+    for combination in all_combinations:
+        strategy_weights = dict(zip(indicators, combination))
+        
+        # Ensure at least three weights are non-zero
+        if sum(weight > 0 for weight in strategy_weights.values()) < 3:
+            continue
 
-        print("\nNet profit on closed positions:")
-        for symbol in symbols:
-            profit = mtrader.net_profit_percent(symbol)
-            print(f"{symbol} net profit: {profit:.2f}%")
+        print(f"Run {count}")
+        count += 1
 
-    total_positive_profit = 0
+        # Simulate trading with these weights
+        mtrader, first_prices, last_prices = run_trader(
+            tconfig, account, exchange, symbols, df, granularity, initial_usdt, strategy_weights
+        )
 
-    if tconfig.log_level() >= LogLevel.INFO.value:
-        print("\npositive profit on closed positions:")
-    for symbol in symbols:
-        profit = mtrader.positive_profit_percent(symbol)
-        total_positive_profit += profit
-        if tconfig.log_level() >= LogLevel.INFO.value:
-            print(f"{symbol} positive profit: {profit:.2f}%")
+        total_positive_profit = sum(
+            mtrader.positive_profit_percent(symbol) for symbol in symbols
+        )
+        total_negative_profit = sum(
+            mtrader.negative_profit_percent(symbol) for symbol in symbols
+        )
+        net_profit = total_positive_profit + total_negative_profit
 
-    total_negative_profit = 0
+        # Ignore cases where any profits are zero or mostly negative profits
+        if total_positive_profit == 0 or total_negative_profit == 0 or net_profit <= 0:
+            continue
 
-    if tconfig.log_level() >= LogLevel.INFO.value:
-        print("\nnegative profit on closed positions:")
-    for symbol in symbols:
-        profit = mtrader.negative_profit_percent(symbol)
-        total_negative_profit += profit
-        if tconfig.log_level() >= LogLevel.INFO.value:
-            print(f"{symbol} negative profit: {profit:.2f}%")
+        print(f"Positive profit: {total_positive_profit:.2f}%")
+        print(f"Negative profit: {total_negative_profit:.2f}%")
+        print(f"Net profit: {net_profit:.2f}%")
 
-    print(f"\nTotal positive profit: {total_positive_profit:.2f}%")
-    print(f"Total negative profit: {total_negative_profit:.2f}%")
-    print(f"Total net profit: {total_positive_profit + total_negative_profit:.2f}%")
+        # Update best profits and weights
+        if net_profit > best_net_profit:
+            best_net_profit = net_profit
+            best_net_profit_weights = strategy_weights
 
-    if tconfig.log_level() >= LogLevel.INFO.value:
-        buys = {}
-        sells = {}
+        if total_positive_profit > best_positive_profit:
+            best_positive_profit = total_positive_profit
+            best_positive_profit_weights = strategy_weights
 
-        #print("\nBuys and Sells:")
-        for symbol in symbols:
-            buys[symbol] = mtrader.buys(symbol)
-            print(f"{symbol} buy count: {len(buys[symbol])}")
-            #print(f"{symbol} buys: {buys}")
-            sells[symbol] = mtrader.sells(symbol)
-            #print(f"{symbol} sells: {sells}")
-            print(f"{symbol} sell count: {len(sells[symbol])}")
+        if total_negative_profit < best_negative_profit:
+            best_negative_profit = total_negative_profit
+            best_negative_profit_weights = strategy_weights
+
+    # Print results
+    print(f"Best positive profit: {best_positive_profit:.2f}% with weights: {best_positive_profit_weights}")
+    print(f"Best negative profit: {best_negative_profit:.2f}% with weights: {best_negative_profit_weights}")
+    print(f"Best net profit: {best_net_profit:.2f}% with weights: {best_net_profit_weights}")
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trade simulation with past klines.')

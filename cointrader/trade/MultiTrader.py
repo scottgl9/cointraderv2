@@ -5,6 +5,7 @@ from cointrader.execute.ExecuteBase import ExecuteBase
 from cointrader.execute.pipeline.ExecutePipeline import ExecutePipeline
 from cointrader.account.AccountBase import AccountBase
 from cointrader.common.Kline import Kline
+from cointrader.common.LogLevel import LogLevel
 
 class MultiTrader(object):
     def __init__(self, account: AccountBase, exec_pipe: ExecutePipeline, config: TraderConfig, orders: Orders = None, restore_positions = False, granularity: int = 0, strategy_weights: dict[str, float] = None):
@@ -27,7 +28,8 @@ class MultiTrader(object):
             self._orders = orders
         self._symbols = self._config.trade_symbols()
 
-        print(f"MultiTrader: strategy: {self._config.strategy()} trade_quote_size: {self._config.max_position_quote_size()} max_positions: {self._config.max_positions()} symbols: {self._symbols} ")
+        if self._config.log_level() >= LogLevel.INFO.value:
+            print(f"MultiTrader: strategy: {self._config.strategy()} trade_quote_size: {self._config.max_position_quote_size()} max_positions: {self._config.max_positions()} symbols: {self._symbols} ")
 
         for symbol in self._symbols:
             if symbol not in self._traders.keys():
@@ -46,7 +48,6 @@ class MultiTrader(object):
         global_balance = self._config.global_current_balance_quote()
         if global_balance != balance:
             print(f"{balance} != {global_balance}")
-
 
 
     def market_preload(self, symbol: str, klines: list[Kline]):
@@ -102,7 +103,8 @@ class MultiTrader(object):
         last_closed_profit = self._config.global_last_closed_position_profit()
         # for the last profit on close, check if we exceeded the maximum loss
         if last_closed_profit <= self._config.global_disable_after_loss_percent():
-            print(f"Disable after loss of {last_closed_profit}")
+            if self._config.log_level() >= LogLevel.INFO.value:
+                print(f"Disable after loss of {last_closed_profit}")
             pass
 
     def market_update_kline(self, symbol: str, kline: Kline, granularity: int):
