@@ -1,11 +1,12 @@
 import os
 import json
+from cointrader.common.LogLevel import LogLevel
 
 # Example of a trade config
 DEFAULT_TRADE_CONFIG = {
     # Configuration options set on start
     'simulate': True,                         # Simulate trading without making real trades
-    'verbose': False,                         # Print verbose output
+    'log_level': LogLevel.INFO.value,         # Log level (4=DEBUG, 3=INFO, 2=WARNING, 1=ERROR, 0=NONE)
     'orders_db_path': 'orders.db',            # Path to the order database
     'market_db_path': 'market_data.db',       # Path to the market database
     'max_position_per_symbol': 1,             # Maximum number of positions to hold per symbol
@@ -117,8 +118,11 @@ class TraderConfig(object):
     def simulate(self):
         return self.get('simulate')
     
-    def verbose(self):
-        return self.get('verbose')
+    def log_level(self) -> int:
+        return self.get('log_level')
+    
+    def set_log_level(self, log_level: int):
+        self.set('log_level', log_level)
 
     def orders_db_path(self):
         return self.get('orders_db_path')

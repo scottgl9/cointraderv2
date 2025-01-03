@@ -2,6 +2,7 @@
 # Trader only operates on a designated symbol
 from cointrader.common.Kline import Kline
 from cointrader.common.Strategy import Strategy
+from cointrader.common.LogLevel import LogLevel
 from cointrader.account.Account import Account
 from .TraderConfig import TraderConfig
 from cointrader.execute.ExecuteBase import ExecuteBase
@@ -126,7 +127,8 @@ class Trader(object):
                     order.update_order(result)
                     if order.placed():
                         # for simplicity, just cancel the open order
-                        print(f"{self._symbol} Cancelling buy order {order}")
+                        if self._config.log_level() >= LogLevel.INFO.value:
+                            print(f"{self._symbol} Cancelling buy order {order}")
                         #result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
                         oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
                         oreq.order_id = order.id
@@ -144,7 +146,8 @@ class Trader(object):
 
                 elif order.side == OrderSide.SELL and order.placed():
                     # to keep things simple, just cancel the order
-                    print(f"{self._symbol} Cancelling sell order {order}")
+                    if self._config.log_level() >= LogLevel.INFO.value:
+                        print(f"{self._symbol} Cancelling sell order {order}")
                     #result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
                     oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
                     oreq.order_id = order.id
@@ -159,7 +162,8 @@ class Trader(object):
                     self._orders.update_order(symbol=self._symbol, order=order)
             else:
                 if order.side == OrderSide.BUY and order.placed():
-                    print(f"Error: Duplicate buy order found, cancelling order: {order}")
+                    if self._config.log_level() >= LogLevel.WARNING.value:
+                        print(f"Error: Duplicate buy order found, cancelling order: {order}")
                     #result = self._execute.cancel(order_id=order.id, symbol=self._symbol, current_price=current_price, current_ts=current_ts)
                     oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
                     oreq.order_id = order.id
@@ -175,7 +179,8 @@ class Trader(object):
         
         # restore the positions with buy orders
         for _, order in order_by_pid.items():
-            print(f"{self._symbol} Restoring position from order: {order}")
+            if self._config.log_level() >= LogLevel.INFO.value:
+                print(f"{self._symbol} Restoring position from order: {order}")
             position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, exec_pipe=self._exec_pipe, config=self._config, orders=self._orders)
             position.restore_buy_order(order=order, current_price=current_price, current_ts=current_ts)
             self._positions.append(position)
@@ -207,11 +212,13 @@ class Trader(object):
         if strategy.buy_signal():
             self._local_disable_new_positions = False
             if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
-                print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
+                if self._config.log_level() >= LogLevel.INFO.value:
+                    print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
         elif strategy.sell_signal():
             self._local_disable_new_positions = True
             if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
-                print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
+                if self._config.log_level() >= LogLevel.INFO.value:
+                    print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
 
         self._prev_local_disable_new_positions = self._local_disable_new_positions
 
@@ -266,7 +273,7 @@ class Trader(object):
 
         # global disable new positions
         disable_new_positions = self._config.global_disable_new_positions()
-        if disable_new_positions != self._global_prev_disable_new_positions:
+        if disable_new_positions != self._global_prev_disable_new_positions and self._config.log_level() >= LogLevel.INFO.value:
             print(f"{self._symbol} global_disable_positions: {disable_new_positions}")
         self._global_prev_disable_new_positions = disable_new_positions
 
@@ -282,14 +289,16 @@ class Trader(object):
         # Open a position on a buy signal
         if not self._disabled and not disable_new_positions and buy_signal and len(self._positions) < self._max_positions_per_symbol:
             if not self._size_strategy.ready():
-                print(f"{self._symbol} Size strategy not ready")
+                if self._config.log_level() >= LogLevel.WARNING.value:
+                    print(f"{self._symbol} Size strategy not ready")
                 return
             size = self._size_strategy.get_base_trade_size(current_price=current_price, current_ts=current_ts)
             quote_size = self._size_strategy.get_quote_trade_size(current_price=current_price, current_ts=current_ts)
             if not size or not quote_size:
-                print(f"{self._symbol} Size too small: {size}")
+                if self._config.log_level() >= LogLevel.WARNING.value:
+                    print(f"{self._symbol} Size too small: {size}")
                 return
-            
+
             # check if we have sufficient balance to open the position
             quote_name = self._account.get_quote_name(self._symbol)
             #balance, _ = self._account.get_asset_balance(quote_name, round=False)
@@ -298,7 +307,7 @@ class Trader(object):
             balance = self._account.round_quote(self._symbol, balance)
             if balance < quote_size:
                 # prevent spamming the console with insufficient balance messages in live trading
-                if self._config.simulate():
+                if self._config.simulate() and self._config.log_level() >= LogLevel.WARNING.value:
                     print(f"{self._symbol} {quote_name} Insufficient balance {balance} to open position at price {current_price} quote_size={quote_size}")
                 return
 
@@ -319,7 +328,8 @@ class Trader(object):
             if position.opened() and self._config.trailing_stop_loss() and self._loss_strategy.ready():
                 stop_price = self._loss_strategy.get_stop_loss_price(price=position.buy_price(), current_ts=current_ts)
                 stop_limit_price = self._loss_strategy.get_stop_limit_price(price=position.buy_price(), current_ts=current_ts)
-                print(f"{self._symbol} Stop loss: {stop_price} Limit: {stop_limit_price}")
+                if self._config.log_level() >= LogLevel.INFO.value:
+                    print(f"{self._symbol} Stop loss: {stop_price} Limit: {stop_limit_price}")
 
                 # handle setting and updating stop loss orders if enabled
                 if not position.stop_loss_is_set():
@@ -351,7 +361,7 @@ class Trader(object):
                     balance = self._account.round_quote(self._symbol, balance)
                     if balance >= size:
                         position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)
-                    else:
+                    elif self._config.log_level() >= LogLevel.WARNING.value:
                         print(f"{self._symbol} {quote_name} Insufficient balance {balance} to update buy position at price {current_price}")
 
                 # skip checking for sell signal if position has not been opened
@@ -459,16 +469,18 @@ class Trader(object):
         self._config.set_global_last_closed_position_profit(profit=profit_percent)
         if profit_percent >= 0:
             self._positive_profit_percent += profit_percent
-            msg = f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}"
-            msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
-            msg += f"{Style.RESET_ALL}"
-            print(msg)
+            if self._config.log_level() >= LogLevel.INFO.value:
+                msg = f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}"
+                msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
+                msg += f"{Style.RESET_ALL}"
+                print(msg)
         else:
             self._negative_profit_percent += profit_percent
-            msg = f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}"
-            msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
-            msg += f"{Style.RESET_ALL}"
-            print(msg)
+            if self._config.log_level() >= LogLevel.INFO.value:
+                msg = f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}"
+                msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
+                msg += f"{Style.RESET_ALL}"
+                print(msg)
             # Disable opening new positions for a period of time after a loss
             if self._disable_after_loss_seconds > 0:
                 self._disable_until_ts = current_ts + self._disable_after_loss_seconds

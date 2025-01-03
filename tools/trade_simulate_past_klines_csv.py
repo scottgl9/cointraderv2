@@ -27,6 +27,7 @@ from cointrader.trade.MultiTrader import MultiTrader
 from cointrader.trade.TraderConfig import TraderConfig
 from cointrader.order.Orders import Orders
 from cointrader.common.Kline import Kline
+from cointrader.common.LogLevel import LogLevel
 from cointrader.config import *
 from cointrader.indicators.EMA import EMA
 from cointrader.common.KlineEmitter import KlineEmitter
@@ -182,46 +183,47 @@ def main(args):
     #if exec_pipe_threaded:
     #    exec_pipe_thread.join(timeout=5)
 
-    print(orders.get_active_orders(symbol=None))
+    if tconfig.log_level() >= LogLevel.INFO.value:
+        print(orders.get_active_orders(symbol=None))
 
-    # calculate what the profit would be if we just bought and held
-    total_hold_profit = 0
-    for symbol in symbols:
-        profit = (last_prices[symbol] - first_prices[symbol]) / first_prices[symbol] * 100
-        total_hold_profit += profit
-        print(f"{symbol} buy and hold profit: {profit:.2f}%")
+        # calculate what the profit would be if we just bought and held
+        total_hold_profit = 0
+        for symbol in symbols:
+            profit = (last_prices[symbol] - first_prices[symbol]) / first_prices[symbol] * 100
+            total_hold_profit += profit
+            print(f"{symbol} buy and hold profit: {profit:.2f}%")
 
-    print(f"\nTotal buy and hold profit: {total_hold_profit:.2f}%")
+        print(f"\nTotal buy and hold profit: {total_hold_profit:.2f}%")
 
-    print(account.get_account_balances())
-    print("\nFinal Total USDT Balance:")
-    print(account.get_total_balance("USDT", prices=last_prices))
+        print(account.get_account_balances())
+        print("\nFinal Total USDT Balance:")
+        print(account.get_total_balance("USDT", prices=last_prices))
 
-    print("\nRemaining open positions:")
-    for symbol in symbols:
-        position = mtrader.position_count(symbol)
-        print(f"{symbol} position_count: {position}")
+        print("\nRemaining open positions:")
+        for symbol in symbols:
+            position = mtrader.position_count(symbol)
+            print(f"{symbol} position_count: {position}")
 
-    print("\nNet profit on closed positions:")
-    for symbol in symbols:
-        profit = mtrader.net_profit_percent(symbol)
-        print(f"{symbol} net profit: {profit:.2f}%")
+        print("\nNet profit on closed positions:")
+        for symbol in symbols:
+            profit = mtrader.net_profit_percent(symbol)
+            print(f"{symbol} net profit: {profit:.2f}%")
 
-    total_positive_profit = 0
+        total_positive_profit = 0
 
-    print("\npositive profit on closed positions:")
-    for symbol in symbols:
-        profit = mtrader.positive_profit_percent(symbol)
-        total_positive_profit += profit
-        print(f"{symbol} positive profit: {profit:.2f}%")
+        print("\npositive profit on closed positions:")
+        for symbol in symbols:
+            profit = mtrader.positive_profit_percent(symbol)
+            total_positive_profit += profit
+            print(f"{symbol} positive profit: {profit:.2f}%")
 
-    total_negative_profit = 0
+        total_negative_profit = 0
 
-    print("\nnegative profit on closed positions:")
-    for symbol in symbols:
-        profit = mtrader.negative_profit_percent(symbol)
-        total_negative_profit += profit
-        print(f"{symbol} negative profit: {profit:.2f}%")
+        print("\nnegative profit on closed positions:")
+        for symbol in symbols:
+            profit = mtrader.negative_profit_percent(symbol)
+            total_negative_profit += profit
+            print(f"{symbol} negative profit: {profit:.2f}%")
 
     print(f"\nTotal positive profit: {total_positive_profit:.2f}%")
     print(f"Total negative profit: {total_negative_profit:.2f}%")

@@ -5,6 +5,7 @@ from cointrader.order.OrderResult import OrderResult
 from cointrader.order.Order import OrderStatus, OrderType, OrderSide, Order
 from cointrader.account.AccountBase import AccountBase
 from cointrader.trade.TraderConfig import TraderConfig
+from cointrader.common.LogLevel import LogLevel
 import uuid
 
 class TraderExecuteSimulate(ExecuteBase):
@@ -33,7 +34,7 @@ class TraderExecuteSimulate(ExecuteBase):
         result.filled_size = result.size
         result.filled_ts = current_ts
 
-        if self._config.verbose():
+        if self._config.log_level() == LogLevel.DEBUG.value:
             print(f'market_buy: {symbol}, {current_price}, {result.size}')
 
         if amount < self._account.get_base_min_size(symbol):
@@ -52,7 +53,7 @@ class TraderExecuteSimulate(ExecuteBase):
         quote_balance, quote_balance_hold = self._account.get_asset_balance(quote)
         new_quote_balance = quote_balance - self._account.round_quote(symbol, current_price * amount)
         if new_quote_balance < 0:
-            if self._config.verbose():
+            if self._config.log_level() == LogLevel.DEBUG.value:
                 print(f'quote_balance: {quote_balance}, quote_balance_hold: {quote_balance_hold}, new_quote_balance: {new_quote_balance}')
             raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
         self._account.update_asset_balance(quote, new_quote_balance, quote_balance_hold)
@@ -75,7 +76,7 @@ class TraderExecuteSimulate(ExecuteBase):
         result.filled_size = result.size
         result.filled_ts = current_ts
 
-        if self._config.verbose():
+        if self._config.log_level() == LogLevel.DEBUG.value:
             print(f'market_sell: {symbol}, {current_price}, {result.size}')
 
         if amount < self._account.get_base_min_size(symbol):
@@ -89,7 +90,7 @@ class TraderExecuteSimulate(ExecuteBase):
         base_balance, base_balance_hold = self._account.get_asset_balance(base)
         new_base_balance = base_balance - amount
         if new_base_balance < 0:
-            if self._config.verbose():
+            if self._config.log_level() == LogLevel.DEBUG.value:
                 print(f'base_balance: {base_balance}, new_base_balance: {new_base_balance}')
             raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
         self._account.update_asset_balance(base, new_base_balance, base_balance_hold)
@@ -113,7 +114,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._account.update_asset_balance(quote, new_quote_balance, new_quote_hold)
 
         if new_quote_balance < 0:
-            if self._config.verbose():
+            if self._config.log_level() == LogLevel.DEBUG.value:
                 print(f'quote_balance: {quote_balance}, new_quote_balance: {new_quote_balance}')
             raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
 
@@ -127,7 +128,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._account.update_asset_balance(base, new_base_balance, new_base_hold)
 
         if new_base_balance < 0:
-            if self._config.verbose():
+            if self._config.log_level() == LogLevel.DEBUG.value:
                 print(f'base_balance: {base_balance}, new_base_balance: {new_base_balance}')
             raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
 
@@ -145,7 +146,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._account.update_asset_balance(quote, quote_balance, new_quote_hold)
 
         if new_quote_hold < 0:
-            if self._config.verbose():
+            if self._config.log_level() == LogLevel.DEBUG.value:
                 print(f'quote_balance: {quote_balance}, quote_balance_hold: {quote_hold}, new_quote_hold: {new_quote_hold}')
             raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
 
@@ -167,7 +168,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._account.update_asset_balance(base, base_balance, new_base_hold)
 
         if new_base_hold < 0:
-            if self._config.verbose():
+            if self._config.log_level() == LogLevel.DEBUG.value:
                 print(f'base_balance: {base_balance}, base_hold: {base_hold}, new_base_hold: {new_base_hold}')
             raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
 
@@ -192,7 +193,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._account.update_asset_balance(quote, new_quote_balance, new_quote_hold)
 
         if new_quote_hold < 0:
-            if self._config.verbose():
+            if self._config.log_level() == LogLevel.DEBUG.value:
                 print(f'quote_balance: {quote_balance}, quote_balance_hold: {quote_hold}, new_quote_hold: {new_quote_hold}')
             raise ValueError(f'{symbol} Insufficient balance for {quote} to buy {base}.')
 
@@ -210,7 +211,7 @@ class TraderExecuteSimulate(ExecuteBase):
         self._account.update_asset_balance(base, new_base_balance, new_base_hold)
 
         if new_base_hold < 0:
-            if self._config.verbose():
+            if self._config.log_level() == LogLevel.DEBUG.value:
                 print(f'base_balance: {base_balance}, base_hold: {base_hold}, new_base_hold: {new_base_hold}')
             raise ValueError(f'{symbol} Insufficient balance for {base} to sell {amount}.')
 
@@ -270,7 +271,7 @@ class TraderExecuteSimulate(ExecuteBase):
         result.size = amount
         result.filled_size = 0.0
 
-        if self._config.verbose():
+        if self._config.log_level() == LogLevel.DEBUG.value:
             print(f'stop_loss_limit_buy: {symbol}, {limit_price}, {result.size}')
 
         # simulate account update
@@ -294,7 +295,7 @@ class TraderExecuteSimulate(ExecuteBase):
         result.size = amount
         result.filled_size = 0.0
 
-        if self._config.verbose():
+        if self._config.log_level() == LogLevel.DEBUG.value:
             print(f'stop_loss_limit_sell: {symbol}, {limit_price}, {amount}, {result.size}')
 
         # simulate account update
@@ -354,7 +355,7 @@ class TraderExecuteSimulate(ExecuteBase):
         """
         order = self._orders[order_id]
 
-        if self._config.verbose():
+        if self._config.log_level() == LogLevel.DEBUG.value:
             print(f'cancel: {symbol}, {order_id}, {current_price}')
 
         if order.type == OrderType.MARKET or order.status == OrderStatus.CANCELLED or order.status == OrderStatus.FILLED:

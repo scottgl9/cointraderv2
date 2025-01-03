@@ -1,6 +1,6 @@
 {
     "simulate": false,
-    "verbose": true,
+    "log_level": 4,
     "orders_db_path": "orders.db",
     "market_db_path": "market_data.db",
     "max_positions_per_symbol": 1,

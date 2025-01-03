@@ -1,5 +1,6 @@
 from cointrader.common.Strategy import Strategy
 from cointrader.common.Kline import Kline
+from cointrader.common.LogLevel import LogLevel
 from cointrader.order.Order import Order, OrderSide, OrderType, OrderStatus
 from cointrader.order.Orders import Orders
 from cointrader.order.OrderRequest import OrderRequest
@@ -192,7 +193,8 @@ class TraderPosition(PositionBase):
                     replace_buy_order = True
 
             if replace_buy_order:
-                print(f"Replacing buy order for {self._symbol} current price: {current_price} limit price: {self._buy_order.limit_price}")
+                if self._config.log_level() >= LogLevel.INFO.value:
+                    print(f"Replacing buy order for {self._symbol} current price: {current_price} limit price: {self._buy_order.limit_price}")
                 # cancel buy order so we can replace it
                 #result = self._execute.cancel(symbol=self._symbol, order_id=self._buy_order.id, current_price=current_price, current_ts=current_ts)
                 oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
@@ -243,7 +245,8 @@ class TraderPosition(PositionBase):
                     replace_sell_order = True
 
             if replace_sell_order:
-                print(f"Replacing sell order for {self._symbol} current price: {current_price} limit price: {self._sell_order.limit_price}")
+                if self._config.log_level() >= LogLevel.INFO.value:
+                    print(f"Replacing sell order for {self._symbol} current price: {current_price} limit price: {self._sell_order.limit_price}")
                 # cancel sell order so we can replace it
                 #result = self._execute.cancel(symbol=self._symbol, order_id=self._sell_order.id, current_price=current_price, current_ts=current_ts)
 
@@ -360,8 +363,8 @@ class TraderPosition(PositionBase):
         """
         Update the position with order status and the current market price
         """
-        #if self._config.verbose():
-        #    print(f"Updating position for {self._symbol} current price: {current_price}")
+        if self._config.log_level() == LogLevel.DEBUG.value:
+            print(f"Updating position for {self._symbol} current price: {current_price}")
         self._current_price = current_price
         self._current_ts = current_ts
 
