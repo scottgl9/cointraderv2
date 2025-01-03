@@ -42,37 +42,7 @@ class PipelineExecutionThread(Thread):
             self._exec_pipe.process_order_requests()
             time.sleep(1 / 1000) # sleep for 1ms
 
-def main(args):
-    name = args.exchange
-    initial_usdt = args.initial_usdt
-
-    exchange = TraderSelectExchange(name).get_exchange()
-
-    symbols = args.symbols.split(',')
-
-    tconfig = TraderConfig(path=f'config/{name}_trader_simulate_csv_config.json')
-    if not tconfig.load_config():
-        print(f"Failed to load config {tconfig.get_config_path()}")
-        tconfig.save_config()
-    else:
-        print(f"Loaded config {tconfig.get_config_path()}")
-
-    tconfig.set_trade_symbols(symbols)
-
-    if args.strategy and tconfig.strategy() != args.strategy:
-        tconfig.set_strategy(args.strategy)
-
-    print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
-
-    granularity = tconfig.granularity()
-
-    market = Market(exchange=exchange, db_path=tconfig.market_db_path())
-    account = AccountSimulate(exchange=exchange, market=market)
-    account.load_symbol_info()
-    account.load_asset_info()
-
-    all_klines = {}
-
+def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, symbols: list[str], df: pd.DataFrame, granularity: int, initial_usdt: float):
     account.update_asset_balance("USDT", available=initial_usdt, hold=0.0)
     tconfig.set_global_current_balance_quote(balance=initial_usdt)
 
@@ -91,32 +61,6 @@ def main(args):
 
     # update quote balance before trying to open positions
     mtrader.market_update_quote_balance(quote_name=tconfig.quote_currency())
-
-    start_ts = int(datetime.fromisoformat(args.start_date).timestamp())
-    if args.end_date == 'now':
-        end_ts = int(datetime.now().timestamp())
-    else:
-        end_ts = int(datetime.fromisoformat(args.end_date).timestamp())
-
-    df = pd.read_csv(args.csv_path)
-
-    # print all unique strings from the Symbols column
-    unique_symbols = df['Symbol'].unique()
-    print("Symbols:", unique_symbols)
-
-    # Convert the Date column to datetime format
-    df['Date'] = pd.to_datetime(df['Date'], format='mixed') #'%Y-%m-%d %H:%M:%S')
-    # Convert the Date column to unix timestamp
-    df['Timestamp'] = df['Date'].apply(lambda x: int(x.timestamp()))
-    # Sort the DataFrame by the Date column
-    df = df.sort_values(by='Date').reset_index(drop=True)
-    # Convert all symbols ending with 'USDT' to '-USDT'
-    df['Symbol'] = df['Symbol'].apply(lambda x: x.replace('USDT', '-USDT'))
-    # Display the first few rows of the DataFrame
-    print(df.head())
-
-    # Filter the DataFrame by the Timestamp column
-    df = df[(df['Timestamp'] >= start_ts) & (df['Timestamp'] <= end_ts)]
 
     kline = Kline()
     #kline.set_dict_names(ts='start')
@@ -179,13 +123,74 @@ def main(args):
             last_prices[symbol] = kline_data['close']
 
     orders.commit()
+    if tconfig.log_level() >= LogLevel.INFO.value:
+        print(orders.get_active_orders(symbol=None))
+    
+    return mtrader, first_prices, last_prices
+
+
+def main(args):
+    name = args.exchange
+    initial_usdt = args.initial_usdt
+
+    exchange = TraderSelectExchange(name).get_exchange()
+
+    symbols = args.symbols.split(',')
+
+    start_ts = int(datetime.fromisoformat(args.start_date).timestamp())
+    if args.end_date == 'now':
+        end_ts = int(datetime.now().timestamp())
+    else:
+        end_ts = int(datetime.fromisoformat(args.end_date).timestamp())
+
+    df = pd.read_csv(args.csv_path)
+
+    # print all unique strings from the Symbols column
+    unique_symbols = df['Symbol'].unique()
+    print("Symbols:", unique_symbols)
+
+    # Convert the Date column to datetime format
+    df['Date'] = pd.to_datetime(df['Date'], format='mixed') #'%Y-%m-%d %H:%M:%S')
+    # Convert the Date column to unix timestamp
+    df['Timestamp'] = df['Date'].apply(lambda x: int(x.timestamp()))
+    # Sort the DataFrame by the Date column
+    df = df.sort_values(by='Date').reset_index(drop=True)
+    # Convert all symbols ending with 'USDT' to '-USDT'
+    df['Symbol'] = df['Symbol'].apply(lambda x: x.replace('USDT', '-USDT'))
+    # Display the first few rows of the DataFrame
+    print(df.head())
+
+    # Filter the DataFrame by the Timestamp column
+    df = df[(df['Timestamp'] >= start_ts) & (df['Timestamp'] <= end_ts)]
+
+
+    tconfig = TraderConfig(path=f'config/{name}_trader_simulate_csv_config.json')
+    if not tconfig.load_config():
+        print(f"Failed to load config {tconfig.get_config_path()}")
+        tconfig.save_config()
+    else:
+        print(f"Loaded config {tconfig.get_config_path()}")
+
+    tconfig.set_trade_symbols(symbols)
+
+    if args.strategy and tconfig.strategy() != args.strategy:
+        tconfig.set_strategy(args.strategy)
+
+    print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
+
+    granularity = tconfig.granularity()
+
+    market = Market(exchange=exchange, db_path=tconfig.market_db_path())
+    account = AccountSimulate(exchange=exchange, market=market)
+    account.load_symbol_info()
+    account.load_asset_info()
+
+    mtrader, first_prices, last_prices = run_trader(tconfig, account, exchange, symbols, df, granularity, initial_usdt)
 
     #if exec_pipe_threaded:
     #    exec_pipe_thread.join(timeout=5)
 
     if tconfig.log_level() >= LogLevel.INFO.value:
-        print(orders.get_active_orders(symbol=None))
-
         # calculate what the profit would be if we just bought and held
         total_hold_profit = 0
         for symbol in symbols:
@@ -229,17 +234,18 @@ def main(args):
     print(f"Total negative profit: {total_negative_profit:.2f}%")
     print(f"Total net profit: {total_positive_profit + total_negative_profit:.2f}%")
 
-    buys = {}
-    sells = {}
+    if tconfig.log_level() >= LogLevel.INFO.value:
+        buys = {}
+        sells = {}
 
-    #print("\nBuys and Sells:")
-    for symbol in symbols:
-        buys[symbol] = mtrader.buys(symbol)
-        print(f"{symbol} buy count: {len(buys[symbol])}")
-        #print(f"{symbol} buys: {buys}")
-        sells[symbol] = mtrader.sells(symbol)
-        #print(f"{symbol} sells: {sells}")
-        print(f"{symbol} sell count: {len(sells[symbol])}")
+        #print("\nBuys and Sells:")
+        for symbol in symbols:
+            buys[symbol] = mtrader.buys(symbol)
+            print(f"{symbol} buy count: {len(buys[symbol])}")
+            #print(f"{symbol} buys: {buys}")
+            sells[symbol] = mtrader.sells(symbol)
+            #print(f"{symbol} sells: {sells}")
+            print(f"{symbol} sell count: {len(sells[symbol])}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trade simulation with past klines.')

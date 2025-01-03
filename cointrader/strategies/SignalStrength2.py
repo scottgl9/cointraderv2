@@ -28,13 +28,13 @@ from cointrader.signals.EOMSignal import EOMSignal
 from cointrader.signals.KSTSignal import KSTSignal
 
 class SignalStrength2(Strategy):
-    def __init__(self, symbol: str, name='signal_strength2', granularity=0, signal_weights=None):
+    def __init__(self, symbol: str, name='signal_strength2', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
         self._buy_signal_name = None
         self._sell_signal_name = None
 
-        if signal_weights is not None:
-            self._signal_weights = signal_weights
+        if weights is not None:
+            self._signal_weights = weights
         else:
             self._signal_weights = {
                 'macd': 0,

@@ -33,7 +33,7 @@ class Trader(object):
     _orders: Orders = None
     _max_positions_per_symbol = 0
 
-    def __init__(self, account: Account, symbol: str, exec_pipe: ExecutePipeline, config: TraderConfig, orders: Orders, granularity: int = 0):
+    def __init__(self, account: Account, symbol: str, exec_pipe: ExecutePipeline, config: TraderConfig, orders: Orders, granularity: int = 0, strategy_weights: dict[str, float] = None):
         self._symbol = symbol
         self._account = account
         self._execute = exec_pipe.execute()
@@ -47,6 +47,7 @@ class Trader(object):
         self._buys = []
         self._sells = []
         # configuration for strategies
+        self._strategy_weights = strategy_weights
         self._strategies_other_config = config.strategies_other_timeframes()
         self._strategies_other_timeframes: dict[int, Strategy] = {}
         self._strategy_name = config.strategy()
@@ -55,11 +56,11 @@ class Trader(object):
         for s in self._strategies_other_config:
             strategy_name, strategy_granularity = s.split(':')
             strategy_module = importlib.import_module(f'cointrader.strategies.{strategy_name}')
-            self._strategies_other_timeframes[strategy_granularity] = getattr(strategy_module, strategy_name)(symbol=symbol, granularity=int(strategy_granularity))
+            self._strategies_other_timeframes[strategy_granularity] = getattr(strategy_module, strategy_name)(symbol=symbol, granularity=int(strategy_granularity), weights=strategy_weights)
 
         # load the main strategy
         strategy_module = importlib.import_module(f'cointrader.strategies.{self._strategy_name}')
-        self._strategy = getattr(strategy_module, self._strategy_name)(symbol=symbol, granularity=granularity)
+        self._strategy = getattr(strategy_module, self._strategy_name)(symbol=symbol, granularity=granularity, weights=strategy_weights)
 
         # load the loss and size strategies
         loss_module = importlib.import_module(f'cointrader.trade.loss.{self._config.loss_strategy()}')

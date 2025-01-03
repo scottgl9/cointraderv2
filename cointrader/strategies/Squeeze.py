@@ -2,7 +2,7 @@ from cointrader.common.Strategy import Strategy
 from cointrader.signals.SqueezeMomentumSignal import SqueezeMomentumSignal
 
 class Squeeze(Strategy):
-    def __init__(self, symbol: str, name='supertrend', granularity=0):
+    def __init__(self, symbol: str, name='supertrend', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
         self._squeeze = SqueezeMomentumSignal(name='squeeze', symbol=self._symbol, length=20, multBB=2.0, multKC=1.5)
         self._buy_signal_name = None

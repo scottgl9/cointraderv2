@@ -2,7 +2,7 @@ from cointrader.common.Strategy import Strategy
 from cointrader.signals.SAMASignal import SAMASignal
 
 class SAMA(Strategy):
-    def __init__(self, symbol: str, name='default', granularity=0):
+    def __init__(self, symbol: str, name='default', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
         self.sama = SAMASignal(symbol=self._symbol)
         self._buy_signal_name = None

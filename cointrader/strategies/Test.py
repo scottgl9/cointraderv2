@@ -8,7 +8,7 @@ from cointrader.signals.SupertrendSignal import SupertrendSignal
 from cointrader.signals.ADXSignal import ADXSignal
 
 class Test(Strategy):
-    def __init__(self, symbol: str, name='test', granularity=0):
+    def __init__(self, symbol: str, name='test', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
         self.macd = MACDSignal(symbol=self._symbol, short_period=12, long_period=26, signal_period=9)
         self.sama = SAMASignal(symbol=self._symbol)

@@ -2,7 +2,7 @@ from cointrader.common.Strategy import Strategy
 from cointrader.signals.ROCSignal import ROCSignal
 
 class ROC(Strategy):
-    def __init__(self, symbol: str, name='roc', granularity=0):
+    def __init__(self, symbol: str, name='roc', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
         self.roc = ROCSignal(symbol=self._symbol, period=14)
         self._buy_signal_name = None

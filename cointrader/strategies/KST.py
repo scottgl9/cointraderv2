@@ -2,7 +2,7 @@ from cointrader.common.Strategy import Strategy
 from cointrader.signals.KSTSignal import KSTSignal
 
 class KST(Strategy):
-    def __init__(self, symbol: str, name='kst', granularity=0):
+    def __init__(self, symbol: str, name='kst', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
         self._kst = KSTSignal(symbol=self._symbol)
         self._buy_signal_name = None
