@@ -44,7 +44,30 @@ class PipelineExecutionThread(Thread):
             self._exec_pipe.process_order_requests()
             time.sleep(1 / 1000) # sleep for 1ms
 
-def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, symbols: list[str], df: pd.DataFrame, granularity: int, initial_usdt: float, strategy_weights: dict[str, float] = None):
+def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt: float, strategy_weights: dict[str, float] = None, count=0, name=""):
+    tconfig = TraderConfig(path=f'config/{name}_trader_simulate_csv_config.json')
+    if not tconfig.load_config():
+        print(f"Failed to load config {tconfig.get_config_path()}")
+        tconfig.save_config()
+    else:
+        print(f"Loaded config {tconfig.get_config_path()}")
+
+    tconfig.set_trade_symbols(symbols)
+
+    if args.strategy and tconfig.strategy() != args.strategy:
+        tconfig.set_strategy(args.strategy)
+
+    #print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
+
+    tconfig.set_log_level(LogLevel.NONE.value)
+
+    granularity = tconfig.granularity()
+
+    market = Market(exchange=exchange, db_path=tconfig.market_db_path())
+    account = AccountSimulate(exchange=exchange, market=market)
+    account.load_symbol_info()
+    account.load_asset_info()
+
     account.update_asset_balance("USDT", available=initial_usdt, hold=0.0)
     tconfig.set_global_current_balance_quote(balance=initial_usdt)
 
@@ -58,7 +81,7 @@ def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, s
     exec_pipe_threaded = False
     ep = ExecutePipeline(execute=ex, max_orders=100, threaded=exec_pipe_threaded)
 
-    orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
+    orders = Orders(config=tconfig, db_path=f"{tconfig.orders_db_path()}{count}", reset=True)
 
     print(f"strategy_weights={strategy_weights}")
     mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity, strategy_weights=strategy_weights)
@@ -167,30 +190,6 @@ def main(args):
     # Filter the DataFrame by the Timestamp column
     df = df[(df['Timestamp'] >= start_ts) & (df['Timestamp'] <= end_ts)]
 
-
-    tconfig = TraderConfig(path=f'config/{name}_trader_simulate_csv_config.json')
-    if not tconfig.load_config():
-        print(f"Failed to load config {tconfig.get_config_path()}")
-        tconfig.save_config()
-    else:
-        print(f"Loaded config {tconfig.get_config_path()}")
-
-    tconfig.set_trade_symbols(symbols)
-
-    if args.strategy and tconfig.strategy() != args.strategy:
-        tconfig.set_strategy(args.strategy)
-
-    print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
-
-    tconfig.set_log_level(LogLevel.NONE.value)
-
-    granularity = tconfig.granularity()
-
-    market = Market(exchange=exchange, db_path=tconfig.market_db_path())
-    account = AccountSimulate(exchange=exchange, market=market)
-    account.load_symbol_info()
-    account.load_asset_info()
-
     # generate weights for strategies
     strategy_weights = {
                 'macd': 0,
@@ -261,7 +260,7 @@ def main(args):
 
         # Simulate trading with these weights
         mtrader, first_prices, last_prices = run_trader(
-            tconfig, account, exchange, symbols, df, granularity, initial_usdt, strategy_weights
+            exchange, symbols, df, initial_usdt, strategy_weights, count, name
         )
 
         total_positive_profit = sum(
