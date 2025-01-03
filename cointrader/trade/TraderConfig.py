@@ -37,6 +37,7 @@ DEFAULT_TRADE_CONFIG = {
     'start_position_type': 'STOP_LOSS_LIMIT', # Type of order to open a position (MARKET, LIMIT, STOP_LOSS_LIMIT)
     'end_position_type': 'STOP_LOSS_LIMIT',   # Type of order to open a position (MARKET, LIMIT, STOP_LOSS_LIMIT)
     'sell_all_on_stop': False,                # sell all open positions when the bot stops
+    'position_open_buy_complete': True,       # Only allow opening a new position when all existing buy orders (limit) are complete for open positions
 
     # temporary global configuration options used across all traders
     'tmp_global_disable_new_positions': False,      # global flag to enable/disable opening new positions
@@ -286,6 +287,12 @@ class TraderConfig(object):
     
     def set_sell_all_on_stop(self, sell_all_on_stop: bool):
         self.set('sell_all_on_stop', sell_all_on_stop)
+
+    def position_open_buy_complete(self) -> bool:
+        return self.get('position_open_buy_complete')
+    
+    def set_position_open_buy_complete(self, position_open_buy_complete: bool):
+        self.set('position_open_buy_complete', position_open_buy_complete)
 
 # temporary global configuration options used across all traders
     def global_disable_new_positions(self) -> bool:

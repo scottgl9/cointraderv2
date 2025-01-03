@@ -270,8 +270,17 @@ class Trader(object):
             print(f"{self._symbol} global_disable_positions: {disable_new_positions}")
         self._global_prev_disable_new_positions = disable_new_positions
 
+        # check if new positions are locally disabled
+        if self._local_disable_new_positions:
+            disable_new_positions = True
+
+        # if we configured to only allow opening new positions after buy orders have completed on all open positions,
+        # then disable new positions until all buy orders have completed
+        if self._config.position_open_buy_complete() and not self.positions_buy_orders_completed():
+            disable_new_positions = True
+
         # Open a position on a buy signal
-        if not self._disabled and not self._local_disable_new_positions and not disable_new_positions and buy_signal and len(self._positions) < self._max_positions_per_symbol:
+        if not self._disabled and not disable_new_positions and buy_signal and len(self._positions) < self._max_positions_per_symbol:
             if not self._size_strategy.ready():
                 print(f"{self._symbol} Size strategy not ready")
                 return
@@ -376,6 +385,16 @@ class Trader(object):
                         #    print(f"{self._symbol} {base_name} Insufficient balance {balance} to update sell position at price {current_price}")
                         #else:
                         position.update_sell_position(current_price=current_price, current_ts=current_ts)
+
+
+    def positions_buy_orders_completed(self):
+        """
+        Check if all buy orders have been completed for all open positions
+        """
+        for position in self._positions:
+            if not position.buy_order_completed():
+                return False
+        return True
 
 
     def update_trailing_stop_loss_position(self, position: TraderPosition, current_price: float, current_ts: int):

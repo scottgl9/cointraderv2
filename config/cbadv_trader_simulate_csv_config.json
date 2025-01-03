@@ -37,5 +37,6 @@
     "disable_after_loss_seconds": 86400,
     "start_position_type": "STOP_LOSS_LIMIT",
     "end_position_type": "STOP_LOSS_LIMIT",
-    "sell_all_on_stop": false
+    "sell_all_on_stop": false,
+    "position_open_buy_complete": false
 }
