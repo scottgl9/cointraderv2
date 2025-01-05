@@ -247,7 +247,7 @@ def main(args):
                 'vo_change': 0,
             }
     # Define possible weights for each indicator
-    weight_values = [0, 0.5, 1.0]
+    weight_values = [0, 0.5]
     indicators = [
         'macd', 'sama', 'zlema', 'rsi', 'stochastic', 'ema', 'sma', 'supertrend', 
         'adx', 'squeeze', 'roc', 'psar', 'vwap', 'ppo', 'cmf', 'cci', 'ao', 
@@ -327,17 +327,21 @@ def main(args):
         if total_positive_profit > best_positive_profit:
             best_positive_profit = total_positive_profit
             best_positive_profit_weights = combination
-            print(f"Best positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
+            print(f"{count} Best positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
+            print(f"\t{count} negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
 
         if abs(total_negative_profit) < abs(best_negative_profit):
             best_negative_profit = total_negative_profit
             best_negative_profit_weights = combination
-            print(f"Best negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
+            print(f"{count} Best negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
+            print(f"\t{count} net profit: {best_net_profit:.2f}% with weights {best_net_profit_weights}")
 
         if net_profit > best_net_profit:
             best_net_profit = net_profit
             best_net_profit_weights = combination
-            print(f"Best net profit: {best_net_profit:.2f}% with weights {best_net_profit_weights}")
+            print(f"{count} Best net profit: {best_net_profit:.2f}% with weights {best_net_profit_weights}")
+            print(f"\t{count} positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
+            print(f"\t{count} negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
 
     print(f"Final Best positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
     print(f"Final Best negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")

@@ -58,7 +58,18 @@ def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, s
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=True)
 
-    mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity)
+    indicators = [
+        'macd', 'sama', 'zlema', 'rsi', 'stochastic', 'ema', 'sma', 'supertrend', 
+        'adx', 'squeeze', 'roc', 'psar', 'vwap', 'ppo', 'cmf', 'cci', 'ao', 
+        'uo', 'dpo', 'ichimoku', 'vo', 'kvo', 'eom', 'kst'
+    ]
+
+    #weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0, 0.5, 0.5, 1.0] # net profit: 54121.47% positive profit: 63561.37% negative profit: -9439.90%
+    weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0.5, 0.5] # net profit: 63928.43% positive profit: 69548.39% negative profit: -5619.96%
+
+    strategy_weights = dict(zip(indicators, weights))
+
+    mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity, strategy_weights=strategy_weights)
 
     # update quote balance before trying to open positions
     mtrader.market_update_quote_balance(quote_name=tconfig.quote_currency())
