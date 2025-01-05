@@ -12,7 +12,6 @@ from cointrader.signals.SMACross import SMACross
 from cointrader.signals.SupertrendSignal import SupertrendSignal
 from cointrader.signals.SqueezeMomentumSignal import SqueezeMomentumSignal
 from cointrader.signals.ADXSignal import ADXSignal
-from cointrader.signals.ROCSignal import ROCSignal
 from cointrader.signals.PSARSignal import PSARSignal
 from cointrader.signals.VWAPSignal import VWAPSignal
 from cointrader.signals.PPOSignal import PPOSignal
@@ -47,7 +46,6 @@ class SignalStrength2(Strategy):
                 'supertrend': 0.8,
                 'adx': 0,
                 'squeeze': 0,
-                'roc': 0,
                 'psar': 0,
                 'vwap': 0,
                 'ppo': 0,
@@ -66,7 +64,6 @@ class SignalStrength2(Strategy):
                 'rsi_change': 0,
                 'stoch_change': 0,
                 'adx_change': 0,
-                'roc_change': 0,
                 'vwap_change': 0,
                 'vo_change': 0,
             }
@@ -95,8 +92,6 @@ class SignalStrength2(Strategy):
             self.signals['adx'] = ADXSignal(symbol=self._symbol, period=14, threshold=20)
         if self._signal_weights['squeeze'] > 0:
             self.signals['squeeze'] = SqueezeMomentumSignal(symbol=self._symbol, length=20, multBB=2.0, multKC=1.5)
-        if self._signal_weights['roc'] > 0:
-            self.signals['roc'] = ROCSignal(symbol=self._symbol, period=14)
         if self._signal_weights['psar'] > 0:
             self.signals['psar'] = PSARSignal(symbol=self._symbol, af=0.02, max_af=0.2)
         if self._signal_weights['vwap'] > 0:   
@@ -247,21 +242,6 @@ class SignalStrength2(Strategy):
             elif self.signals['squeeze'].cross_down():
                 self.signal_states['squeeze'] = OrderSide.SELL
         
-        if self._signal_weights['roc'] > 0 and self.signals['roc'].ready():
-            if self.signals['roc'].cross_up():
-                self.signal_states['roc'] = OrderSide.BUY
-            elif self.signals['roc'].cross_down():
-                self.signal_states['roc'] = OrderSide.SELL
-            if self.signals['roc'].increasing():
-                if 'roc_change' in self._signal_weights.keys():
-                    self.signal_states['roc_change'] = OrderSide.BUY
-            elif self.signals['roc'].decreasing():
-                if 'roc_change' in self._signal_weights.keys():
-                    self.signal_states['roc_change'] = OrderSide.BUY
-            else:
-                if 'roc_change' in self._signal_weights.keys():
-                    self.signal_states['roc_change'] = OrderSide.NONE
-
         if self._signal_weights['psar'] > 0 and self.signals['psar'].ready():
             if self.signals['psar'].cross_up():
                 self.signal_states['psar'] = OrderSide.BUY

@@ -60,13 +60,20 @@ def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, s
 
     indicators = [
         'macd', 'sama', 'zlema', 'rsi', 'stochastic', 'ema', 'sma', 'supertrend', 
-        'adx', 'squeeze', 'roc', 'psar', 'vwap', 'ppo', 'cmf', 'cci', 'ao', 
+        'adx', 'squeeze', 'psar', 'vwap', 'ppo', 'cmf', 'cci', 'ao', 
         'uo', 'dpo', 'ichimoku', 'vo', 'kvo', 'eom', 'kst'
     ]
 
-    #weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0, 0.5, 0.5, 1.0] # net profit: 54121.47% positive profit: 63561.37% negative profit: -9439.90%
-    weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0.5, 0.5] # net profit: 63928.43% positive profit: 69548.39% negative profit: -5619.96%
+    #weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0, 0.5, 0.5, 1.0] # net profit: 54121.47% positive profit: 63561.37% negative profit: -9439.90%
+    
+    # SignalStrength2 weights:
+    # net profit: 49769.38% positive profit: 55522.45% negative profit: -5753.07%
+    # supertrend=0.8, kst=1.0
 
+    # net profit: 63928.43% positive profit: 69548.39% negative profit: -5619.96%
+    # ichimoku=0.5, vo=0.5, eom=0.5, kst=0.5
+    weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0.5, 0.5]
+    
     strategy_weights = dict(zip(indicators, weights))
 
     mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity, strategy_weights=strategy_weights)

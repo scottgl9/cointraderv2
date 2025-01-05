@@ -57,8 +57,9 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
 
     tconfig.set_trade_symbols(symbols)
 
-    if args.strategy and tconfig.strategy() != args.strategy:
-        tconfig.set_strategy(args.strategy)
+    #if args.strategy and tconfig.strategy() != args.strategy:
+    #    tconfig.set_strategy(args.strategy)
+    tconfig.set_strategy("SignalStrength2" )
 
     #print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
 
@@ -223,7 +224,6 @@ def main(args):
                 'supertrend': 0.8,
                 'adx': 0,
                 'squeeze': 0,
-                'roc': 0,
                 'psar': 0,
                 'vwap': 0,
                 'ppo': 0,
@@ -237,20 +237,12 @@ def main(args):
                 'kvo': 0,
                 'eom': 0,
                 'kst': 1.0,
-                # minor signal weights
-                'macd_change': 0,
-                'rsi_change': 0,
-                'stoch_change': 0,
-                'adx_change': 0,
-                'roc_change': 0,
-                'vwap_change': 0,
-                'vo_change': 0,
             }
     # Define possible weights for each indicator
     weight_values = [0, 0.5]
     indicators = [
         'macd', 'sama', 'zlema', 'rsi', 'stochastic', 'ema', 'sma', 'supertrend', 
-        'adx', 'squeeze', 'roc', 'psar', 'vwap', 'ppo', 'cmf', 'cci', 'ao', 
+        'adx', 'squeeze', 'psar', 'vwap', 'ppo', 'cmf', 'cci', 'ao', 
         'uo', 'dpo', 'ichimoku', 'vo', 'kvo', 'eom', 'kst'
     ]
 
