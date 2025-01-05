@@ -12,6 +12,7 @@ import sys
 import time
 import argparse
 import itertools
+import gc
 
 try:
     import cointrader
@@ -115,17 +116,16 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
 
     # iterate through all rows in the DataFrame
     for index, row in df.iterrows():
-        if index >= 100000:
-            if not found:
-                position_count = 0
-                for symbol in symbols:
-                    position_count += mtrader.total_position_count(symbol)
-                if position_count == 0:
-                    #print(f"Exiting at index {index} with no positions")
-                    break
-                #print(f"{count} strategy_weights={strategy_weights}")
-                found = True
-
+        # if index >= 100000:
+        #     if not found:
+        #         position_count = 0
+        #         for symbol in symbols:
+        #             position_count += mtrader.total_position_count(symbol)
+        #         if position_count == 0:
+        #             #print(f"Exiting at index {index} with no positions")
+        #             break
+        #         #print(f"{count} strategy_weights={strategy_weights}")
+        #         found = True
         symbol = row['Symbol']
         if symbol in symbols:
             kline_data = {
@@ -168,11 +168,11 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
     if tconfig.log_level() >= LogLevel.INFO.value:
         print(orders.get_active_orders(symbol=None))
 
-    position_count = 0
-    for symbol in symbols:
-        position_count += mtrader.total_position_count(symbol)
-    if position_count != 0:
-        print(f"{count} strategy_weights={strategy_weights}")
+    #position_count = 0
+    #for symbol in symbols:
+    #    position_count += mtrader.total_position_count(symbol)
+    #if position_count != 0:
+    #    print(f"{count} strategy_weights={strategy_weights}")
 
     return mtrader, first_prices, last_prices
 
@@ -273,7 +273,7 @@ def main(args):
         strategy_weights = dict(zip(indicators, combination))
         
         # Ensure at least three weights are non-zero
-        if sum(weight > 0 for weight in strategy_weights.values()) < 3:
+        if sum(weight > 0 for weight in strategy_weights.values()) < 4:
             return None
 
         # Simulate trading with these weights
@@ -295,9 +295,9 @@ def main(args):
         if total_positive_profit == 0 or total_negative_profit == 0 or net_profit <= 0:
             return None
 
-        print(f"{count} Positive profit: {total_positive_profit:.2f}%")
-        print(f"{count} Negative profit: {total_negative_profit:.2f}%")
-        print(f"{count} Net profit: {net_profit:.2f}%")
+        #print(f"{count} Positive profit: {total_positive_profit:.2f}%")
+        #print(f"{count} Negative profit: {total_negative_profit:.2f}%")
+        #print(f"{count} Net profit: {net_profit:.2f}%")
 
         return {
             'combination': combination,
@@ -309,33 +309,35 @@ def main(args):
     lock = RLock()
     futures = []
 
-    with ThreadPoolExecutor(max_workers=6) as executor:
-        futures = []
-        for count, combination in enumerate(all_combinations):
-            result = simulate_combination(combination, count)
-            if result:
-                with lock:
-                    combination = result['combination']
-                    total_positive_profit = result['total_positive_profit']
-                    total_negative_profit = result['total_negative_profit']
-                    net_profit = result['net_profit']
+    #with ThreadPoolExecutor(max_workers=6) as executor:
+    #    futures = [executor.submit(simulate_combination, combination, count) for count, combination in enumerate(all_combinations)]
+        #for future in futures:
+        #    result = future.result()
+        #    if result:
+        #        with lock:
+    for count, combination in enumerate(all_combinations):
+        result = simulate_combination(combination, count)
+        if result is None:
+            continue
+        combination = result['combination']
+        total_positive_profit = result['total_positive_profit']
+        total_negative_profit = result['total_negative_profit']
+        net_profit = result['net_profit']
 
-                if total_positive_profit > best_positive_profit:
-                    best_positive_profit = total_positive_profit
-                    best_positive_profit_weights = combination
-                    print(f"{count} Best positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
+        if total_positive_profit > best_positive_profit:
+            best_positive_profit = total_positive_profit
+            best_positive_profit_weights = combination
+            print(f"Best positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
 
-                if total_negative_profit < best_negative_profit:
-                    best_negative_profit = total_negative_profit
-                    best_negative_profit_weights = combination
-                    print(f"{count} Best negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
+        if abs(total_negative_profit) < abs(best_negative_profit):
+            best_negative_profit = total_negative_profit
+            best_negative_profit_weights = combination
+            print(f"Best negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
 
-
-                if net_profit > best_net_profit:
-                    best_net_profit = net_profit
-                    best_net_profit_weights = combination
-                    print(f"{count} Best net profit: {best_net_profit:.2f}% with weights {best_net_profit_weights}")
-            #print("Completed {count}")
+        if net_profit > best_net_profit:
+            best_net_profit = net_profit
+            best_net_profit_weights = combination
+            print(f"Best net profit: {best_net_profit:.2f}% with weights {best_net_profit_weights}")
 
     print(f"Final Best positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
     print(f"Final Best negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
