@@ -328,20 +328,20 @@ def main(args):
             best_positive_profit = total_positive_profit
             best_positive_profit_weights = combination
             print(f"{count} Best positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
-            print(f"\t{count} negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
+            print(f"\t{count} negative profit: {total_negative_profit:.2f}%")
 
         if abs(total_negative_profit) < abs(best_negative_profit):
             best_negative_profit = total_negative_profit
             best_negative_profit_weights = combination
             print(f"{count} Best negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
-            print(f"\t{count} net profit: {best_net_profit:.2f}% with weights {best_net_profit_weights}")
+            print(f"\t{count} net profit: {net_profit:.2f}%")
 
         if net_profit > best_net_profit:
             best_net_profit = net_profit
             best_net_profit_weights = combination
             print(f"{count} Best net profit: {best_net_profit:.2f}% with weights {best_net_profit_weights}")
-            print(f"\t{count} positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
-            print(f"\t{count} negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
+            print(f"\t{count} positive profit: {total_positive_profit:.2f}%")
+            print(f"\t{count} negative profit: {total_negative_profit:.2f}%")
 
     print(f"Final Best positive profit: {best_positive_profit:.2f}% with weights {best_positive_profit_weights}")
     print(f"Final Best negative profit: {best_negative_profit:.2f}% with weights {best_negative_profit_weights}")
