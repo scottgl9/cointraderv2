@@ -44,6 +44,7 @@ class Trader(object):
         self._disabled = False
         self._cur_id = 0
         self._total_position_count = 0
+        self._total_closed_position_count = 0
         self._positions = []
         self._buys = []
         self._sells = []
@@ -490,6 +491,7 @@ class Trader(object):
                 self._disabled = True
 
         self._net_profit_percent += profit_percent
+        self._total_closed_position_count += 1
 
         if self._config.simulate():
             self._buys.append(position.buy_info())
@@ -517,6 +519,21 @@ class Trader(object):
         """
         return self._negative_profit_percent
 
+    def positive_average_profit_percent(self) -> float:
+        """
+        Get the average positive profit percent for the symbol
+        """
+        if self._total_closed_position_count == 0:
+            return 0
+        return self._positive_profit_percent / self._total_closed_position_count
+    
+    def negative_average_profit_percent(self) -> float:
+        """
+        Get the average negative profit percent for the symbol
+        """
+        if self._total_closed_position_count == 0:
+            return 0
+        return self._negative_profit_percent / self._total_closed_position_count
 
     def buys(self) -> list:
         """

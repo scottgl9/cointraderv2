@@ -233,6 +233,7 @@ def main(args):
             profit = mtrader.net_profit_percent(symbol)
             print(f"{symbol} net profit: {profit:.2f}%")
 
+    total_average_profit = 0
     total_positive_profit = 0
 
     if tconfig.log_level() >= LogLevel.INFO.value:
@@ -240,8 +241,9 @@ def main(args):
     for symbol in symbols:
         profit = mtrader.positive_profit_percent(symbol)
         total_positive_profit += profit
+        total_average_profit += mtrader.positive_average_profit_percent(symbol)
         if tconfig.log_level() >= LogLevel.INFO.value:
-            print(f"{symbol} positive profit: {profit:.2f}%")
+            print(f"{symbol} positive profit: {profit:.2f}% average profit: {mtrader.positive_average_profit_percent(symbol):.2f}")
 
     total_negative_profit = 0
 
@@ -250,12 +252,16 @@ def main(args):
     for symbol in symbols:
         profit = mtrader.negative_profit_percent(symbol)
         total_negative_profit += profit
+        total_average_profit += mtrader.negative_average_profit_percent(symbol)
         if tconfig.log_level() >= LogLevel.INFO.value:
-            print(f"{symbol} negative profit: {profit:.2f}%")
+            print(f"{symbol} negative profit: {profit:.2f}% average profit: {mtrader.negative_average_profit_percent(symbol):.2f}")
+
+    total_average_profit /= (len(symbols) * 2)
 
     print(f"\nTotal positive profit: {total_positive_profit:.2f}%")
     print(f"Total negative profit: {total_negative_profit:.2f}%")
     print(f"Total net profit: {total_positive_profit + total_negative_profit:.2f}%")
+    print(f"Total average profit: {total_average_profit:.2f}%")
 
     if tconfig.log_level() >= LogLevel.INFO.value:
         buys = {}
