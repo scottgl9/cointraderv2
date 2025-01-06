@@ -151,7 +151,8 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
             kline_emitter.update(kline)
             if kline_emitter.ready():
                 kline_daily = kline_emitter.emit()
-                if kline:
+                kline_emitter.reset()
+                if kline_daily:
                     kline_daily.symbol = symbol
                     kline_daily.granularity = kline_emitter.granularity()
                     #mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=kline_emitter.granularity())

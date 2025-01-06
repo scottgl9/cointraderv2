@@ -112,7 +112,9 @@ def main(args):
             kline_emitters[symbol].update(kline)
             if kline_emitters[symbol].ready():
                 kline_15m = kline_emitters[symbol].emit()
-                mtrader.market_update_kline_other_timeframe(symbol, kline_15m, 900)
+                kline_emitters[symbol].reset()
+                if kline_15m:
+                    mtrader.market_update_kline_other_timeframe(symbol, kline_15m, 900)
 
             mtrader.market_update_kline(symbol=symbol, kline=kline, granularity=args.granularity)
 

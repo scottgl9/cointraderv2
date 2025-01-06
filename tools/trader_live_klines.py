@@ -215,7 +215,9 @@ def main(name):
             kline_emitters[symbol].update(kline)
             if kline_emitters[symbol].ready():
                 kline_15m = kline_emitters[symbol].emit()
-                mtrader.market_update_kline_other_timeframe(symbol, kline_15m, 900, preload=True)
+                kline_emitters[symbol].reset()
+                if kline_15m:
+                    mtrader.market_update_kline_other_timeframe(symbol, kline_15m, 900, preload=True)
         time.sleep(1)
 
     exec_pipe_thread = PipelineExecutionThread(exec_pipe=ep)

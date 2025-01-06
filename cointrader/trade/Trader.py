@@ -52,7 +52,7 @@ class Trader(object):
         # configuration for strategies
         self._strategy_weights = strategy_weights
         self._strategies_other_config = config.strategies_other_timeframes()
-        self._strategies_other_timeframes: dict[int, Strategy] = {}
+        self._strategies_other_timeframes: dict[str, Strategy] = {}
         self._strategy_name = config.strategy()
 
         # load the strategies for each granularity
@@ -217,14 +217,14 @@ class Trader(object):
         # re-enable opening new positions on a buy signal from another timeframe
         if strategy.buy_signal():
             self._local_disable_new_positions = False
-            if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
+            if not preload:# and self._prev_local_disable_new_positions != self._local_disable_new_positions:
                 if self._config.log_level() >= LogLevel.INFO.value:
                     print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
             self._prev_local_disable_new_positions = self._local_disable_new_positions
         
         if strategy.sell_signal():
             self._local_disable_new_positions = True
-            if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
+            if not preload:# and self._prev_local_disable_new_positions != self._local_disable_new_positions:
                 if self._config.log_level() >= LogLevel.INFO.value:
                     print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
             self._prev_local_disable_new_positions = self._local_disable_new_positions

@@ -9,9 +9,10 @@ class KlineEmitter(object):
         if src_granularity > dst_granularity:
             raise ValueError("src granularity must be less than dst granularity")
         self._ratio = dst_granularity // src_granularity
+        print(f"src_gran: {src_granularity} dst_gran: {dst_granularity} ratio: {self._ratio}")
         self._klines = deque(maxlen=self._ratio)
         self._dst_kline = None
-    
+
     def reset(self):
         self._klines.clear()
         self._dst_kline = None
@@ -29,8 +30,6 @@ class KlineEmitter(object):
         """
         Update the kline emitter with a new kline
         """
-        if self.ready():
-            return
         self._klines.append(kline)
         # if we have enough klines to emit, do so
         if len(self._klines) == self._ratio:
@@ -39,18 +38,18 @@ class KlineEmitter(object):
             if kline.symbol:
                 self._dst_kline.symbol = kline.symbol
 
+            # set open and close prices
+            self._dst_kline.open = self._klines[0].open
+            self._dst_kline.close = self._klines[-1].close
+            self._dst_kline.ts = self._klines[-1].ts
+            self._dst_kline.volume = 0
+            self._dst_kline.high = self._klines[0].high
+            self._dst_kline.low = self._klines[0].low
+
             for i in range(self._ratio):
                 k = self._klines[i]
-                # set open and close prices
-                if i == 0:
-                    self._dst_kline.open = k.open
-                elif i == self._ratio - 1:
-                    self._dst_kline.close = k.close
-                    self._dst_kline.ts = k.ts
-
                 # sum up the volume from all klines
                 self._dst_kline.volume += k.volume
-
                 # set the high and low prices from all klines
                 if k.high > self._dst_kline.high:
                     self._dst_kline.high = k.high
@@ -64,6 +63,5 @@ class KlineEmitter(object):
         if not self.ready():
             return None
         kline = self._dst_kline
-        self.reset()
 
         return kline
