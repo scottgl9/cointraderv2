@@ -14,6 +14,7 @@ class MultiTrader(object):
         self._config = config
         self._exec_pipe = exec_pipe
         self._granularity = granularity
+        self._global_disable_ts = 0
         self._max_positions = self._config.max_positions()
         self._position_count_per_symbol = {}
 
@@ -88,12 +89,17 @@ class MultiTrader(object):
         for count in self._position_count_per_symbol.values():
             total_position_count += count
 
+        # check if we need to re-enable new positions
+        if self._global_disable_ts > 0 and current_ts >= self._global_disable_ts:
+            self._config.set_global_disable_new_positions(False)
+            self._global_disable_ts = 0
+
         # enforce max position count
         if total_position_count >= self._max_positions:
             #print(f"Max positions reached: {total_position_count} >= {self._max_positions}")
             self._config.set_global_disable_new_positions(True)
             #trader.disable_new_positions(True)
-        else:
+        elif self._global_disable_ts == 0:
             self._config.set_global_disable_new_positions(False)
             #trader.disable_new_positions(False)
 
@@ -102,10 +108,13 @@ class MultiTrader(object):
 
         last_closed_profit = self._config.global_last_closed_position_profit()
         # for the last profit on close, check if we exceeded the maximum loss
-        if last_closed_profit <= self._config.global_disable_after_loss_percent():
+        if self._config.global_disable_after_loss_percent() < 0 and last_closed_profit <= self._config.global_disable_after_loss_percent() and self._global_disable_ts == 0:
             if self._config.log_level() >= LogLevel.INFO.value:
                 print(f"Disable after loss of {last_closed_profit}")
-            pass
+            self._config.set_global_disable_new_positions(True)
+            disable_after_loss_secs = self._config.global_disable_after_loss_seconds()
+            if disable_after_loss_secs > 0:
+                self._global_disable_ts = current_ts + disable_after_loss_secs
 
     def market_update_kline(self, symbol: str, kline: Kline, granularity: int):
         """

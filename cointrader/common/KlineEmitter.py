@@ -9,7 +9,7 @@ class KlineEmitter(object):
         if src_granularity > dst_granularity:
             raise ValueError("src granularity must be less than dst granularity")
         self._ratio = dst_granularity // src_granularity
-        print(f"src_gran: {src_granularity} dst_gran: {dst_granularity} ratio: {self._ratio}")
+        #print(f"src_gran: {src_granularity} dst_gran: {dst_granularity} ratio: {self._ratio}")
         self._klines = deque(maxlen=self._ratio)
         self._dst_kline = None
 
