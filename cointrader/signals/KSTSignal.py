@@ -57,11 +57,11 @@ class KSTSignal(Signal):
         
         # Check for signal cross
         if self._values[-1]['kst'] > self._values[-1]['signal'] and self._values[-2]['kst'] <= self._values[-1]['signal']:
-            self._cross_down = False
             self._cross_up = True
+            self._cross_down = False
         elif self._values[-1]['kst'] <= self._values[-1]['signal'] and self._values[-2]['kst'] > self._values[-1]['signal']:
-            self._cross_up = True
-            self._cross_down = False
+            self._cross_up = False
+            self._cross_down = True
 
     def cross_up(self):
         return self._cross_up
