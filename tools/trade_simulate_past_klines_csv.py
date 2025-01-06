@@ -131,7 +131,7 @@ def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, s
                     kline_daily.symbol = symbol
                     kline_daily.granularity = kline_emitter.granularity()
                     #mtrader.market_update(symbol=symbol, kline=kline, current_price=kline.close, current_ts=kline.ts, granularity=kline_emitter.granularity())
-                    mtrader.market_update_kline_other_timeframe(symbol=symbol, kline=kline_daily, granularity=kline_emitter.granularity())
+                    mtrader.market_update_kline_other_timeframe(symbol=symbol, kline=kline_daily, granularity=kline_emitter.granularity(), preload=False)
 
             mtrader.market_update_kline(symbol=symbol, kline=kline, granularity=granularity)
 
@@ -235,26 +235,32 @@ def main(args):
 
     total_average_profit = 0
     total_positive_profit = 0
+    total_positive_count = 0
 
     if tconfig.log_level() >= LogLevel.INFO.value:
         print("\npositive profit on closed positions:")
     for symbol in symbols:
         profit = mtrader.positive_profit_percent(symbol)
         total_positive_profit += profit
+        positive_count = mtrader.positive_profit_closed_position_count(symbol)
+        total_positive_count += positive_count
         total_average_profit += mtrader.positive_average_profit_percent(symbol)
         if tconfig.log_level() >= LogLevel.INFO.value:
-            print(f"{symbol} positive profit: {profit:.2f}% average profit: {mtrader.positive_average_profit_percent(symbol):.2f}")
+            print(f"{symbol} positive profit: {profit:.2f}% average profit: {mtrader.positive_average_profit_percent(symbol):.2f} count: {positive_count}")
 
     total_negative_profit = 0
+    total_negative_count = 0
 
     if tconfig.log_level() >= LogLevel.INFO.value:
         print("\nnegative profit on closed positions:")
     for symbol in symbols:
         profit = mtrader.negative_profit_percent(symbol)
         total_negative_profit += profit
+        negative_count = mtrader.negative_profit_closed_position_count(symbol)
+        total_negative_count += negative_count
         total_average_profit += mtrader.negative_average_profit_percent(symbol)
         if tconfig.log_level() >= LogLevel.INFO.value:
-            print(f"{symbol} negative profit: {profit:.2f}% average profit: {mtrader.negative_average_profit_percent(symbol):.2f}")
+            print(f"{symbol} negative profit: {profit:.2f}% average profit: {mtrader.negative_average_profit_percent(symbol):.2f} count: {negative_count}")
 
     total_average_profit /= (len(symbols) * 2)
 
@@ -262,6 +268,8 @@ def main(args):
     print(f"Total negative profit: {total_negative_profit:.2f}%")
     print(f"Total net profit: {total_positive_profit + total_negative_profit:.2f}%")
     print(f"Total average profit: {total_average_profit:.2f}%")
+    print(f"Total closed positive position count: {total_positive_count}")
+    print(f"Total closed negative position count: {total_negative_count}")
 
     if tconfig.log_level() >= LogLevel.INFO.value:
         buys = {}

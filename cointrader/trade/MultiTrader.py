@@ -132,6 +132,16 @@ class MultiTrader(object):
         if symbol not in self._traders.keys():
             return 0.0
         return self._traders[symbol].negative_profit_percent()
+    
+    def positive_profit_closed_position_count(self, symbol: str):
+        if symbol not in self._traders.keys():
+            return 0
+        return self._traders[symbol].positive_profit_closed_position_count()
+    
+    def negative_profit_closed_position_count(self, symbol: str):
+        if symbol not in self._traders.keys():
+            return 0
+        return self._traders[symbol].positive_profit_closed_position_count()
 
     def positive_average_profit_percent(self, symbol: str):
         if symbol not in self._traders.keys():

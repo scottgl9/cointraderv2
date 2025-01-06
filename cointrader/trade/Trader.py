@@ -44,7 +44,8 @@ class Trader(object):
         self._disabled = False
         self._cur_id = 0
         self._total_position_count = 0
-        self._total_closed_position_count = 0
+        self._total_closed_positive_position_count = 0
+        self._total_closed_negative_position_count = 0
         self._positions = []
         self._buys = []
         self._sells = []
@@ -205,7 +206,9 @@ class Trader(object):
         Update the strategy for a different timeframe
         """
         if str(granularity) not in self._strategies_other_timeframes.keys():
-            raise ValueError(f"Granularity {granularity} not found in strategies: {self._strategies_other_timeframes.keys()}")
+            if not self._config.simulate():
+                print(f"Granularity {granularity} not found in strategies: {self._strategies_other_timeframes.keys()}")
+            return
 
         strategy = self._strategies_other_timeframes[str(granularity)]
         strategy.update(kline)
@@ -217,14 +220,14 @@ class Trader(object):
             if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
                 if self._config.log_level() >= LogLevel.INFO.value:
                     print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
-        elif strategy.sell_signal():
+            self._prev_local_disable_new_positions = self._local_disable_new_positions
+        
+        if strategy.sell_signal():
             self._local_disable_new_positions = True
             if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
                 if self._config.log_level() >= LogLevel.INFO.value:
                     print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
-
-        self._prev_local_disable_new_positions = self._local_disable_new_positions
-
+            self._prev_local_disable_new_positions = self._local_disable_new_positions
 
     def market_update_kline(self, kline: Kline, granularity: int):
         """
@@ -473,6 +476,7 @@ class Trader(object):
         self._config.set_global_last_closed_position_profit(profit=profit_percent)
         if profit_percent >= 0:
             self._positive_profit_percent += profit_percent
+            self._total_closed_positive_position_count += 1
             if self._config.log_level() >= LogLevel.INFO.value:
                 msg = f"{Fore.GREEN}{self._symbol} Profit: {position.profit_percent()}"
                 msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
@@ -480,6 +484,7 @@ class Trader(object):
                 print(msg)
         else:
             self._negative_profit_percent += profit_percent
+            self._total_closed_negative_position_count += 1
             if self._config.log_level() >= LogLevel.INFO.value:
                 msg = f"{Fore.RED}{self._symbol} Profit: {position.profit_percent()}"
                 msg += f" Buy: {buy_price} Sell: {sell_price} Buy Date: {buy_date} Sell Date: {sell_date}"
@@ -491,7 +496,6 @@ class Trader(object):
                 self._disabled = True
 
         self._net_profit_percent += profit_percent
-        self._total_closed_position_count += 1
 
         if self._config.simulate():
             self._buys.append(position.buy_info())
@@ -519,21 +523,36 @@ class Trader(object):
         """
         return self._negative_profit_percent
 
+
+    def positive_profit_closed_position_count(self) -> int:
+        """
+        Get the total number of closed positive positions
+        """
+        return self._total_closed_positive_position_count
+
+
+    def negative_profit_closed_position_count(self) -> int:
+        """
+        Get the total number of closed negative positions
+        """
+        return self._total_closed_negative_position_count
+
+
     def positive_average_profit_percent(self) -> float:
         """
         Get the average positive profit percent for the symbol
         """
-        if self._total_closed_position_count == 0:
+        if self._total_closed_positive_position_count == 0:
             return 0
-        return self._positive_profit_percent / self._total_closed_position_count
-    
+        return self._positive_profit_percent / self._total_closed_positive_position_count
+
     def negative_average_profit_percent(self) -> float:
         """
         Get the average negative profit percent for the symbol
         """
-        if self._total_closed_position_count == 0:
+        if self._total_closed_positive_position_count == 0:
             return 0
-        return self._negative_profit_percent / self._total_closed_position_count
+        return self._negative_profit_percent / self._total_closed_negative_position_count
 
     def buys(self) -> list:
         """

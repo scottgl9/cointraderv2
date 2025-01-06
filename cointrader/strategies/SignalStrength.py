@@ -57,6 +57,13 @@ class SignalStrength(Strategy):
             'kst': 1.0,
         }
 
+        # self._signal_weights = {
+        #     'ichimoku': 0.5,
+        #     'vo': 0.5,
+        #     'eom': 0.5,
+        #     'kst': 0.5
+        # }
+
         # set to 0 if not present
         if 'macd' not in self._signal_weights:
             self._signal_weights['macd'] = 0
@@ -498,7 +505,7 @@ class SignalStrength(Strategy):
         # make sure we have enough signals to make a decision
         if buy_signal_weight + sell_signal_weight < self._total_weight / 2:
             return False
-        if buy_signal_weight >= sell_signal_weight:
+        if buy_signal_weight > sell_signal_weight:
             return True
         return False
 
@@ -509,7 +516,7 @@ class SignalStrength(Strategy):
         # make sure we have enough signals to make a decision
         if buy_signal_weight + sell_signal_weight < self._total_weight / 2:
             return False
-        if sell_signal_weight >= buy_signal_weight:
+        if sell_signal_weight > buy_signal_weight:
             return True
         return False
 
