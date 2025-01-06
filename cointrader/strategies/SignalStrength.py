@@ -2,30 +2,7 @@
 from cointrader.common.Strategy import Strategy
 from cointrader.common.Signal import Signal
 from cointrader.order.enum.OrderSide import OrderSide
-from cointrader.signals.MACDSignal import MACDSignal
-from cointrader.signals.RSISignal import RSISignal
-from cointrader.signals.StochasticSignal import StochasticSignal
-from cointrader.signals.SAMASignal import SAMASignal
-from cointrader.signals.ZLEMACross import ZLEMACross
-from cointrader.signals.EMACross import EMACross
-from cointrader.signals.SMACross import SMACross
-from cointrader.signals.SupertrendSignal import SupertrendSignal
-from cointrader.signals.SqueezeMomentumSignal import SqueezeMomentumSignal
-from cointrader.signals.ADXSignal import ADXSignal
-from cointrader.signals.ROCSignal import ROCSignal
-from cointrader.signals.PSARSignal import PSARSignal
-from cointrader.signals.VWAPSignal import VWAPSignal
-from cointrader.signals.PPOSignal import PPOSignal
-from cointrader.signals.IchimokuSignal import IchimokuSignal
-from cointrader.signals.CMFSignal import CMFSignal
-from cointrader.signals.DPOSignal import DPOSignal
-from cointrader.signals.UltimateOscillatorSignal import UltimateOscillatorSignal
-from cointrader.signals.AwesomeOscillatorSignal import AwesomeOscillatorSignal
-from cointrader.signals.CCISignal import CCISignal
-from cointrader.signals.VOSignal import VOSignal
-from cointrader.signals.KVOSignal import KVOSignal
-from cointrader.signals.EOMSignal import EOMSignal
-from cointrader.signals.KSTSignal import KSTSignal
+
 
 class SignalStrength(Strategy):
     def __init__(self, symbol: str, name='signal_strength', granularity=0, weights=None):
@@ -63,10 +40,8 @@ class SignalStrength(Strategy):
                 'kst': 1.8,
                 # minor signal weights
                 'macd_change': 0.5,
-                #'zlema_change': 0.2,
                 'rsi_change': 0.5,
                 'stoch_change': 0.5,
-                #'ema_change': 0.3,
                 'adx_change': 0.3,
                 'roc_change': 0.5,
                 'vwap_change': 0.5,
@@ -75,57 +50,157 @@ class SignalStrength(Strategy):
                 #'uo_change': 0.3
                 #'kst_change': 0.2
             }
+        
+
+        self._signal_weights = {
+            'supertrend': 0.8,
+            'kst': 1.0,
+        }
+
+        # set to 0 if not present
+        if 'macd' not in self._signal_weights:
+            self._signal_weights['macd'] = 0
+        if 'sama' not in self._signal_weights:
+            self._signal_weights['sama'] = 0
+        if 'zlema' not in self._signal_weights:
+            self._signal_weights['zlema'] = 0
+        if 'rsi' not in self._signal_weights:
+            self._signal_weights['rsi'] = 0
+        if 'stochastic' not in self._signal_weights:
+            self._signal_weights['stochastic'] = 0
+        if 'ema' not in self._signal_weights:
+            self._signal_weights['ema'] = 0
+        if 'sma' not in self._signal_weights:
+            self._signal_weights['sma'] = 0
+        if 'supertrend' not in self._signal_weights:
+            self._signal_weights['supertrend'] = 0
+        if 'adx' not in self._signal_weights:
+            self._signal_weights['adx'] = 0
+        if 'squeeze' not in self._signal_weights:
+            self._signal_weights['squeeze'] = 0
+        if 'roc' not in self._signal_weights:
+            self._signal_weights['roc'] = 0
+        if 'psar' not in self._signal_weights:
+            self._signal_weights['psar'] = 0
+        if 'vwap' not in self._signal_weights:
+            self._signal_weights['vwap'] = 0
+        if 'ppo' not in self._signal_weights:
+            self._signal_weights['ppo'] = 0
+        if 'cmf' not in self._signal_weights:
+            self._signal_weights['cmf'] = 0
+        if 'cci' not in self._signal_weights:
+            self._signal_weights['cci'] = 0
+        if 'ao' not in self._signal_weights:
+            self._signal_weights['ao'] = 0
+        if 'uo' not in self._signal_weights:
+            self._signal_weights['uo'] = 0
+        if 'dpo' not in self._signal_weights:
+            self._signal_weights['dpo'] = 0
+        if 'ichimoku' not in self._signal_weights:
+            self._signal_weights['ichimoku'] = 0
+        if 'vo' not in self._signal_weights:
+            self._signal_weights['vo'] = 0
+        if 'kvo' not in self._signal_weights:
+            self._signal_weights['kvo'] = 0
+        if 'eom' not in self._signal_weights:
+            self._signal_weights['eom'] = 0
+        if 'kst' not in self._signal_weights:
+            self._signal_weights['kst'] = 0
+        if 'macd_change' not in self._signal_weights:
+            self._signal_weights['macd_change'] = 0
+        if 'rsi_change' not in self._signal_weights:
+            self._signal_weights['rsi_change'] = 0
+        if 'stoch_change' not in self._signal_weights:
+            self._signal_weights['stoch_change'] = 0
+        if 'adx_change' not in self._signal_weights:
+            self._signal_weights['adx_change'] = 0
+        if 'roc_change' not in self._signal_weights:
+            self._signal_weights['roc_change'] = 0
+        if 'vwap_change' not in self._signal_weights:
+            self._signal_weights['vwap_change'] = 0
+        if 'vo_change' not in self._signal_weights:
+            self._signal_weights['vo_change'] = 0
+        if 'kvo_change' not in self._signal_weights:
+            self._signal_weights['kvo_change'] = 0
+        if 'uo_change' not in self._signal_weights:
+            self._signal_weights['uo_change'] = 0
+        if 'kst_change' not in self._signal_weights:
+            self._signal_weights['kst_change'] = 0
 
         self._total_weight = sum(self._signal_weights.values())
 
         self.signals: dict[str, Signal] = {}
         if self._signal_weights['macd'] > 0:
+            from cointrader.signals.MACDSignal import MACDSignal
             self.signals['macd'] = MACDSignal(symbol=self._symbol, short_period=12, long_period=26, signal_period=9)
         if self._signal_weights['sama'] > 0:
+            from cointrader.signals.SAMASignal import SAMASignal
             self.signals['sama'] = SAMASignal(symbol=self._symbol)
         if self._signal_weights['zlema'] > 0:
+            from cointrader.signals.ZLEMACross import ZLEMACross
             self.signals['zlema'] = ZLEMACross(symbol=self._symbol, short_period=12, long_period=26)
         if self._signal_weights['rsi'] > 0:
+            from cointrader.signals.RSISignal import RSISignal
             self.signals['rsi'] = RSISignal(symbol=self._symbol, period=14, overbought=70, oversold=30)
         if self._signal_weights['stochastic'] > 0:
+            from cointrader.signals.StochasticSignal import StochasticSignal
             self.signals['stochastic'] = StochasticSignal(symbol=self._symbol, k_period=14, d_period=3, overbought=80, oversold=20)
         if self._signal_weights['ema'] > 0:
+            from cointrader.signals.EMACross import EMACross
             self.signals['ema'] = EMACross(symbol=self._symbol, short_period=12, long_period=26)
         if self._signal_weights['sma'] > 0:
+            from cointrader.signals.SMACross import SMACross
             self.signals['sma'] = SMACross(symbol=self._symbol, short_period=50, long_period=100)
         if self._signal_weights['supertrend'] > 0:
+            from cointrader.signals.SupertrendSignal import SupertrendSignal
             self.signals['supertrend'] = SupertrendSignal(symbol=self._symbol, period=14, multiplier=3)
         if self._signal_weights['adx'] > 0:
+            from cointrader.signals.ADXSignal import ADXSignal
             self.signals['adx'] = ADXSignal(symbol=self._symbol, period=14, threshold=20)
         if self._signal_weights['squeeze'] > 0:
+            from cointrader.signals.SqueezeMomentumSignal import SqueezeMomentumSignal
             self.signals['squeeze'] = SqueezeMomentumSignal(symbol=self._symbol, length=20, multBB=2.0, multKC=1.5)
         if self._signal_weights['roc'] > 0:
+            from cointrader.signals.ROCSignal import ROCSignal
             self.signals['roc'] = ROCSignal(symbol=self._symbol, period=14)
         if self._signal_weights['psar'] > 0:
+            from cointrader.signals.PSARSignal import PSARSignal
             self.signals['psar'] = PSARSignal(symbol=self._symbol, af=0.02, max_af=0.2)
-        if self._signal_weights['vwap'] > 0:   
+        if self._signal_weights['vwap'] > 0:
+            from cointrader.signals.VWAPSignal import VWAPSignal
             self.signals['vwap'] = VWAPSignal(symbol=self._symbol, period=14)
         if self._signal_weights['ppo'] > 0:
+            from cointrader.signals.PPOSignal import PPOSignal
             self.signals['ppo'] = PPOSignal(symbol=self._symbol, short_period=12, long_period=26, signal_period=9, overbought=100, oversold=-100)
         if self._signal_weights['cmf'] > 0:
+            from cointrader.signals.CMFSignal import CMFSignal
             self.signals['cmf'] = CMFSignal(symbol=self._symbol, period=20, signal_period=9, overbought=0.05, oversold=-0.05)
         if self._signal_weights['cci'] > 0:
+            from cointrader.signals.CCISignal import CCISignal
             self.signals['cci'] = CCISignal(symbol=self._symbol, period=20, overbought=100, oversold=-100)
         if self._signal_weights['ao'] > 0:
+            from cointrader.signals.AwesomeOscillatorSignal import AwesomeOscillatorSignal
             self.signals['ao'] = AwesomeOscillatorSignal(symbol=self._symbol, short_period=5, long_period=34)
         if self._signal_weights['dpo'] > 0:
+            from cointrader.signals.DPOSignal import DPOSignal
             self.signals['dpo'] = DPOSignal(symbol=self._symbol, period=20, overbought=50, oversold=-50)
         if self._signal_weights['uo'] > 0:
+            from cointrader.signals.UltimateOscillatorSignal import UltimateOscillatorSignal
             self.signals['uo'] = UltimateOscillatorSignal(symbol=self._symbol, short_period=7, medium_period=14, long_period=28, overbought=70, oversold=30)
         if self._signal_weights['ichimoku'] > 0:
+            from cointrader.signals.IchimokuSignal import IchimokuSignal
             self.signals['ichimoku'] = IchimokuSignal(symbol=self._symbol, win_short=9, win_med=26, win_long=52)
         if self._signal_weights['vo'] > 0:
+            from cointrader.signals.VOSignal import VOSignal
             self.signals['vo'] = VOSignal(symbol=self._symbol, short_period=14, long_period=28, threshold=0.0)
         if self._signal_weights['kvo'] > 0:
+            from cointrader.signals.KVOSignal import KVOSignal
             self.signals['kvo'] = KVOSignal(symbol=self._symbol, short_period=34, long_period=55, signal_period=13, threshold=0.0)
         if self._signal_weights['eom'] > 0:
+            from cointrader.signals.EOMSignal import EOMSignal
             self.signals['eom'] = EOMSignal(symbol=self._symbol, period=14, threshold=0.0)
         if self._signal_weights['kst'] > 0:
+            from cointrader.signals.KSTSignal import KSTSignal
             self.signals['kst'] = KSTSignal(symbol=self._symbol, roc_periods=[10, 15, 20, 30], smoothing_periods=[10, 10, 10, 15], weights=[1, 2, 3, 4], signal_period=9, threshold=0.0)
 
         self.signal_states: dict[str, OrderSide] = {}
@@ -164,12 +239,6 @@ class SignalStrength(Strategy):
                 self.signal_states['zlema'] = OrderSide.BUY
             elif self.signals['zlema'].cross_down():
                 self.signal_states['zlema'] = OrderSide.SELL
-            #if self.signals['zlema'].increasing():
-            #    self.signal_states['zlema_change'] = OrderSide.BUY
-            #elif self.signals['zlema'].decreasing():
-            #    self.signal_states['zlema_change'] = OrderSide.SELL
-            #else:
-            #    self.signal_states['zlema_change'] = OrderSide.NONE
 
         if self._signal_weights['rsi'] > 0 and self.signals['rsi'].ready():
             if self.signals['rsi'].above():
@@ -208,12 +277,6 @@ class SignalStrength(Strategy):
                 self.signal_states['ema'] = OrderSide.BUY
             elif self.signals['ema'].cross_down():
                 self.signal_states['ema'] = OrderSide.SELL
-            #if self.signals['ema'].increasing():
-            #    self.signal_states['ema_change'] = OrderSide.BUY
-            #elif self.signals['ema'].decreasing():
-            #    self.signal_states['ema_change'] = OrderSide.SELL
-            #else:
-            #    self.signal_states['ema_change'] = OrderSide.NONE
 
         if self._signal_weights['sma'] > 0 and self.signals['sma'].ready():
             if self.signals['sma'].cross_up():
@@ -435,7 +498,7 @@ class SignalStrength(Strategy):
         # make sure we have enough signals to make a decision
         if buy_signal_weight + sell_signal_weight < self._total_weight / 2:
             return False
-        if buy_signal_weight > sell_signal_weight:
+        if buy_signal_weight >= sell_signal_weight:
             return True
         return False
 
@@ -446,7 +509,7 @@ class SignalStrength(Strategy):
         # make sure we have enough signals to make a decision
         if buy_signal_weight + sell_signal_weight < self._total_weight / 2:
             return False
-        if sell_signal_weight > buy_signal_weight:
+        if sell_signal_weight >= buy_signal_weight:
             return True
         return False
 

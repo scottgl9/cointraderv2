@@ -59,7 +59,7 @@ def run_trader(exchange: str, symbols: list[str], df: pd.DataFrame, initial_usdt
 
     #if args.strategy and tconfig.strategy() != args.strategy:
     #    tconfig.set_strategy(args.strategy)
-    tconfig.set_strategy("SignalStrength2" )
+    tconfig.set_strategy("SignalStrength" )
 
     #print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
 

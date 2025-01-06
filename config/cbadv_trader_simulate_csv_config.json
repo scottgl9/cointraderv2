@@ -8,9 +8,9 @@
     "quote_currency": "USDT",
     "max_position_quote_size": 100.0,
     "strategies_other_timeframes": [
-        "SignalStrength2:86400"
+        "SignalStrength:86400"
     ],
-    "strategy": "SignalStrength2",
+    "strategy": "SignalStrength",
     "granularity": 3600,
     "loss_strategy": "ChandelierExit",
     "size_strategy": "Fixed",

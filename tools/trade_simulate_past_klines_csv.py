@@ -74,7 +74,7 @@ def run_trader(tconfig: TraderConfig, account: AccountSimulate, exchange: str, s
     # ichimoku=0.5, vo=0.5, eom=0.5, kst=0.5
     weights = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0.5, 0.5]
     
-    strategy_weights = dict(zip(indicators, weights))
+    strategy_weights = None #dict(zip(indicators, weights))
 
     mtrader = MultiTrader(account=account, exec_pipe=ep, config=tconfig, orders=orders, restore_positions=False, granularity=granularity, strategy_weights=strategy_weights)
 
