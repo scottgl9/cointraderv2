@@ -38,7 +38,7 @@ class CandlestickType(Enum):
     BEARISH_TRI_STAR = 33
     TOWER_BOTTOM = 34
     TOWER_TOP = 35
-    KICKER= 36
+    KICKER = 36
     BULLISH_HARAMI_CROSS = 37
     BEARISH_HARAMI_CROSS = 38
     BULLISH_BELT_HOLD = 39
@@ -73,13 +73,24 @@ class CandlestickAnalyzer:
         return abs(kline.open - kline.close) <= (kline.high - kline.low) * 0.1
 
     def is_dragonfly_doji(self, kline):
-        return self.is_doji(kline) and kline.high == max(kline.open, kline.close) and kline.low < min(kline.open, kline.close)
+        return (
+            self.is_doji(kline)
+            and kline.high == max(kline.open, kline.close)
+            and kline.low < min(kline.open, kline.close)
+        )
 
     def is_gravestone_doji(self, kline):
-        return self.is_doji(kline) and kline.low == min(kline.open, kline.close) and kline.high > max(kline.open, kline.close)
+        return (
+            self.is_doji(kline)
+            and kline.low == min(kline.open, kline.close)
+            and kline.high > max(kline.open, kline.close)
+        )
 
     def is_long_legged_doji(self, kline):
-        return self.is_doji(kline) and kline.high - kline.low > 2 * abs(kline.open - kline.close)
+        return (
+            self.is_doji(kline)
+            and (kline.high - kline.low) > 2 * abs(kline.open - kline.close)
+        )
 
     def is_spinning_top(self, kline):
         body = abs(kline.open - kline.close)
@@ -88,15 +99,23 @@ class CandlestickAnalyzer:
 
     def is_hammer(self, kline):
         body = abs(kline.open - kline.close)
-        lower_shadow = kline.open - kline.low if self.is_bullish(kline) else kline.close - kline.low
-        upper_shadow = kline.high - kline.open if self.is_bullish(kline) else kline.high - kline.close
-        return lower_shadow > 2 * body and upper_shadow < body
+        lower_shadow = (
+            kline.open - kline.low if self.is_bullish(kline) else kline.close - kline.low
+        )
+        upper_shadow = (
+            kline.high - kline.open if self.is_bullish(kline) else kline.high - kline.close
+        )
+        return (lower_shadow > 2 * body) and (upper_shadow < body)
 
     def is_inverted_hammer(self, kline):
         body = abs(kline.open - kline.close)
-        lower_shadow = kline.open - kline.low if self.is_bullish(kline) else kline.close - kline.low
-        upper_shadow = kline.high - kline.open if self.is_bullish(kline) else kline.high - kline.close
-        return upper_shadow > 2 * body and lower_shadow < body
+        lower_shadow = (
+            kline.open - kline.low if self.is_bullish(kline) else kline.close - kline.low
+        )
+        upper_shadow = (
+            kline.high - kline.open if self.is_bullish(kline) else kline.high - kline.close
+        )
+        return (upper_shadow > 2 * body) and (lower_shadow < body)
 
     def is_shooting_star(self, kline):
         return self.is_inverted_hammer(kline) and self.is_bearish(kline)
@@ -105,60 +124,111 @@ class CandlestickAnalyzer:
         return self.is_hammer(kline) and self.is_bearish(kline)
 
     def is_bullish_marubozu(self, kline):
-        return kline.open == kline.low and kline.close == kline.high
-    
+        candle_range = kline.high - kline.low
+        if candle_range == 0:
+            return False
+
+        # Real body is (close - open)
+        body = kline.close - kline.open
+        upper_wick = kline.high - kline.close
+        lower_wick = kline.open - kline.low
+
+        # Suppose “minimal” wicks means each wick <= 5% of total range.
+        wick_threshold = 0.05 * candle_range
+
+        return (
+            self.is_bullish(kline) and
+            (lower_wick <= wick_threshold) and
+            (upper_wick <= wick_threshold) and
+            # body must be a large chunk of the total range
+            (body >= 0.9 * candle_range)  # e.g., 90% or more
+        )
+
     def is_bearish_marubozu(self, kline):
-        return kline.open == kline.high and kline.close == kline.low
+        candle_range = kline.high - kline.low
+        if candle_range == 0:
+            return False
+
+        # Real body is (open - close) if bearish
+        body = kline.open - kline.close
+        upper_wick = kline.high - kline.open
+        lower_wick = kline.close - kline.low
+
+        wick_threshold = 0.05 * candle_range
+
+        return (
+            self.is_bearish(kline) and
+            (lower_wick <= wick_threshold) and
+            (upper_wick <= wick_threshold) and
+            (body >= 0.9 * candle_range)
+        )
 
     def is_bullish_engulfing(self, prev_kline, kline):
-        return prev_kline.close < prev_kline.open and kline.close > kline.open and kline.close > prev_kline.open and kline.open < prev_kline.close
+        return (
+            prev_kline.close < prev_kline.open
+            and kline.close > kline.open
+            and kline.close > prev_kline.open
+            and kline.open < prev_kline.close
+        )
 
     def is_bearish_engulfing(self, prev_kline, kline):
-        return prev_kline.close > prev_kline.open and kline.close < kline.open and kline.close < prev_kline.open and kline.open > prev_kline.close
+        return (
+            prev_kline.close > prev_kline.open
+            and kline.close < kline.open
+            and kline.close < prev_kline.open
+            and kline.open > prev_kline.close
+        )
 
     def is_piercing_pattern(self, prev_kline, kline):
         return (
-            prev_kline.close < prev_kline.open and self.is_bullish(kline) and kline.open < prev_kline.close and kline.close > (prev_kline.open + prev_kline.close) / 2
+            prev_kline.close < prev_kline.open
+            and self.is_bullish(kline)
+            and (kline.open < prev_kline.close)
+            and (kline.close > (prev_kline.open + prev_kline.close) / 2)
         )
 
     def is_dark_cloud_cover(self, prev_kline, kline):
         return (
-            prev_kline.close > prev_kline.open and self.is_bearish(kline) and kline.open > prev_kline.close and kline.close < (prev_kline.open + prev_kline.close) / 2
+            prev_kline.close > prev_kline.open
+            and self.is_bearish(kline)
+            and (kline.open > prev_kline.close)
+            and (kline.close < (prev_kline.open + prev_kline.close) / 2)
         )
 
-    def is_three_white_soldiers(self, prev1_kline, prev2_kline, kline):
+    def is_three_white_soldiers(self, prev2_kline, prev1_kline, kline):
         """
         Checks for Three White Soldiers pattern using the classic definition:
-
+        
         - Candle #1 (prev2_kline) is bullish.
         - Candle #2 (prev1_kline) is bullish and opens within Candle #1's real body,
-        and closes higher than Candle #1's close.
+          and closes higher than Candle #1's close.
         - Candle #3 (kline) is bullish and opens within Candle #2's real body,
-        and closes higher than Candle #2's close.
+          and closes higher than Candle #2's close.
         """
-
-        # 1) All three must be bullish
-        if not (self.is_bullish(prev2_kline) and self.is_bullish(prev1_kline) and self.is_bullish(kline)):
+        if not (
+            self.is_bullish(prev2_kline)
+            and self.is_bullish(prev1_kline)
+            and self.is_bullish(kline)
+        ):
             return False
 
-        # 2) Candle #2 opens within Candle #1's real body
-        #    (between Candle #1's open and Candle #1's close).
-        if not (prev1_kline.open >= prev2_kline.open and prev1_kline.open <= prev2_kline.close):
+        # Candle #2 opens within Candle #1's body (between Candle #1's open & close)
+        if not (prev2_kline.open <= prev1_kline.open <= prev2_kline.close):
             return False
 
-        # 3) Candle #2 closes higher than Candle #1's close
+        # Candle #2 closes above Candle #1's close
         if not (prev1_kline.close > prev2_kline.close):
             return False
 
-        # 4) Candle #3 opens within Candle #2's real body
-        if not (kline.open >= prev1_kline.open and kline.open <= prev1_kline.close):
+        # Candle #3 opens within Candle #2's body
+        if not (prev1_kline.open <= kline.open <= prev1_kline.close):
             return False
 
-        # 5) Candle #3 closes higher than Candle #2's close
+        # Candle #3 closes above Candle #2's close
         if not (kline.close > prev1_kline.close):
             return False
 
-        # Optional: Short shadows
+        # Optional: short upper shadow on the 3rd candle
         upper_shadow = kline.high - kline.close
         body = kline.close - kline.open
         if upper_shadow > body * 0.5:
@@ -166,18 +236,16 @@ class CandlestickAnalyzer:
 
         return True
 
-    def is_three_black_crows(self, prev1_kline, prev2_kline, kline):
+    def is_three_black_crows(self, prev2_kline, prev1_kline, kline):
         """
         Three Black Crows (classic definition):
-        1) Candle #1 (prev2_kline) is bearish.
-        2) Candle #2 (prev1_kline) is bearish and opens within Candle #1's real body,
-            then closes below Candle #1's close.
-        3) Candle #3 (kline) is bearish and opens within Candle #2's real body,
-            then closes below Candle #2's close.
-        4) (Optional) Candles have relatively small lower shadows (not mandatory, but typical).
+          1) Candle #1 (prev2_kline) is bearish.
+          2) Candle #2 (prev1_kline) is bearish and opens within Candle #1's real body,
+             then closes below Candle #1's close.
+          3) Candle #3 (kline) is bearish and opens within Candle #2's real body,
+             then closes below Candle #2's close.
+          (Optional) short lower shadows.
         """
-
-        # 1) All three must be bearish
         if not (
             self.is_bearish(prev2_kline)
             and self.is_bearish(prev1_kline)
@@ -185,194 +253,200 @@ class CandlestickAnalyzer:
         ):
             return False
 
-        # Real body for a bearish candle is [close, open].
-        # 2) Candle #2 opens within Candle #1's real body
+        # Candle #2 opens within Candle #1's real body ([close, open] for bearish #1)
         if not (prev2_kline.close <= prev1_kline.open <= prev2_kline.open):
             return False
 
-        # 3) Candle #2 closes below Candle #1's close
+        # Candle #2 closes below Candle #1's close
         if not (prev1_kline.close < prev2_kline.close):
             return False
 
-        # 4) Candle #3 opens within Candle #2's real body
+        # Candle #3 opens within Candle #2's real body
         if not (prev1_kline.close <= kline.open <= prev1_kline.open):
             return False
 
-        # 5) Candle #3 closes below Candle #2's close
+        # Candle #3 closes below Candle #2's close
         if not (kline.close < prev1_kline.close):
             return False
 
-        # Optional: Check for short lower shadows.
-        #           (Classic text often wants small wicks, showing steady selling.)
-        #           For Candle #3, for instance:
-        lower_shadow = kline.close - kline.low  # Because it's bearish, close < open
+        # Optional: short lower shadow on Candle #3
+        lower_shadow = kline.close - kline.low
         body = kline.open - kline.close
         if lower_shadow > 0.5 * body:
-            # If the lower shadow is bigger than half the real body,
-            # it might not fit the strict "steady selloff" look.
             return False
 
         return True
 
     def is_tweezer_top(self, prev_kline, kline):
-        return kline.high == prev_kline.high and self.is_bearish(kline)
+        return (kline.high == prev_kline.high) and self.is_bearish(kline)
 
     def is_tweezer_bottom(self, prev_kline, kline):
-        return kline.low == prev_kline.low and self.is_bullish(kline)
+        return (kline.low == prev_kline.low) and self.is_bullish(kline)
 
     def is_three_line_strike(self, prev1_kline, prev2_kline, prev3_kline, kline):
-        if prev1_kline.close < prev1_kline.open and prev2_kline.close < prev2_kline.open and prev3_kline.close < prev3_kline.open:
-            return self.is_bullish(kline) and kline.close > prev3_kline.open
-        elif prev1_kline.close > prev1_kline.open and prev2_kline.close > prev2_kline.open and prev3_kline.close > prev3_kline.open:
-            return self.is_bearish(kline) and kline.close < prev3_kline.open
+        # Bearish run, then a bullish strike?
+        if (
+            prev1_kline.close < prev1_kline.open
+            and prev2_kline.close < prev2_kline.open
+            and prev3_kline.close < prev3_kline.open
+        ):
+            return self.is_bullish(kline) and (kline.close > prev3_kline.open)
+        # Bullish run, then a bearish strike?
+        elif (
+            prev1_kline.close > prev1_kline.open
+            and prev2_kline.close > prev2_kline.open
+            and prev3_kline.close > prev3_kline.open
+        ):
+            return self.is_bearish(kline) and (kline.close < prev3_kline.open)
         return False
 
     def is_bullish_harami(self, prev_kline, kline):
-        return self.is_bearish(prev_kline) and self.is_bullish(kline) and kline.open > prev_kline.close and kline.close < prev_kline.open
+        return (
+            self.is_bearish(prev_kline)
+            and self.is_bullish(kline)
+            and (kline.open > prev_kline.close)
+            and (kline.close < prev_kline.open)
+        )
 
     def is_bearish_harami(self, prev_kline, kline):
-        return self.is_bullish(prev_kline) and self.is_bearish(kline) and kline.open < prev_kline.close and kline.close > prev_kline.open
+        return (
+            self.is_bullish(prev_kline)
+            and self.is_bearish(kline)
+            and (kline.open < prev_kline.close)
+            and (kline.close > prev_kline.open)
+        )
 
     def is_bullish_harami_cross(self, prev_kline, kline):
         """
         Bullish Harami Cross pattern:
-        1) The first candle is bearish (close < open).
-        2) The second candle is a doji.
-        3) The doji is completely inside the real body of the first candle.
+          1) The first candle is bearish.
+          2) The second candle is a doji.
+          3) That doji is fully inside the first candle's real body.
         """
-        # 1) First candle must be bearish
         if not self.is_bearish(prev_kline):
             return False
-
-        # 2) Second candle is a doji
         if not self.is_doji(kline):
             return False
-
-        # 3) The doji’s open (and close, since doji) must lie within the body of the first candle
-        #    For a bearish candle, body range is [close, open] (since open > close).
+        # Bearish body range is [close, open]
         if not (prev_kline.close < kline.open < prev_kline.open):
             return False
-
-        # If all conditions are met:
         return True
-
 
     def is_bearish_harami_cross(self, prev_kline, kline):
         """
         Bearish Harami Cross pattern:
-        1) The first candle is bullish (close > open).
-        2) The second candle is a doji.
-        3) The doji is completely inside the real body of the first candle.
+          1) The first candle is bullish.
+          2) The second candle is a doji.
+          3) That doji is fully inside the first candle's real body.
         """
-        # 1) First candle must be bullish
         if not self.is_bullish(prev_kline):
             return False
-
-        # 2) Second candle is a doji
         if not self.is_doji(kline):
             return False
-
-        # 3) The doji’s open (and close) must lie within the body of the first candle
-        #    For a bullish candle, body range is [open, close] (since close > open).
+        # Bullish body range is [open, close]
         if not (prev_kline.open < kline.open < prev_kline.close):
             return False
-
-        # If all conditions are met:
         return True
 
     def is_morning_star(self, prev1_kline, prev2_kline, kline):
         return (
-            self.is_bearish(prev1_kline) and
-            self.is_doji(prev2_kline) and
-            self.is_bullish(kline) and
-            kline.close > (prev1_kline.close + prev1_kline.open) / 2
+            self.is_bearish(prev1_kline)
+            and self.is_doji(prev2_kline)
+            and self.is_bullish(kline)
+            and (kline.close > (prev1_kline.close + prev1_kline.open) / 2)
         )
 
     def is_evening_star(self, prev1_kline, prev2_kline, kline):
         return (
-            self.is_bullish(prev1_kline) and
-            self.is_doji(prev2_kline) and
-            self.is_bearish(kline) and
-            kline.close < (prev1_kline.close + prev1_kline.open) / 2
+            self.is_bullish(prev1_kline)
+            and self.is_doji(prev2_kline)
+            and self.is_bearish(kline)
+            and (kline.close < (prev1_kline.close + prev1_kline.open) / 2)
         )
 
     def is_abandoned_baby(self, prev1_kline, prev2_kline, kline):
         return (
-            self.is_bearish(prev1_kline) and
-            self.is_doji(prev2_kline) and
-            self.is_bullish(kline) and
-            prev2_kline.low > prev1_kline.close and
-            prev2_kline.low > kline.open
+            self.is_bearish(prev1_kline)
+            and self.is_doji(prev2_kline)
+            and self.is_bullish(kline)
+            and (prev2_kline.low > prev1_kline.close)
+            and (prev2_kline.low > kline.open)
         )
 
     def is_rising_three_methods(self, prev1_kline, prev2_kline, prev3_kline, kline):
         return (
-            self.is_bullish(prev1_kline) and
-            self.is_bearish(prev2_kline) and
-            self.is_bearish(prev3_kline) and
-            prev3_kline.close > prev1_kline.open and
-            self.is_bullish(kline) and
-            kline.close > prev1_kline.close
+            self.is_bullish(prev1_kline)
+            and self.is_bearish(prev2_kline)
+            and self.is_bearish(prev3_kline)
+            and (prev3_kline.close > prev1_kline.open)
+            and self.is_bullish(kline)
+            and (kline.close > prev1_kline.close)
         )
 
     def is_falling_three_methods(self, prev1_kline, prev2_kline, prev3_kline, kline):
         return (
-            self.is_bearish(prev1_kline) and
-            self.is_bullish(prev2_kline) and
-            self.is_bullish(prev3_kline) and
-            prev3_kline.close < prev1_kline.open and
-            self.is_bearish(kline) and
-            kline.close < prev1_kline.close
+            self.is_bearish(prev1_kline)
+            and self.is_bullish(prev2_kline)
+            and self.is_bullish(prev3_kline)
+            and (prev3_kline.close < prev1_kline.open)
+            and self.is_bearish(kline)
+            and (kline.close < prev1_kline.close)
         )
 
     def is_upside_tasuki_gap(self, prev1_kline, prev2_kline, kline):
         return (
-            self.is_bullish(prev1_kline) and
-            self.is_bullish(prev2_kline) and
-            prev2_kline.open > prev1_kline.close and
-            self.is_bearish(kline) and
-            kline.close > prev1_kline.close
+            self.is_bullish(prev1_kline)
+            and self.is_bullish(prev2_kline)
+            and (prev2_kline.open > prev1_kline.close)
+            and self.is_bearish(kline)
+            and (kline.close > prev1_kline.close)
         )
 
     def is_downside_tasuki_gap(self, prev1_kline, prev2_kline, kline):
         return (
-            self.is_bearish(prev1_kline) and
-            self.is_bearish(prev2_kline) and
-            prev2_kline.open < prev1_kline.close and
-            self.is_bullish(kline) and
-            kline.close < prev1_kline.close
+            self.is_bearish(prev1_kline)
+            and self.is_bearish(prev2_kline)
+            and (prev2_kline.open < prev1_kline.close)
+            and self.is_bullish(kline)
+            and (kline.close < prev1_kline.close)
         )
 
     def is_three_inside_up(self, prev1_kline, prev2_kline, kline):
         return (
-            self.is_bearish(prev1_kline) and
-            self.is_bullish(prev2_kline) and
-            prev2_kline.open > kline.low and prev2_kline.close < prev1_kline.open and
-            self.is_bullish(kline) and kline.close > prev1_kline.high
+            self.is_bearish(prev1_kline)
+            and self.is_bullish(prev2_kline)
+            and (prev2_kline.open > kline.low)
+            and (prev2_kline.close < prev1_kline.open)
+            and self.is_bullish(kline)
+            and (kline.close > prev1_kline.high)
         )
 
     def is_three_inside_down(self, prev1_kline, prev2_kline, kline):
         return (
-            self.is_bullish(prev1_kline) and
-            self.is_bearish(prev2_kline) and
-            prev2_kline.open < prev1_kline.close and prev2_kline.close > prev1_kline.open and
-            self.is_bearish(kline) and kline.close < prev1_kline.low
+            self.is_bullish(prev1_kline)
+            and self.is_bearish(prev2_kline)
+            and (prev2_kline.open < prev1_kline.close)
+            and (prev2_kline.close > prev1_kline.open)
+            and self.is_bearish(kline)
+            and (kline.close < prev1_kline.low)
         )
 
     def is_bullish_tri_star(self, prev1_kline, prev2_kline, kline):
         return (
-            self.is_doji(prev1_kline) and
-            self.is_doji(prev2_kline) and
-            self.is_doji(kline) and
-            prev2_kline.low < prev1_kline.low and prev2_kline.low < kline.low
+            self.is_doji(prev1_kline)
+            and self.is_doji(prev2_kline)
+            and self.is_doji(kline)
+            and (prev2_kline.low < prev1_kline.low)
+            and (prev2_kline.low < kline.low)
         )
 
     def is_bearish_tri_star(self, prev1_kline, prev2_kline, kline):
         return (
-            self.is_doji(prev1_kline) and
-            self.is_doji(prev2_kline) and
-            self.is_doji(kline) and
-            prev2_kline.high > prev1_kline.high and prev2_kline.high > kline.high
+            self.is_doji(prev1_kline)
+            and self.is_doji(prev2_kline)
+            and self.is_doji(kline)
+            and (prev2_kline.high > prev1_kline.high)
+            and (prev2_kline.high > kline.high)
         )
 
     def is_tower_bottom(self):
@@ -402,7 +476,7 @@ class CandlestickAnalyzer:
         Common definition:
           1) Candle is bullish (close > open).
           2) The open is very close to the low (little/no lower shadow).
-          3) The candle has a relatively large body compared to its range.
+          3) The candle has a relatively large body compared to its total range.
         """
         if not self.is_bullish(kline):
             return False
@@ -414,12 +488,9 @@ class CandlestickAnalyzer:
         body = kline.close - kline.open
         lower_shadow = kline.open - kline.low
 
-        # Threshold examples: open is near the low, body is large relative to total range
-        near_low = (lower_shadow <= 0.1 * candle_range)    # <=10% of full range
-        large_body = (body >= 0.6 * candle_range)          # body is >=60% of full range
-
+        near_low = (lower_shadow <= 0.1 * candle_range)   # e.g. <= 10% of total range
+        large_body = (body >= 0.6 * candle_range)         # body >= 60% of total range
         return near_low and large_body
-
 
     def is_bearish_belt_hold(self, kline):
         """
@@ -427,7 +498,7 @@ class CandlestickAnalyzer:
         Common definition:
           1) Candle is bearish (open > close).
           2) The open is very close to the high (little/no upper shadow).
-          3) The candle has a relatively large body compared to its range.
+          3) The candle has a relatively large body compared to its total range.
         """
         if not self.is_bearish(kline):
             return False
@@ -439,20 +510,16 @@ class CandlestickAnalyzer:
         body = kline.open - kline.close
         upper_shadow = kline.high - kline.open
 
-        near_high = (upper_shadow <= 0.1 * candle_range) 
+        near_high = (upper_shadow <= 0.1 * candle_range)
         large_body = (body >= 0.6 * candle_range)
-
         return near_high and large_body
 
-
-    def is_stick_sandwich(self, prev1_kline, prev2_kline, kline):
+    def is_stick_sandwich(self, prev2_kline, prev1_kline, kline):
         """
         Stick Sandwich (3-candle pattern)
-        Simplified definition:
-          1) Candle #1 (prev2) is bearish.
-          2) Candle #2 (prev1) is bullish and closes above Candle #1's close.
-          3) Candle #3 (kline) is bearish and closes at exactly the same price 
-             as Candle #1's close (forming a 'sandwich' around that price).
+          1) Candle #1 (prev2_kline) is bearish.
+          2) Candle #2 (prev1_kline) is bullish and closes above Candle #1's close.
+          3) Candle #3 (kline) is bearish and closes exactly at Candle #1's close.
         """
         # Candle #1: Bearish
         if not self.is_bearish(prev2_kline):
@@ -468,55 +535,40 @@ class CandlestickAnalyzer:
         if not self.is_bearish(kline):
             return False
 
-        # If you want exact matching, you can require equality; or you can allow a small tolerance
+        # Exact match or within a small tolerance
         return abs(kline.close - prev2_kline.close) < 1e-8
-
 
     def is_matching_low(self, prev_kline, kline):
         """
         Matching Low (2-candle pattern)
-        One definition:
-          1) Candle #1 (prev_kline) is bearish.
-          2) Candle #2 (kline) is also bearish (some variants allow bullish #2).
-          3) Both candles have the same closing price.
+          1) Candle #1 is bearish.
+          2) Candle #2 is also bearish (or optionally could be bullish).
+          3) Both candles share the same close.
         """
-        # Check Candle #1 is bearish
         if not self.is_bearish(prev_kline):
             return False
-
-        # Check Candle #2 is also bearish (if you prefer allowing a bullish #2, omit this)
         if not self.is_bearish(kline):
             return False
-
-        # Same closing price (exact or near). For exact, do:
         return abs(kline.close - prev_kline.close) < 1e-8
-
 
     def is_matching_high(self, prev_kline, kline):
         """
         Matching High (2-candle pattern)
-        One definition:
-          1) Candle #1 (prev_kline) is bullish.
-          2) Candle #2 (kline) is also bullish (some variants allow #2 to be bearish).
-          3) Both candles have the same closing price.
+          1) Candle #1 is bullish.
+          2) Candle #2 is also bullish (or optionally could be bearish).
+          3) Both candles share the same close.
         """
-        # Check Candle #1 is bullish
         if not self.is_bullish(prev_kline):
             return False
-
-        # Check Candle #2 is also bullish
         if not self.is_bullish(kline):
             return False
-
         return abs(kline.close - prev_kline.close) < 1e-8
-
 
     def is_high_wave(self, kline):
         """
         High Wave (single candle)
-        Common definition:
-          1) Very small real body compared to total range.
-          2) Very long upper and lower shadows, typically each at least as large as (or bigger than) the real body.
+          1) Very small real body relative to total range.
+          2) Very long upper and lower shadows, each at least as large as the body.
         """
         candle_range = kline.high - kline.low
         if candle_range == 0:
@@ -526,13 +578,9 @@ class CandlestickAnalyzer:
         upper_shadow = kline.high - max(kline.open, kline.close)
         lower_shadow = min(kline.open, kline.close) - kline.low
 
-        # Typically, body is quite small relative to total range
         small_body = (body <= 0.3 * candle_range)
-
-        # Both shadows are long (could define "at least as big as the body", or bigger)
         long_upper = (upper_shadow >= body)
         long_lower = (lower_shadow >= body)
-
         return small_body and long_upper and long_lower
 
     def get_candlestick_type(self):
@@ -541,28 +589,33 @@ class CandlestickAnalyzer:
 
         kline = self._klines[-1]
 
-        # Multi-Candlestick Patterns
+        # ---------- 6-Candle Patterns ----------
         if len(self._klines) >= 6:
             if self.is_tower_bottom():
                 return CandlestickType.TOWER_BOTTOM
             elif self.is_tower_top():
                 return CandlestickType.TOWER_TOP
 
+        # ---------- 4-Candle Patterns ----------
         if len(self._klines) >= 4:
             prev1_kline = self._klines[-2]
             prev2_kline = self._klines[-3]
             prev3_kline = self._klines[-4]
+
             if self.is_three_line_strike(prev1_kline, prev2_kline, prev3_kline, kline):
                 return CandlestickType.THREE_LINE_STRIKE
             elif self.is_abandoned_baby(prev1_kline, prev2_kline, kline):
                 return CandlestickType.ABANDONED_BABY
 
+        # ---------- 3-Candle Patterns ----------
         if len(self._klines) >= 3:
             prev1_kline = self._klines[-2]
             prev2_kline = self._klines[-3]
-            if self.is_three_white_soldiers(prev1_kline, prev2_kline, kline):
+
+            # Notice we pass (prev2, prev1, kline) to match the docstrings.
+            if self.is_three_white_soldiers(prev2_kline, prev1_kline, kline):
                 return CandlestickType.THREE_WHITE_SOLDIERS
-            elif self.is_three_black_crows(prev1_kline, prev2_kline, kline):
+            elif self.is_three_black_crows(prev2_kline, prev1_kline, kline):
                 return CandlestickType.THREE_BLACK_CROWS
             elif self.is_morning_star(prev1_kline, prev2_kline, kline):
                 return CandlestickType.MORNING_STAR
@@ -580,15 +633,17 @@ class CandlestickAnalyzer:
                 return CandlestickType.BULLISH_TRI_STAR
             elif self.is_bearish_tri_star(prev1_kline, prev2_kline, kline):
                 return CandlestickType.BEARISH_TRI_STAR
-            elif self.is_stick_sandwich(prev1_kline, prev2_kline, kline):
+            elif self.is_stick_sandwich(prev2_kline, prev1_kline, kline):
                 return CandlestickType.STICK_SANDWICH
-            elif self.is_upside_tasuki_gap(prev1_kline, prev2_kline, kline):
+            elif self.is_upside_tasuki_gap(prev2_kline, prev1_kline, kline):
                 return CandlestickType.UPSIDE_TASUKI_GAP
-            elif self.is_downside_tasuki_gap(prev1_kline, prev2_kline, kline):
+            elif self.is_downside_tasuki_gap(prev2_kline, prev1_kline, kline):
                 return CandlestickType.DOWNSIDE_TASUKI_GAP
 
+        # ---------- 2-Candle Patterns ----------
         if len(self._klines) >= 2:
             prev_kline = self._klines[-2]
+
             if self.is_bullish_engulfing(prev_kline, kline):
                 return CandlestickType.BULLISH_ENGULFING
             elif self.is_bearish_engulfing(prev_kline, kline):
@@ -616,8 +671,10 @@ class CandlestickAnalyzer:
             elif self.is_matching_high(prev_kline, kline):
                 return CandlestickType.MATCHING_HIGH
 
-        # Single Candlestick Patterns
-        if self.is_doji(kline):
+        # ---------- Single-Candle Patterns ----------
+        if self.is_high_wave(kline):
+            return CandlestickType.HIGH_WAVE
+        elif self.is_doji(kline):
             if self.is_dragonfly_doji(kline):
                 return CandlestickType.DRAGONFLY_DOJI
             elif self.is_gravestone_doji(kline):
@@ -643,8 +700,6 @@ class CandlestickAnalyzer:
             return CandlestickType.BULLISH_BELT_HOLD
         elif self.is_bearish_belt_hold(kline):
             return CandlestickType.BEARISH_BELT_HOLD
-        elif self.is_high_wave(kline):
-            return CandlestickType.HIGH_WAVE
 
         # Unknown Type
         return CandlestickType.UNKNOWN
