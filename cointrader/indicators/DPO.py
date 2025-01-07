@@ -92,4 +92,5 @@ class DetrendedPriceOscillator(Indicator):
 
         :return: True if ready, False otherwise.
         """
-        return len(self.closes) == self.total_length and self.sma.ready() and len(self.sma_values) == self.shift
+        #return len(self.closes) == self.total_length and self.sma.ready() and len(self.sma_values) == self.shift
+        return self._last_value is not None
