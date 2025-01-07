@@ -71,19 +71,29 @@ class RVISignal(Signal):
 
         signal_action = None
 
-        if self._cross_up:
-            # Optional: Check if RVI is above the oversold threshold for added confirmation
-            if rvi > self.oversold:
-                signal_action = 'buy'
-            self._cross_up = False
+        # if self._cross_up:
+        #     # Optional: Check if RVI is above the oversold threshold for added confirmation
+        #     if rvi > self.oversold:
+        #         signal_action = 'buy'
+        #     self._cross_up = False
 
-        if self._cross_down:
-            # Optional: Check if RVI is below the overbought threshold for added confirmation
-            if rvi < self.overbought:
-                signal_action = 'sell'
-            self._cross_down = False
+        # if self._cross_down:
+        #     # Optional: Check if RVI is below the overbought threshold for added confirmation
+        #     if rvi < self.overbought:
+        #         signal_action = 'sell'
+        #     self._cross_down = False
 
         return signal_action
+
+    def cross_up(self):
+        result = self._cross_up
+        self._cross_up = False
+        return result
+    
+    def cross_down(self):
+        result = self._cross_down
+        self._cross_down = False
+        return result
 
     def ready(self):
         """

@@ -1,10 +1,10 @@
 from cointrader.common.Strategy import Strategy
 from cointrader.signals.VOSignal import VOSignal
 
-class VolumeOscillator(Strategy):
+class VO(Strategy):
     def __init__(self, symbol: str, name='volume_oscillator_strategy', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
-        self.volume_oscillator = VOSignal(symbol=self._symbol, period=14)
+        self.volume_oscillator = VOSignal(symbol=self._symbol, short_period=14, long_period=28, threshold=0)
         self._buy_signal_name = None
         self._sell_signal_name = None
 

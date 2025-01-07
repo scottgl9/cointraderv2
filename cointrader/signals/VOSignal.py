@@ -15,7 +15,7 @@ class VOSignal(Signal):
         :param threshold: Signal threshold.
         """
         super().__init__(name, symbol)
-        self.vo = VolumeOscillator(short_period, long_period)
+        self.vo = VolumeOscillator(short_period=short_period, long_period=long_period)
         self.threshold = threshold
         self._values = deque(maxlen=2)
 

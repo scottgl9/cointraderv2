@@ -74,27 +74,31 @@ class CMFSignal(Signal):
 
                 signal_action = None
 
-                if self._cross_up:
-                    # Optional: Check if CMF is above oversold threshold for added confirmation
-                    if current_cmf > self.oversold:
-                        signal_action = 'buy'
-                    self._cross_up = False
+                # if self._cross_up:
+                #     # Optional: Check if CMF is above oversold threshold for added confirmation
+                #     if current_cmf > self.oversold:
+                #         signal_action = 'buy'
+                #     self._cross_up = False
 
-                if self._cross_down:
-                    # Optional: Check if CMF is below overbought threshold for added confirmation
-                    if current_cmf < self.overbought:
-                        signal_action = 'sell'
-                    self._cross_down = False
+                # if self._cross_down:
+                #     # Optional: Check if CMF is below overbought threshold for added confirmation
+                #     if current_cmf < self.overbought:
+                #         signal_action = 'sell'
+                #     self._cross_down = False
 
                 return signal_action
 
         return None
 
     def cross_up(self):
-        return self._cross_up
+        result = self._cross_up
+        self._cross_up = False
+        return result
     
     def cross_down(self):
-        return self._cross_down
+        result = self._cross_down
+        self._cross_down = False
+        return result
 
     def ready(self):
         """

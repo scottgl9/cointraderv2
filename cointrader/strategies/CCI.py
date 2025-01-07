@@ -22,13 +22,13 @@ class CCI(Strategy):
         return result
 
     def buy_signal(self):
-        if self.cci.ready() and self.cci.cross_up():
+        if self.cci.ready() and self.cci.below():
             self._buy_signal_name = self.cci.name()
             return True
         return False
 
     def sell_signal(self):
-        if self.cci.ready() and self.cci.cross_down():
+        if self.cci.ready() and self.cci.above():
             self._sell_signal_name = self.cci.name()
             return True
         return False

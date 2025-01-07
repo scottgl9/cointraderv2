@@ -52,20 +52,28 @@ class EOMSignal(Signal):
         
         # Check for signal cross
         if self._values[-1] > self._threshold and self._values[-2] <= self._threshold:
-            self._cross_down = False
             self._cross_up = True
         elif self._values[-1] <= self._threshold and self._values[-2] > self._threshold:
-            self._cross_up = True
             self._cross_down = False
     
     def cross_up(self):
-        return self._cross_up
+        result = self._cross_up
+        self._cross_up = False
+        return result
     
     def cross_down(self):
-        return self._cross_down
+        result = self._cross_down
+        self._cross_down = False
+        return result
     
     def increasing(self):
         return self._values[-1] > self._values[-2]
     
     def decreasing(self):
         return self._values[-1] < self._values[-2]
+
+    def above(self):
+        return self._values[-1] > self._threshold
+    
+    def below(self):
+        return self._values[-1] < self._threshold

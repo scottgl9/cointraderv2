@@ -59,21 +59,17 @@ class DPOSignal(Signal):
 
         signal = None
 
-        if self._cross_up:
-            signal = 'buy'
-            self._cross_up = False
-
-        if self._cross_down:
-            signal = 'sell'
-            self._cross_down = False
-
         return signal
     
     def cross_up(self):
-        return self._cross_up
+        result = self._cross_up
+        self._cross_up = False
+        return result
     
     def cross_down(self):
-        return self._cross_down
+        result = self._cross_down
+        self._cross_down = False
+        return result
 
     def ready(self):
         """

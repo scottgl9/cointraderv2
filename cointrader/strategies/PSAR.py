@@ -4,7 +4,7 @@ from cointrader.signals.PSARSignal import PSARSignal
 class PSAR(Strategy):
     def __init__(self, symbol: str, name='psar_strategy', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
-        self.psar = PSARSignal(symbol=self._symbol, step=0.02, max_step=0.2)
+        self.psar = PSARSignal(symbol=self._symbol, af=0.02, max_af=0.2)
         self._buy_signal_name = None
         self._sell_signal_name = None
 

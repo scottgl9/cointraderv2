@@ -167,22 +167,6 @@ def main(args):
 
     # print all unique strings from the Symbols column
     unique_symbols = df['Symbol'].unique()
-    print("Symbols:", unique_symbols)
-
-    # Convert the Date column to datetime format
-    df['Date'] = pd.to_datetime(df['Date'], format='mixed') #'%Y-%m-%d %H:%M:%S')
-    # Convert the Date column to unix timestamp
-    df['Timestamp'] = df['Date'].apply(lambda x: int(x.timestamp()))
-    # Sort the DataFrame by the Date column
-    df = df.sort_values(by='Date').reset_index(drop=True)
-    # Convert all symbols ending with 'USDT' to '-USDT'
-    df['Symbol'] = df['Symbol'].apply(lambda x: x.replace('USDT', '-USDT'))
-    # Display the first few rows of the DataFrame
-    print(df.head())
-
-    # Filter the DataFrame by the Timestamp column
-    df = df[(df['Timestamp'] >= start_ts) & (df['Timestamp'] <= end_ts)]
-
 
     tconfig = TraderConfig(path=f'config/{name}_trader_simulate_csv_config.json')
     if not tconfig.load_config():
@@ -193,12 +177,33 @@ def main(args):
 
     tconfig.set_trade_symbols(symbols)
 
+    tconfig.set_log_level(args.log_level)
+
     if args.strategy and tconfig.strategy() != args.strategy:
         tconfig.set_strategy(args.strategy)
 
     print(f"Using strategy: {tconfig.strategy()} db_path: {tconfig.orders_db_path()}")
 
     granularity = tconfig.granularity()
+
+    if tconfig.log_level() >= LogLevel.INFO.value:
+        print("Symbols:", unique_symbols)
+
+    # Convert the Date column to datetime format
+    df['Date'] = pd.to_datetime(df['Date'], format='mixed') #'%Y-%m-%d %H:%M:%S')
+    # Convert the Date column to unix timestamp
+    df['Timestamp'] = df['Date'].apply(lambda x: int(x.timestamp()))
+    # Sort the DataFrame by the Date column
+    df = df.sort_values(by='Date').reset_index(drop=True)
+    # Convert all symbols ending with 'USDT' to '-USDT'
+    df['Symbol'] = df['Symbol'].apply(lambda x: x.replace('USDT', '-USDT'))
+    # Display the first few rows of the DataFrame
+    if tconfig.log_level() >= LogLevel.INFO.value:
+        print(df.head())
+
+    # Filter the DataFrame by the Timestamp column
+    df = df[(df['Timestamp'] >= start_ts) & (df['Timestamp'] <= end_ts)]
+
 
     market = Market(exchange=exchange, db_path=tconfig.market_db_path())
     account = AccountSimulate(exchange=exchange, market=market)
@@ -295,5 +300,6 @@ if __name__ == '__main__':
     parser.add_argument('--strategy', type=str, default='', help='Strategy to use for simulation')
     parser.add_argument('--start_date', type=str, default='2020-08-11 06:00:00', help='Start date for klines')
     parser.add_argument('--end_date', type=str, default='2023-10-19 23:00:00', help='End date for klines')
+    parser.add_argument('--log_level', type=int, default=3, help='Log level')
     args = parser.parse_args()
     main(args)
