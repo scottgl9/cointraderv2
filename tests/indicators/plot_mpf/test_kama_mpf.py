@@ -56,8 +56,11 @@ if __name__ == '__main__':
     kline = Kline()
     kline.set_dict_names(ts='start')
 
-    kama = KAMA('KAMA', 10)
-    kama_values = []
+    kama10 = KAMA('KAMA', 10)
+    kama10_values = []
+
+    kama30 = KAMA('KAMA', 30)
+    kama30_values = []
 
     opens = []
     closes = []
@@ -68,11 +71,16 @@ if __name__ == '__main__':
 
     for candle in reversed(candles):
         kline.from_dict(candle)
-        result = kama.update(kline)
-        if kama.ready():
-            kama_values.append(result)
+        result = kama10.update(kline)
+        if kama10.ready():
+            kama10_values.append(result)
         else:
-            kama_values.append(np.nan)
+            kama10_values.append(np.nan)
+        result = kama30.update(kline)
+        if kama30.ready():
+            kama30_values.append(result)
+        else:
+            kama30_values.append(np.nan)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -92,13 +100,14 @@ if __name__ == '__main__':
     df = pd.DataFrame(data)
     df.set_index('Date', inplace=True)
 
-    kama_plot = mpf.make_addplot(kama_values, panel=0, color='blue', width=1.5)
+    kama_plot = mpf.make_addplot(kama10_values, panel=0, color='blue', width=1.5)
+    kama30_plot = mpf.make_addplot(kama30_values, panel=0, color='red', width=1.5)
 
     mpf.plot(
         df,
         type='candle',
         style='charles',
-        title=f'{ticker} {granularity_name} chart with KAMA',
+        title=f'{ticker} {granularity_name} chart with KAMA(10) vs KAMA(30)',
         ylabel='Price',
-        addplot=[kama_plot],
+        addplot=[kama_plot, kama30_plot],
     )

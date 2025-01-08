@@ -25,14 +25,19 @@ class EMACross(Signal):
         short_ema_value = self.short_ema.update(kline)
         long_ema_value = self.long_ema.update(kline)
 
+        if short_ema_value is None or long_ema_value is None:
+            return
+
         self._short_ema_values.append(short_ema_value)
         self._long_ema_values.append(long_ema_value)
-        
-        if self.short_ema.ready() and self.long_ema.ready():
-            if self._short_ema_values[-1] > self._long_ema_values[-1] and self._short_ema_values[-2] <= self._long_ema_values[-2]:
-                self._cross_up = True
-            elif self._short_ema_values[-1] < self._long_ema_values[-1] and self._short_ema_values[-2] >= self._long_ema_values[-2]:
-                self._cross_down = True
+
+        if not self.ready():
+            return
+
+        if self._short_ema_values[-1] > self._long_ema_values[-1] and self._short_ema_values[-2] <= self._long_ema_values[-2]:
+            self._cross_up = True
+        elif self._short_ema_values[-1] < self._long_ema_values[-1] and self._short_ema_values[-2] >= self._long_ema_values[-2]:
+            self._cross_down = True
         return
 
     def cross_up(self):
@@ -58,7 +63,7 @@ class EMACross(Signal):
         return self._short_ema_values[-1] < self._short_ema_values[-2]
 
     def ready(self):
-        return self.short_ema.ready() and self.long_ema.ready()
+        return self.short_ema.ready() and self.long_ema.ready() and len(self._short_ema_values) >= 2
 
     def get_last_value(self):
         result = {

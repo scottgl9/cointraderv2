@@ -53,8 +53,13 @@ class SignalStrength(Strategy):
         
 
         self._signal_weights = {
-            'supertrend': 0.8,
+            'supertrend': 1.0,
             'kst': 1.0,
+            'ema': 1.0,
+            'rsi': 1.0,
+            'uo': 1.0,
+            'vo': 1.0,
+            'ichimoku': 1.0,
         }
 
         # self._signal_weights = {

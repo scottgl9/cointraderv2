@@ -1,15 +1,15 @@
 from cointrader.common.Strategy import Strategy
-from cointrader.signals.EMACross import EMACross
+from cointrader.signals.KAMACross import KAMACross
 
-class EMA(Strategy):
-    def __init__(self, symbol: str, name='ema_cross', granularity=0, weights=None):
+class KAMA(Strategy):
+    def __init__(self, symbol: str, name='kama_cross', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
-        self.ema = EMACross(symbol=self._symbol, short_period=12, long_period=26)
+        self.kama = KAMACross(symbol=self._symbol, short_period=12, long_period=26)
         self._buy_signal_name = None
         self._sell_signal_name = None
 
     def update(self, kline):
-        self.ema.update(kline)
+        self.kama.update(kline)
 
     def buy_signal_name(self):
         result = self._buy_signal_name
@@ -22,13 +22,13 @@ class EMA(Strategy):
         return result
 
     def buy_signal(self):
-        if self.ema.ready() and self.ema.cross_up():
-            self._buy_signal_name = self.ema.name()
+        if self.kama.ready() and self.kama.cross_up():
+            self._buy_signal_name = self.kama.name()
             return True
         return False
 
     def sell_signal(self):
-        if self.ema.ready() and self.ema.cross_down():
-            self._sell_signal_name = self.ema.name()
+        if self.kama.ready() and self.kama.cross_down():
+            self._sell_signal_name = self.kama.name()
             return True
         return False
