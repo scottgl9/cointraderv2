@@ -60,7 +60,6 @@ class SignalStrength(Strategy):
                 'vo': 1.0,
                 'stochastic': 1.0,
                 'vwap': 1.0,
-                #'adx': 1.0,
             }
 
         # set to 0 if not present
