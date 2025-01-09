@@ -10,7 +10,8 @@ class EMA(Indicator):
         self.reset()
 
     def reset(self):
-        self.values = deque(maxlen=self.period)
+        self._last_value = None
+        self._last_kline = None
 
     def update(self, kline: Kline):
         result = self.update_with_value(kline.close)
@@ -18,20 +19,12 @@ class EMA(Indicator):
         return result
 
     def update_with_value(self, value: float):
-        if len(self.values) == 0:
-            self.values.append(value)
+        if self._last_value is None:
+            self._last_value = value
         else:
-            ema_value = (value - self.values[-1]) * self.multiplier + self.values[-1]
-            self.values.append(ema_value)
-        
-        self._last_value = self.values[-1]
+            self._last_value = (value - self._last_value) * self.multiplier + self._last_value
+
         return self._last_value
-
-    def increasing(self) -> bool:
-        return self.values[-1] > self.values[0]
-
-    def decreasing(self) -> bool:
-        return self.values[-1] < self.values[0]
 
     def get_last_value(self):
         return self._last_value
@@ -40,4 +33,4 @@ class EMA(Indicator):
         return self._last_kline
 
     def ready(self):
-        return len(self.values) == self.period
+        return self._last_value is not None
