@@ -17,7 +17,7 @@ from .WMA import WMA
 
 
 class ADX(Indicator):
-    def __init__(self, name='adx', period=14.0):
+    def __init__(self, name='adx', period=14):
         Indicator.__init__(self, name=name)
         self.win = period
         self.atr = ATR(period=self.win)

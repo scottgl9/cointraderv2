@@ -59,7 +59,8 @@ class SignalStrength(Strategy):
             'rsi': 1.0,
             'uo': 1.0,
             'vo': 1.0,
-            'ichimoku': 1.0,
+            'stochastic': 1.0,
+            'vwap': 1.0,
         }
 
         # self._signal_weights = {
