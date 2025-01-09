@@ -26,9 +26,12 @@ class ADXSignal(Signal):
         if len(self._values) == self.period:
             prev = self._values[-2]
             last = self._values[-1]
-            if last['pdm'] > prev['ndm'] and last['pdm'] < prev['ndm']:
+            # Cross up: +DI just went above -DI
+            if (last['pdi'] > last['ndi']) and (prev['pdi'] <= prev['ndi']):
                 self._cross_up = True
-            if last['pdm'] < prev['ndm'] and last['pdm'] > prev['ndm']:
+
+            # Cross down: +DI just went below -DI
+            if (last['pdi'] < last['ndi']) and (prev['pdi'] >= prev['ndi']):
                 self._cross_down = True
 
     def cross_up(self):

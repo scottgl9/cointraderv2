@@ -2,128 +2,142 @@ from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 from .ATR import ATR
-from .WMA import WMA
-
-# Average Directional Index Indicator (ADX)
-# Formula:
-# - upmove = high - high(-1)
-# - downmove = low(-1) - low
-# - +dm = upmove if upmove > downmove and upmove > 0 else 0
-# - -dm = downmove if downmove > upmove and downmove > 0 else 0
-# - +di = 100 * MovingAverage(+dm, period) / atr(period)
-# - -di = 100 * MovingAverage(-dm, period) / atr(period)
-# - dx = 100 * abs(+di - -di) / (+di + -di)
-# - adx = MovingAverage(dx, period)
-
 
 class ADX(Indicator):
+    """
+    Average Directional Index (ADX) using simple moving averages (SMA).
+    Formula references:
+
+    - upmove = high - high(-1)
+    - downmove = low(-1) - low
+    - +dm = upmove if upmove > downmove and upmove > 0 else 0
+    - -dm = downmove if downmove > upmove and downmove > 0 else 0
+    - +di = 100 * (SMA(+dm, period) / ATR(period))
+    - -di = 100 * (SMA(-dm, period) / ATR(period))
+    - dx = 100 * abs(+di - -di) / (+di + -di)
+    - adx = SMA(dx, period)
+    """
+
     def __init__(self, name='adx', period=14):
-        Indicator.__init__(self, name=name)
-        self.win = period
-        self.atr = ATR(period=self.win)
+        super().__init__(name=name)
+        self.period = period
+        self.atr = ATR(period=self.period)
         self.reset()
 
     def reset(self):
-        self.adx = 0
-        self.dx_values = []
-        self.dx_age = 0
-        self._dx_sum = 0
-        # +DM values
-        self.pDM_values = []
-        self._pDM_sum = 0
-        self.pDM = 0
-        # -DM values
-        self.nDM_values = []
-        self._nDM_sum = 0
-        self.nDM = 0
-        # +DI
-        self.pDI = 0
-        # -DI
-        self.nDI = 0
-        self.dm_age = 0
-        self.prev_low = 0
-        self.prev_high = 0
-        self.result = 0
+        # Store the last Kline values so we can compute upmove / downmove
+        self.prev_high = None
+        self.prev_low = None
+
+        # Rolling windows for +DM, -DM, and DX
+        self.plus_dm_window = deque(maxlen=self.period)
+        self.minus_dm_window = deque(maxlen=self.period)
+        self.dx_window = deque(maxlen=self.period)
+
+        # Latest computed values
+        self.plus_di = 0.0
+        self.minus_di = 0.0
+        self.adx = 0.0
+
+        # Keep references to last output
         self._last_kline = None
         self._last_value = None
 
     def update(self, kline: Kline):
-        close = kline.close
-        low = kline.low
-        high = kline.high
+        """
+        Update the ADX with a new Kline (candlestick).
+        Returns the latest ADX, or None if not enough data.
+        """
+
+        # Update underlying ATR
         self.atr.update(kline)
-
-        if not self.prev_low or not self.prev_high:
-            self.prev_low = low
-            self.prev_high = high
+        if not self.atr.ready():
+            # We can't compute ADX until ATR is ready (period bars)
             self._last_kline = kline
             return self._last_value
 
-        pDM = high - self.prev_high
-        nDM = self.prev_low - low
+        cur_high = kline.high
+        cur_low = kline.low
 
-        # - +dm = upmove if upmove > downmove and upmove > 0 else 0
-        # - -dm = downmove if downmove > upmove and downmove > 0 else 0
-        if pDM > nDM and pDM > 0:
-            self.pDM = pDM
-        else:
-            self.pDM = 0.0
-        if nDM > pDM and nDM > 0:
-            self.nDM = nDM
-        else:
-            self.nDM = 0
-
-        self.prev_low = low
-        self.prev_high = high
-
-        if len(self.pDM_values) < self.win or len(self.nDM_values) < self.win:
-            self.pDM_values.append(self.pDM)
-            self.nDM_values.append(self.nDM)
-            self._pDM_sum += self.pDM
-            self._nDM_sum += self.nDM
+        # If we don’t have previous bar info, just store and wait for the next
+        if self.prev_high is None or self.prev_low is None:
+            self.prev_high = cur_high
+            self.prev_low = cur_low
             self._last_kline = kline
             return self._last_value
-        else:
-            if self.pDI and self.nDI:
-                prev_pdm_sum = self._pDM_sum
-                prev_ndm_sum = self._nDM_sum
-                self._pDM_sum -= prev_pdm_sum / self.win
-                self._pDM_sum += self.pDM
-                self._nDM_sum -= prev_ndm_sum / self.win
-                self._nDM_sum += self.nDM
 
-            self.pDI = 100.0 * (self._pDM_sum / self.atr.get_last_value())
-            self.nDI = 100.0 * (self._nDM_sum / self.atr.get_last_value())
+        # Calculate directional moves
+        upmove = cur_high - self.prev_high
+        downmove = self.prev_low - cur_low
 
-        if not self.pDI and not self.nDI:
-            return self._last_value
+        # +DM, -DM
+        plus_dm = upmove if (upmove > downmove and upmove > 0) else 0.0
+        minus_dm = downmove if (downmove > upmove and downmove > 0) else 0.0
 
-        dx = 100.0 * abs(self.pDI - self.nDI) / abs(self.pDI + self.nDI)
-        if len(self.dx_values) < self.win:
-            self.dx_values.append(dx)
-            self._dx_sum += dx
+        # Add +DM, -DM to rolling windows
+        self.plus_dm_window.append(plus_dm)
+        self.minus_dm_window.append(minus_dm)
+
+        # Now that we've used these, update previous values
+        self.prev_high = cur_high
+        self.prev_low = cur_low
+
+        # We can only compute +DI, -DI once we have at least 'period' bars
+        if len(self.plus_dm_window) < self.period or not self.atr.ready():
+            # Not enough data to produce ADX yet
             self._last_kline = kline
             return self._last_value
-        else:
-            if not self.adx:
-                self.adx = self._dx_sum / self.win
-            else:
-                prev_adx = self.adx
-                self.adx = ((prev_adx * (self.win - 1.0)) + dx) / self.win
 
-        self.result = {
+        # --- Compute +DI and -DI ---
+        # Simple moving average of +DM and -DM
+        sum_plus_dm = sum(self.plus_dm_window)
+        sum_minus_dm = sum(self.minus_dm_window)
+
+        # ATR for the current bar
+        current_atr = self.atr.get_last_value()
+        if current_atr == 0:
+            # Avoid division by zero
+            self._last_kline = kline
+            return self._last_value
+
+        self.plus_di = 100.0 * ((sum_plus_dm / self.period) / current_atr)
+        self.minus_di = 100.0 * ((sum_minus_dm / self.period) / current_atr)
+
+        # --- Compute DX ---
+        di_sum = self.plus_di + self.minus_di
+        if di_sum == 0:
+            # Avoid division by zero
+            self._last_kline = kline
+            return self._last_value
+
+        dx = 100.0 * abs(self.plus_di - self.minus_di) / di_sum
+
+        # Add DX to rolling window
+        self.dx_window.append(dx)
+
+        # Compute ADX from the simple average of the last 'period' DX values
+        if len(self.dx_window) == self.period:
+            self.adx = sum(self.dx_window) / self.period
+
+        # Prepare the result dictionary
+        self._last_value = {
             'adx': self.adx,
-            'pdm': self.pDM,
-            'ndm': self.nDM
+            'pdi': self.plus_di,
+            'ndi': self.minus_di
         }
-    
-        self._last_value = self.result
         self._last_kline = kline
-    
-        return self.result
-    
+
+        return self._last_value
+
     def get_last_value(self):
         return self._last_value
-    
+
     def ready(self):
-        return self.atr.ready() and self._last_value is not None
+        """
+        Returns True if the indicator has enough data to produce valid ADX.
+        """
+        return (
+            self.atr.ready() and
+            len(self.plus_dm_window) == self.period and
+            len(self.dx_window) == self.period
+        )

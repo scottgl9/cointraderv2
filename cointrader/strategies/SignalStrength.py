@@ -60,6 +60,7 @@ class SignalStrength(Strategy):
                 'vo': 1.0,
                 'stochastic': 1.0,
                 'vwap': 1.0,
+                #'adx': 1.0,
             }
 
         # set to 0 if not present
@@ -161,7 +162,7 @@ class SignalStrength(Strategy):
             self.signals['supertrend'] = SupertrendSignal(symbol=self._symbol, period=14, multiplier=3)
         if self._signal_weights['adx'] > 0:
             from cointrader.signals.ADXSignal import ADXSignal
-            self.signals['adx'] = ADXSignal(symbol=self._symbol, period=14, threshold=20)
+            self.signals['adx'] = ADXSignal(symbol=self._symbol, period=14, threshold=25)
         if self._signal_weights['squeeze'] > 0:
             from cointrader.signals.SqueezeMomentumSignal import SqueezeMomentumSignal
             self.signals['squeeze'] = SqueezeMomentumSignal(symbol=self._symbol, length=20, multBB=2.0, multKC=1.5)
