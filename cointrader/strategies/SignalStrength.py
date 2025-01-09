@@ -451,9 +451,9 @@ class SignalStrength(Strategy):
                 self.signal_states['eom'] = OrderSide.SELL
 
         if self._signal_weights['kst'] > 0 and self.signals['kst'].ready():
-            if self.signals['kst'].cross_up():
+            if self.signals['kst'].cross_up() and self.signals['kst'].above():
                 self.signal_states['kst'] = OrderSide.BUY
-            elif self.signals['kst'].cross_down():
+            elif self.signals['kst'].cross_down() and self.signals['kst'].below():
                 self.signal_states['kst'] = OrderSide.SELL
             if self.signals['kst'].increasing():
                if 'kst_change' in self._signal_weights.keys():

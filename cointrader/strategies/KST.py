@@ -22,13 +22,13 @@ class KST(Strategy):
         return result
 
     def buy_signal(self):
-        if self._kst.ready() and self._kst.cross_up():
+        if self._kst.ready() and self._kst.above() and self._kst.cross_up():
             self._buy_signal_name = self._kst.name()
             return True
         return False
 
     def sell_signal(self):
-        if self._kst.ready() and self._kst.cross_down():
+        if self._kst.ready() and self._kst.below() and self._kst.cross_down():
             self._sell_signal_name = self._kst.name()
             return True
         return False
