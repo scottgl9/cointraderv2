@@ -4,7 +4,7 @@ from cointrader.signals.ZLEMACross import ZLEMACross
 class ZLEMA(Strategy):
     def __init__(self, symbol: str, name='zlema_strategy', granularity=0, weights=None):
         super().__init__(symbol=symbol, name=name, granularity=granularity)
-        self.zlema = ZLEMACross(symbol=self._symbol, short_period=12, long_period=24)
+        self.zlema = ZLEMACross(symbol=self._symbol, short_period=12, long_period=30)
         self._buy_signal_name = None
         self._sell_signal_name = None
 

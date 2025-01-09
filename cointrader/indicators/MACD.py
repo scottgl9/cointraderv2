@@ -30,12 +30,6 @@ class MACD(Indicator):
 
         return self._last_value
 
-    def increasing(self):
-        self.signal_ema.increasing() and self.short_ema.increasing() and self.long_ema.increasing()
-
-    def decreasing(self):
-        self.signal_ema.decreasing() and self.short_ema.decreasing() and self.long_ema.decreasing()
-
     def get_last_value(self):
         return self._last_value
     

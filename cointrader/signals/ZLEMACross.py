@@ -2,15 +2,16 @@ from collections import deque
 from cointrader.common.Signal import Signal
 from cointrader.common.Kline import Kline
 from cointrader.indicators.ZLEMA import ZLEMA
+from cointrader.indicators.EMA import EMA
 
 class ZLEMACross(Signal):
-    def __init__(self, name='zlema', symbol=None, short_period=12, long_period=24):
+    def __init__(self, name='zlema', symbol=None, short_period=12, long_period=30):
         super().__init__(name, symbol)
         self.short_period = short_period
         self.long_period = long_period
         self.window = max(short_period, long_period)
-        self.short_zlema = ZLEMA(f"{self._name}_short", self.short_period)
-        self.long_zlema = ZLEMA(f"{self._name}_long", self.long_period)
+        self.short_zlema = ZLEMA(name=f"{self._name}_short", period=self.short_period)
+        self.long_zlema = EMA(name=f"{self._name}_long", period=self.long_period)
         self.reset()
 
     def reset(self):
