@@ -11,11 +11,15 @@ class EMACross(Signal):
         self.window = max(short_period, long_period)
         self.short_ema = EMA(f"{self._name}_short", self.short_period)
         self.long_ema = EMA(f"{self._name}_long", self.long_period)
+        self.diff_period = 9
+        self.diff_ema = EMA(f"{self._name}_diff", self.diff_period)
+        self._threshold = 0.01
         self.reset()
 
     def reset(self):
         self.short_ema.reset()
         self.long_ema.reset()
+        self.diff_ema.reset()
         self._cross_up = False
         self._cross_down = False
         self._short_ema_values = deque(maxlen=self.window)
@@ -31,8 +35,15 @@ class EMACross(Signal):
         self._short_ema_values.append(short_ema_value)
         self._long_ema_values.append(long_ema_value)
 
+        #if long_ema_value != 0:
+        #    self.diff_ema.update_with_value((short_ema_value - long_ema_value) / long_ema_value * 100)
+
         if not self.ready():
             return
+
+        # if cross is below threshold, ignore
+        #if abs(self.diff_ema.get_last_value()) < self._threshold:
+        #    return
 
         if self._short_ema_values[-1] > self._long_ema_values[-1] and self._short_ema_values[-2] <= self._long_ema_values[-2]:
             self._cross_up = True
