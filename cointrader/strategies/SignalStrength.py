@@ -50,25 +50,17 @@ class SignalStrength(Strategy):
                 #'uo_change': 0.3
                 #'kst_change': 0.2
             }
-        
 
-        self._signal_weights = {
-            'supertrend': 1.0,
-            'kst': 1.0,
-            'ema': 1.0,
-            'rsi': 1.0,
-            'uo': 1.0,
-            'vo': 1.0,
-            'stochastic': 1.0,
-            'vwap': 1.0,
-        }
-
-        # self._signal_weights = {
-        #     'ichimoku': 0.5,
-        #     'vo': 0.5,
-        #     'eom': 0.5,
-        #     'kst': 0.5
-        # }
+            self._signal_weights = {
+                'supertrend': 1.0,
+                'kst': 1.0,
+                'ema': 1.0,
+                'rsi': 1.0,
+                'uo': 1.0,
+                'vo': 1.0,
+                'stochastic': 1.0,
+                'vwap': 1.0,
+            }
 
         # set to 0 if not present
         if 'macd' not in self._signal_weights:

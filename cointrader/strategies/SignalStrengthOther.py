@@ -6,6 +6,8 @@ class SignalStrengthOther(SignalStrength):
         weights = {
             'supertrend': 0.8,
             'kst': 1.0,
-            #'vwap': 1.0,
+            'vwap': 0.8,
+            'ema': 1.0,
+            'rsi': 1.0,
         }
         super().__init__(symbol=symbol, name=name, granularity=granularity, weights=weights)
