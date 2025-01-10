@@ -27,7 +27,7 @@
     "replace_buy_order_percent": 1.0,
     "replace_sell_order_percent": 1.0,
     "trailing_stop_loss": true,
-    "min_take_profit_percent": 0.5,
+    "min_take_profit_percent": 2.0,
     "stop_on_loss": true,
     "max_total_loss_percent": 10.0,
     "global_cooldown_period_seconds": 3600,
