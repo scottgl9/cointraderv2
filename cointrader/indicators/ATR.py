@@ -1,3 +1,4 @@
+# This file is created to implement the ATR (Average True Range) indicator
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 

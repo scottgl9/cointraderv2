@@ -111,6 +111,8 @@ class SignalStrength(Strategy):
             self._signal_weights['eom'] = 0
         if 'kst' not in self._signal_weights:
             self._signal_weights['kst'] = 0
+        if 'willr' not in self._signal_weights:
+            self._signal_weights['willr'] = 0
         if 'macd_change' not in self._signal_weights:
             self._signal_weights['macd_change'] = 0
         if 'rsi_change' not in self._signal_weights:
@@ -207,6 +209,9 @@ class SignalStrength(Strategy):
         if self._signal_weights['kst'] > 0:
             from cointrader.signals.KSTSignal import KSTSignal
             self.signals['kst'] = KSTSignal(symbol=self._symbol, roc_periods=[10, 15, 20, 30], smoothing_periods=[10, 10, 10, 15], weights=[1, 2, 3, 4], signal_period=9, threshold=0.0)
+        if self._signal_weights['willr'] > 0:
+            from cointrader.signals.WILLRSignal import WILLRSignal
+            self.signals['willr'] = WILLRSignal(symbol=self._symbol, period=14, overbought=-20, oversold=-80)
 
         self.signal_states: dict[str, OrderSide] = {}
         for name in self.signals.keys():
@@ -457,6 +462,14 @@ class SignalStrength(Strategy):
             else:
                if 'kst_change' in self._signal_weights.keys():
                    self.signal_states['kst_change'] = OrderSide.NONE
+        
+        if self._signal_weights['willr'] > 0 and self.signals['willr'].ready():
+            if self.signals['willr'].above():
+                self.signal_states['willr'] = OrderSide.SELL
+            elif self.signals['willr'].below():
+                self.signal_states['willr'] = OrderSide.BUY
+            else:
+                self.signal_states['willr'] = OrderSide.NONE
 
     def buy_signal_name(self):
         result = self._buy_signal_name
