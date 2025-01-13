@@ -8,7 +8,7 @@
     "quote_currency": "USD",
     "max_position_quote_size": 25.0,
     "strategies_other_timeframes": [
-        "SignalStrength:900"
+        "SignalStrengthOther:1800"
     ],
     "strategy": "SignalStrength",
     "granularity": 300,
@@ -62,5 +62,5 @@
     "start_position_type": "STOP_LOSS_LIMIT",
     "end_position_type": "STOP_LOSS_LIMIT",
     "sell_all_on_stop": false,
-    "position_open_buy_complete": false
+    "position_open_buy_complete": true
 }

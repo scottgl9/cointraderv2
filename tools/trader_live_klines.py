@@ -114,6 +114,7 @@ class CBADVLive:
 
 
 def main(name):
+    OTHER_TIMEFRAME = 1800
     exchange = TraderSelectExchange(name).get_exchange()
 
     # top 35 cryptocurrencies
@@ -210,14 +211,14 @@ def main(name):
         mtrader.market_preload(symbol, klines)
 
         # emitter takes in 5m klines, and emits 15m klines
-        kline_emitters[symbol] = KlineEmitter(src_granularity=GRANULARITY, dst_granularity=900)
+        kline_emitters[symbol] = KlineEmitter(src_granularity=GRANULARITY, dst_granularity=OTHER_TIMEFRAME)
         for kline in klines:
             kline_emitters[symbol].update(kline)
             if kline_emitters[symbol].ready():
                 kline_15m = kline_emitters[symbol].emit()
                 kline_emitters[symbol].reset()
                 if kline_15m:
-                    mtrader.market_update_kline_other_timeframe(symbol, kline_15m, 900, preload=True)
+                    mtrader.market_update_kline_other_timeframe(symbol, kline_15m, OTHER_TIMEFRAME, preload=True)
         time.sleep(1)
 
     exec_pipe_thread = PipelineExecutionThread(exec_pipe=ep)
@@ -282,8 +283,8 @@ def main(name):
                     kline_15m.granularity = kline_emitter.granularity()
                     mtrader.market_update_kline_other_timeframe(kline.symbol, kline_15m, kline_emitter.granularity(), preload=False)
 
-                # print only once every 15 minutes
-                if kline.ts != last_ts and kline.ts % 900 == 0:
+                # print only once every 30 minutes
+                if kline.ts != last_ts and kline.ts % OTHER_TIMEFRAME == 0:
                     pd.to_datetime(kline.ts, unit='s')
                     print(f"{pd.to_datetime(kline.ts, unit='s')} {kline.symbol} Low: {kline.low}, High: {kline.high}, Open: {kline.open}, Close: {kline.close} Volume: {kline.volume}")
                 mtrader.market_update_kline(symbol=kline.symbol, kline=kline, granularity=GRANULARITY)
