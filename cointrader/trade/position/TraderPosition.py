@@ -127,8 +127,8 @@ class TraderPosition(PositionBase):
         elif self._config.start_position_type() == OrderType.STOP_LOSS_LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price + current_price * limit_order_percent / 100)
-            stop_loss_percent = self._config.stop_loss_percent()
-            stop_loss = self._account.round_quote(self._symbol, current_price + current_price * stop_loss_percent / 100)
+            stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
+            stop_loss = self._account.round_quote(self._symbol, limit_price - limit_price * stop_loss_limit_percent / 100)
             oreq.type = OrderType.STOP_LOSS_LIMIT
             oreq.limit_price = limit_price
             oreq.stop_price = stop_loss
@@ -326,8 +326,8 @@ class TraderPosition(PositionBase):
         elif self._config.end_position_type() == OrderType.STOP_LOSS_LIMIT.name:
             limit_order_percent = self._config.limit_order_percent()
             limit_price = self._account.round_quote(self._symbol, current_price - current_price * limit_order_percent / 100)
-            stop_loss_percent = self._config.stop_loss_percent()
-            stop_loss = self._account.round_quote(self._symbol, current_price - current_price * stop_loss_percent / 100)
+            stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
+            stop_loss = self._account.round_quote(self._symbol, limit_price + limit_price * stop_loss_limit_percent / 100)
             oreq.type = OrderType.STOP_LOSS_LIMIT
             oreq.limit_price = limit_price
             oreq.stop_price = stop_loss
