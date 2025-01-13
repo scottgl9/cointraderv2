@@ -365,7 +365,7 @@ class TraderPosition(PositionBase):
         """
         Update the position with order status and the current market price
         """
-        if self._config.log_level() == LogLevel.DEBUG.value:
+        if self._config.simulate() and self._config.log_level() == LogLevel.DEBUG.value:
             print(f"Updating position for {self._symbol} current price: {current_price}")
         self._current_price = current_price
         self._current_ts = current_ts
