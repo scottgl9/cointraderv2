@@ -170,9 +170,11 @@ def main(name):
     print("Total USD Balance:")
     print(account.get_total_balance("USD"))
 
+    threaded = True
+
     ex = TraderExecute(exchange=exchange, account=account, config=tconfig)
 
-    ep = ExecutePipeline(execute=ex, max_orders=100, threaded=True)
+    ep = ExecutePipeline(execute=ex, max_orders=100, threaded=threaded)
 
     orders = Orders(config=tconfig, db_path=tconfig.orders_db_path(), reset=False)
 
@@ -221,9 +223,10 @@ def main(name):
                     mtrader.market_update_kline_other_timeframe(symbol, kline_15m, OTHER_TIMEFRAME, preload=True)
         time.sleep(1)
 
-    exec_pipe_thread = PipelineExecutionThread(exec_pipe=ep)
-    exec_pipe_thread.daemon = True
-    exec_pipe_thread.start()
+    if threaded:
+        exec_pipe_thread = PipelineExecutionThread(exec_pipe=ep)
+        exec_pipe_thread.daemon = True
+        exec_pipe_thread.start()
 
     #product_ids = ["BTC-USD", "SOL-USD", "ETH-USD"]
     ws_client.open()

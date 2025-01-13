@@ -322,26 +322,28 @@ class Trader(object):
 
             #print(f'Buy signal {self._strategy.buy_signal_name()} for {self._symbol}')
             position = TraderPosition(symbol=self._symbol, pid=self._cur_id, strategy=self._strategy, exec_pipe=self._exec_pipe, config=self._config, orders=self._orders)
-            position.open_position(size=size, current_price=current_price, current_ts=current_ts)
-            self._total_position_count += 1
-            opened_position_id = self._cur_id
-            self._positions.append(position)
-            self._cur_id += 1
-            if self._cooldown_period_seconds > 0:
-                self._disabled = True
-                self._disable_until_ts = current_ts + self._cooldown_period_seconds
+            if position.open_position(size=size, current_price=current_price, current_ts=current_ts):
+                # if position successfully opened, update quote balance
+                self._config.set_global_current_balance_quote(balance - quote_size)
+                self._total_position_count += 1
+                opened_position_id = self._cur_id
+                self._positions.append(position)
+                self._cur_id += 1
+                if self._cooldown_period_seconds > 0:
+                    self._disabled = True
+                    self._disable_until_ts = current_ts + self._cooldown_period_seconds
 
-            # if we have a market order filled immediately, then set the stop loss
-            if position.opened() and self._config.trailing_stop_loss() and self._loss_strategy.ready():
-                stop_price = self._loss_strategy.get_stop_loss_price(price=position.buy_price(), current_ts=current_ts)
-                stop_limit_price = self._loss_strategy.get_stop_limit_price(price=position.buy_price(), current_ts=current_ts)
-                if self._config.log_level() >= LogLevel.INFO.value:
-                    print(f"{self._symbol} Stop loss: {stop_price} Limit: {stop_limit_price}")
+                # if we have a market order filled immediately, then set the stop loss
+                if position.opened() and self._config.trailing_stop_loss() and self._loss_strategy.ready():
+                    stop_price = self._loss_strategy.get_stop_loss_price(price=position.buy_price(), current_ts=current_ts)
+                    stop_limit_price = self._loss_strategy.get_stop_limit_price(price=position.buy_price(), current_ts=current_ts)
+                    if self._config.log_level() >= LogLevel.INFO.value:
+                        print(f"{self._symbol} Stop loss: {stop_price} Limit: {stop_limit_price}")
 
-                # handle setting and updating stop loss orders if enabled
-                if not position.stop_loss_is_set():
-                    #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
-                    position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_limit_price, current_ts=current_ts)
+                    # handle setting and updating stop loss orders if enabled
+                    if not position.stop_loss_is_set():
+                        #print(f"buy price: {position.buy_price()} Stop price: {stop_price}")
+                        position.create_stop_loss_position(stop_price=stop_price, limit_price=stop_limit_price, current_ts=current_ts)
 
         strategy_sell_signal = self._strategy.sell_signal()
 

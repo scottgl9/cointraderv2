@@ -69,6 +69,8 @@ class OrderStorage:
         return cursor.fetchone() is not None
 
     def add_order(self, order: Order):
+        if not order.id:
+            raise ValueError('Order id is required')
         conn = self.get_connection()
         field_str = ', '.join(self._fields)
         cursor = conn.cursor()

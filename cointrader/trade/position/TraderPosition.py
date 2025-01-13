@@ -153,6 +153,7 @@ class TraderPosition(PositionBase):
 
         if self._buy_order.rejected() or self._buy_order.unknown():
             print(f"open_position() Buy order rejected or unknown: {self._buy_order.msg}")
+            return False
 
         self._buy_order.pid = self._pid
         self._orders.add_order(self._symbol, self._buy_order)
@@ -160,6 +161,7 @@ class TraderPosition(PositionBase):
         # if this is a market order, the buy order should already be filled
         if self._buy_order.filled():
             self._opened_position_completed = True
+        return True
 
 
     def update_buy_position(self, size: float, current_price: float, current_ts: int):
