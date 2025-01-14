@@ -417,6 +417,12 @@ class CBADVTraderExchange(TraderExchangeBase):
                     if 'message' in response:
                         order_result.error_msg = response['message']
                     return order_result
+                elif response['error'] == "INVALID_PRICE_PRECISION":
+                    order_result.status = OrderStatus.REJECTED
+                    order_result.error_reason = OrderErrorReason.INVALID_PRICE
+                    if 'message' in response:
+                        order_result.error_msg = response['message']
+                    return order_result
                 else:
                     print("Unknown error: ", response['error'])
                     order_result.status = OrderStatus.UNKNOWN
