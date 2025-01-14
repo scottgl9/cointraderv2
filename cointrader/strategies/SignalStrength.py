@@ -229,13 +229,13 @@ class SignalStrength(Strategy):
             elif self.signals['macd'].cross_down():
                 self.signal_states['macd'] = OrderSide.SELL
             if self.signals['macd'].increasing():
-                if 'macd_change' in self._signal_weights.keys():
+                if self._signal_weights['macd_change'] > 0:
                     self._signal_weights['macd_change'] = OrderSide.BUY
             elif self.signals['macd'].decreasing():
-                if 'macd_change' in self._signal_weights.keys():
+                if self._signal_weights['macd_change'] > 0:
                     self._signal_weights['macd_change'] = OrderSide.SELL
             else:
-                if 'macd_change' in self._signal_weights.keys():
+                if self._signal_weights['macd_change'] > 0:
                     self._signal_weights['macd_change'] = OrderSide.NONE
 
         if self._signal_weights['sama'] > 0 and self.signals['sama'].ready():
@@ -258,13 +258,13 @@ class SignalStrength(Strategy):
             else:
                 self.signal_states['rsi'] = OrderSide.NONE
             if self.signals['rsi'].increasing():
-                if 'rsi_change' in self._signal_weights.keys():
+                if self._signal_weights['rsi_change'] > 0:
                     self.signal_states['rsi_change'] = OrderSide.BUY
             elif self.signals['rsi'].decreasing():
-                if 'rsi_change' in self._signal_weights.keys():
+                if self._signal_weights['rsi_change'] > 0:
                     self.signal_states['rsi_change'] = OrderSide.SELL
             else:
-                if 'rsi_change' in self._signal_weights.keys():
+                if self._signal_weights['rsi_change'] > 0:
                     self.signal_states['rsi_change'] = OrderSide.NONE
 
         if self._signal_weights['stochastic'] > 0 and self.signals['stochastic'].ready():
@@ -273,13 +273,13 @@ class SignalStrength(Strategy):
             elif self.signals['stochastic'].cross_down():
                 self.signal_states['stochastic'] = OrderSide.SELL
             if self.signals['stochastic'].increasing():
-                if 'stoch_change' in self._signal_weights.keys():
+                if self._signal_weights['stoch_change'] > 0:
                     self.signal_states['stoch_change'] = OrderSide.BUY
             elif self.signals['stochastic'].decreasing():
-                if 'stoch_change' in self._signal_weights.keys():
+                if self._signal_weights['stoch_change'] > 0:
                     self.signal_states['stoch_change'] = OrderSide.SELL
             else:
-                if 'stoch_change' in self._signal_weights.keys():
+                if self._signal_weights['stoch_change'] > 0:
                     self.signal_states['stoch_change'] = OrderSide.NONE
 
         if self._signal_weights['ema'] > 0 and self.signals['ema'].ready():
@@ -309,13 +309,13 @@ class SignalStrength(Strategy):
             elif self.signals['adx'].below():
                 self.signal_states['adx'] = OrderSide.NONE
             if self.signals['adx'].increasing():
-                if 'adx_change' in self._signal_weights.keys():
+                if self._signal_weights['adx_change'] > 0:
                     self.signal_states['adx_change'] = OrderSide.BUY
             elif self.signals['adx'].decreasing():
-                if 'adx_change' in self._signal_weights.keys():
+                if self._signal_weights['adx_change'] > 0:
                     self.signal_states['adx_change'] = OrderSide.SELL
             else:
-                if 'adx_change' in self._signal_weights.keys():
+                if self._signal_weights['adx_change'] > 0:
                     self.signal_states['adx_change'] = OrderSide.NONE
 
         if self._signal_weights['squeeze'] > 0 and self.signals['squeeze'].ready():
@@ -330,13 +330,13 @@ class SignalStrength(Strategy):
             elif self.signals['roc'].cross_down():
                 self.signal_states['roc'] = OrderSide.SELL
             if self.signals['roc'].increasing():
-                if 'roc_change' in self._signal_weights.keys():
+                if self._signal_weights['roc_change'] > 0:
                     self.signal_states['roc_change'] = OrderSide.BUY
             elif self.signals['roc'].decreasing():
-                if 'roc_change' in self._signal_weights.keys():
+                if self._signal_weights['roc_change'] > 0:
                     self.signal_states['roc_change'] = OrderSide.BUY
             else:
-                if 'roc_change' in self._signal_weights.keys():
+                if self._signal_weights['roc_change'] > 0:
                     self.signal_states['roc_change'] = OrderSide.NONE
 
         if self._signal_weights['psar'] > 0 and self.signals['psar'].ready():
@@ -351,11 +351,14 @@ class SignalStrength(Strategy):
             elif self.signals['vwap'].below():
                 self.signal_states['vwap'] = OrderSide.SELL
             if self.signals['vwap'].increasing():
-                self.signal_states['vwap_change'] = OrderSide.BUY
+                if self._signal_weights['vwap_change'] > 0:
+                    self.signal_states['vwap_change'] = OrderSide.BUY
             elif self.signals['vwap'].decreasing():
-                self.signal_states['vwap_change'] = OrderSide.SELL
+                if self._signal_weights['vwap_change'] > 0:
+                    self.signal_states['vwap_change'] = OrderSide.SELL
             else:
-                self.signal_states['vwap_change'] = OrderSide.NONE
+                if self._signal_weights['vwap_change'] > 0:
+                    self.signal_states['vwap_change'] = OrderSide.NONE
 
         if self._signal_weights['ppo'] > 0 and self.signals['ppo'].ready():
             if self.signals['ppo'].cross_up():
@@ -391,14 +394,14 @@ class SignalStrength(Strategy):
             else:
                 self.signal_states['uo'] = OrderSide.NONE
             if self.signals['uo'].increasing():
-               if 'uo_change' in self._signal_weights.keys():
-                   self.signal_states['uo_change'] = OrderSide.BUY
+                if self._signal_weights['uo_change'] > 0:
+                    self.signal_states['uo_change'] = OrderSide.BUY
             elif self.signals['uo'].decreasing():
-               if 'uo_change' in self._signal_weights.keys():
-                   self.signal_states['uo_change'] = OrderSide.SELL
+                if self._signal_weights['uo_change'] > 0:
+                    self.signal_states['uo_change'] = OrderSide.SELL
             else:
-               if 'uo_change' in self._signal_weights.keys():
-                   self.signal_states['uo_change'] = OrderSide.NONE
+                if self._signal_weights['uo_change'] > 0:
+                    self.signal_states['uo_change'] = OrderSide.NONE
 
         if self._signal_weights['dpo'] > 0 and self.signals['dpo'].ready():
           if self.signals['dpo'].cross_up():
@@ -418,30 +421,30 @@ class SignalStrength(Strategy):
             elif self.signals['vo'].cross_down():
                 self.signal_states['vo'] = OrderSide.SELL
             if self.signals['vo'].increasing():
-               if 'vo_change' in self._signal_weights.keys():
-                   self.signal_states['vo_change'] = OrderSide.BUY
+                if self._signal_weights['vo_change'] > 0:
+                    self.signal_states['vo_change'] = OrderSide.BUY
             elif self.signals['vo'].decreasing():
-               if 'vo_change' in self._signal_weights.keys():
-                   self.signal_states['vo_change'] = OrderSide.SELL
+                if self._signal_weights['vo_change'] > 0:
+                    self.signal_states['vo_change'] = OrderSide.SELL
             else:
-               if 'vo_change' in self._signal_weights.keys():
-                   self.signal_states['vo_change'] = OrderSide.NONE
-        
+                if self._signal_weights['vo_change'] > 0:
+                    self.signal_states['vo_change'] = OrderSide.NONE
+
         if self._signal_weights['kvo'] > 0 and self.signals['kvo'].ready():
             if self.signals['kvo'].cross_up():
                 self.signal_states['kvo'] = OrderSide.BUY
             elif self.signals['kvo'].cross_down():
                 self.signal_states['kvo'] = OrderSide.SELL
             if self.signals['kvo'].increasing():
-               if 'kvo_change' in self._signal_weights.keys():
-                   self.signal_states['kvo_change'] = OrderSide.BUY
+                if self._signal_weights['kvo_change'] > 0:
+                    self.signal_states['kvo_change'] = OrderSide.BUY
             elif self.signals['kvo'].decreasing():
-               if 'kvo_change' in self._signal_weights.keys():
-                   self.signal_states['kvo_change'] = OrderSide.SELL
+                if self._signal_weights['kvo_change'] > 0:
+                    self.signal_states['kvo_change'] = OrderSide.SELL
             else:
-               if 'kvo_change' in self._signal_weights.keys():
-                   self.signal_states['kvo_change'] = OrderSide.NONE
-        
+                if self._signal_weights['kvo_change'] > 0:
+                    self.signal_states['kvo_change'] = OrderSide.NONE
+
         if self._signal_weights['eom'] > 0 and self.signals['eom'].ready():
             if self.signals['eom'].cross_up():
                 self.signal_states['eom'] = OrderSide.BUY
@@ -454,15 +457,15 @@ class SignalStrength(Strategy):
             elif self.signals['kst'].cross_down() and self.signals['kst'].below():
                 self.signal_states['kst'] = OrderSide.SELL
             if self.signals['kst'].increasing():
-               if 'kst_change' in self._signal_weights.keys():
-                   self.signal_states['kst_change'] = OrderSide.BUY
+                if self._signal_weights['kst_change'] > 0:
+                    self.signal_states['kst_change'] = OrderSide.BUY
             elif self.signals['kst'].decreasing():
-               if 'kst_change' in self._signal_weights.keys():
-                   self.signal_states['kst_change'] = OrderSide.SELL
+                if self._signal_weights['kst_change'] > 0:
+                    self.signal_states['kst_change'] = OrderSide.SELL
             else:
-               if 'kst_change' in self._signal_weights.keys():
-                   self.signal_states['kst_change'] = OrderSide.NONE
-        
+                if self._signal_weights['kst_change'] > 0:
+                    self.signal_states['kst_change'] = OrderSide.NONE
+
         if self._signal_weights['willr'] > 0 and self.signals['willr'].ready():
             if self.signals['willr'].above():
                 self.signal_states['willr'] = OrderSide.SELL

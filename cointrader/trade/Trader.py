@@ -73,9 +73,9 @@ class Trader(object):
 
         self._max_positions_per_symbol = config.max_positions_per_symbol()
 
-        # control disabling new positions from this specific trader
-        self._local_disable_new_positions = False
-        self._prev_local_disable_new_positions = False
+        # control disabling new positions from this specific trader (disabled by default)
+        self._local_disable_new_positions = True
+        self._prev_local_disable_new_positions = True
         self._global_prev_disable_new_positions = False
 
         self._net_profit_percent = 0.0
@@ -219,14 +219,14 @@ class Trader(object):
             self._local_disable_new_positions = False
             if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
                 if self._config.log_level() >= LogLevel.INFO.value:
-                    print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal granularity={granularity}{Style.RESET_ALL}')
+                    print(f'{Fore.GREEN}{self._symbol} strategy {strategy.name()} buy signal {self._strategy.buy_signal_name()} granularity={granularity}{Style.RESET_ALL}')
             self._prev_local_disable_new_positions = self._local_disable_new_positions
         
         if strategy.sell_signal():
             self._local_disable_new_positions = True
             if not preload and self._prev_local_disable_new_positions != self._local_disable_new_positions:
                 if self._config.log_level() >= LogLevel.INFO.value:
-                    print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal granularity={granularity}{Style.RESET_ALL}')
+                    print(f'{Fore.RED}{self._symbol} strategy {strategy.name()} sell signal {self._strategy.sell_signal_name()} granularity={granularity}{Style.RESET_ALL}')
             self._prev_local_disable_new_positions = self._local_disable_new_positions
 
     def market_update_kline(self, kline: Kline, granularity: int):
