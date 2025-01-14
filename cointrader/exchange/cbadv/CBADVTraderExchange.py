@@ -411,6 +411,12 @@ class CBADVTraderExchange(TraderExchangeBase):
                     if 'message' in response:
                         order_result.error_msg = response['message']
                     return order_result
+                elif response['error'] == "UNKNOWN_FAILURE_REASON":
+                    order_result.status = OrderStatus.REJECTED
+                    order_result.error_reason = OrderErrorReason.UNKNOWN
+                    if 'message' in response:
+                        order_result.error_msg = response['message']
+                    return order_result
                 else:
                     print("Unknown error: ", response['error'])
                     order_result.status = OrderStatus.UNKNOWN

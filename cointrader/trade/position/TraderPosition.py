@@ -40,6 +40,10 @@ class TraderPosition(PositionBase):
             return
         self._exec_pipe.completed(oreq.rid)
 
+        if result.status == OrderStatus.REJECTED or result.status == OrderStatus.UNKNOWN:
+            print(f"create_stop_loss_position() Stop loss order rejected or unknown: {result.msg}")
+            return
+
         self._stop_loss_order = Order(symbol=self._symbol)
         self._stop_loss_order.update_order(result)
         self._stop_loss_order.pid = self._pid
