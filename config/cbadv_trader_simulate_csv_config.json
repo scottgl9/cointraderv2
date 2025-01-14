@@ -22,6 +22,7 @@
         "DOT-USDT"
     ],
     "stop_loss_percent": 5.0,
+    "min_stop_loss_percent": 0.5,
     "stop_loss_limit_order_percent": 0.1,
     "limit_order_percent": 0.2,
     "replace_buy_order_percent": 1.0,

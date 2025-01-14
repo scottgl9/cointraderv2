@@ -11,6 +11,7 @@ class ChandelierExit(TradeLossBase):
         super().__init__(name=name, symbol=symbol, account=account, config=config)
         self._period = 22
         self._stop_loss_limit_percent = self._config.stop_loss_limit_order_percent()
+        self._min_stop_loss_percent = self._config.min_stop_loss_percent()
         self._atr = ATR(period=self._period)
         self._multiplier = 3.0
         self._highs = deque(maxlen=self._period)
@@ -25,15 +26,23 @@ class ChandelierExit(TradeLossBase):
         return len(self._highs) == self._period
 
     def get_stop_loss_price(self, price: float, current_ts: int) -> float:
-        highest_high = max(self._highs)
-        stop_limit_price = highest_high - self._multiplier * self._atr.get_last_value()
+        #highest_high = max(self._highs)
+        #stop_limit_price = highest_high - self._multiplier * self._atr.get_last_value()
+        stop_limit_price = self.get_stop_limit_price(price, current_ts)
+
         # Stop price is set slightly above the stop limit price
         stop_price = self._account.round_quote(self._symbol, stop_limit_price * (1.0 + self._stop_loss_limit_percent / 100.0))
         return stop_price
 
     def get_stop_limit_price(self, price: float, current_ts: int) -> float:
         highest_high = max(self._highs)
+
         stop_limit_price = self._account.round_quote(self._symbol, highest_high - self._multiplier * self._atr.get_last_value())
+
+        # if the stop loss price is less than the minimum stop loss percent, set it to the minimum stop loss percent
+        if (price - stop_limit_price) / stop_limit_price * 100.0 < self._min_stop_loss_percent:
+            stop_limit_price = price * (1.0 - self._min_stop_loss_percent / 100.0)
+
         return stop_limit_price
 
     def update(self, kline: Kline):

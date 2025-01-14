@@ -21,7 +21,8 @@ DEFAULT_TRADE_CONFIG = {
     'loss_strategy': 'ChandelierExit',        # Strategy to use for setting stop loss
     'size_strategy': 'Fixed',                 # Strategy to use for setting trade size
     'trade_symbols': ['BTC-USD', 'ETH-USD', 'SOL-USD'],
-    'stop_loss_percent': 5.0,                 # percent stop loss to set under the buy price
+    'stop_loss_percent': 5.0,                 # percent stop loss to set under the buy price (for fixed stop loss strategy)
+    'min_stop_loss_percent': 1.0,             # minimum percent stop loss to set under the buy price (for dynamic stop loss strategy)
     'stop_loss_limit_order_percent': 0.1,     # percent to set the stop loss above or below the limit price
     'limit_order_percent': 0.2,               # percent to set the limit price above or below the current price
     'replace_buy_order_percent': 1.0,         # percent of price movement away from order before buy order gets replaced (limit and stop loss limit orders)
@@ -195,6 +196,12 @@ class TraderConfig(object):
     
     def set_stop_loss_percent(self, stop_loss_percent: float):
         self.set('stop_loss_percent', stop_loss_percent)
+
+    def min_stop_loss_percent(self) -> float:
+        return self.get('min_stop_loss_percent')
+    
+    def set_min_stop_loss_percent(self, min_stop_loss_percent: float):
+        self.set('min_stop_loss_percent', min_stop_loss_percent)
 
     def stop_loss_limit_order_percent(self) -> float:
         return self.get('stop_loss_limit_order_percent')
