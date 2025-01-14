@@ -41,7 +41,7 @@ class ChandelierExit(TradeLossBase):
 
         # if the stop loss price is less than the minimum stop loss percent, set it to the minimum stop loss percent
         if (price - stop_limit_price) / stop_limit_price * 100.0 < self._min_stop_loss_percent:
-            stop_limit_price = price * (1.0 - self._min_stop_loss_percent / 100.0)
+            stop_limit_price = self._account.round_quote(self._symbol, price * (1.0 - self._min_stop_loss_percent / 100.0))
 
         return stop_limit_price
 

@@ -31,7 +31,6 @@ class TraderPosition(PositionBase):
         oreq.limit_price = limit_price
         oreq.stop_price = stop_price
 
-        # TODO: replace with order pipeline
         #result = self._execute.execute_order(oreq)
         self._exec_pipe.process_order_request(order_request=oreq)
         result = self._exec_pipe.wait_order_result(oreq.rid)
@@ -42,7 +41,6 @@ class TraderPosition(PositionBase):
 
         if result.status == OrderStatus.REJECTED or result.status == OrderStatus.UNKNOWN:
             print(f"create_stop_loss_position()  Stop loss order rejected or unknown: {self._symbol} stop_price={stop_price} limit_price={limit_price} ts={current_ts} {result.msg}")
-            return
 
         self._stop_loss_order = Order(symbol=self._symbol)
         self._stop_loss_order.update_order(result)
@@ -57,11 +55,14 @@ class TraderPosition(PositionBase):
         if not self._stop_loss_order:
             return None
         
+        # if the stop loss order was rejected or unknown, we can't update it
+        if self._stop_loss_order.rejected() or self._stop_loss_order.unknown():
+            return self._stop_loss_order
+
         #result = self._execute.status(symbol=self._symbol, order_id=self._stop_loss_order.id, current_price=self._current_price, current_ts=self._current_ts)
         oreq = OrderRequest(symbol=self._symbol, type=OrderType.STATUS, current_price=self._current_price, current_ts=self._current_ts)
         oreq.order_id = self._stop_loss_order.id
 
-        # TODO: replace with order pipeline
         #result = self._execute.execute_order(oreq)
         self._exec_pipe.process_order_request(order_request=oreq)
         result = self._exec_pipe.wait_order_result(oreq.rid)
@@ -92,7 +93,6 @@ class TraderPosition(PositionBase):
         oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=self._current_price, current_ts=self._current_ts)
         oreq.order_id = self._stop_loss_order.id
 
-        # TODO: replace with order pipeline
         #result = self._execute.execute_order(oreq)
         self._exec_pipe.process_order_request(order_request=oreq)
         result = self._exec_pipe.wait_order_result(oreq.rid)
@@ -143,7 +143,6 @@ class TraderPosition(PositionBase):
         if not self._config.simulate():
             time.sleep(1)
 
-        # TODO: replace with order pipeline
         #result = self._execute.execute_order(oreq)
         self._exec_pipe.process_order_request(order_request=oreq)
         result = self._exec_pipe.wait_order_result(oreq.rid)
@@ -206,7 +205,6 @@ class TraderPosition(PositionBase):
                 oreq = OrderRequest(symbol=self._symbol, type=OrderType.CANCEL, current_price=current_price, current_ts=current_ts)
                 oreq.order_id = self._buy_order.id
 
-                # TODO: replace with order pipeline
                 #result = self._execute.execute_order(oreq)
                 self._exec_pipe.process_order_request(order_request=oreq)
                 result = self._exec_pipe.wait_order_result(oreq.rid)
@@ -296,6 +294,7 @@ class TraderPosition(PositionBase):
             if not self.stop_loss_is_completed():
                 # check if the stop loss order is filled
                 self.update_stop_loss_position()
+
                 if self.stop_loss_is_completed():
                     # stop loss order already filled, so position is closed
                     self._closed_position_completed = True
@@ -344,7 +343,7 @@ class TraderPosition(PositionBase):
         self._exec_pipe.process_order_request(order_request=oreq)
         result = self._exec_pipe.wait_order_result(oreq.rid)
         if result is None:
-            print(f"close_position() Sell order failed: {self._symbol} {current_price}")
+            print(f"close_position() Sell order failed: {self._symbol} price={current_price} ts={current_ts}")
             return
         self._exec_pipe.completed(oreq.rid)
 
@@ -408,7 +407,6 @@ class TraderPosition(PositionBase):
             oreq = OrderRequest(symbol=self._symbol, type=OrderType.STATUS, current_price=current_price, current_ts=current_ts)
             oreq.order_id = self._sell_order.id
 
-            # TODO: replace with order pipeline
             #result = self._execute.execute_order(oreq)
             self._exec_pipe.process_order_request(order_request=oreq)
             result = self._exec_pipe.wait_order_result(oreq.rid)
@@ -443,7 +441,6 @@ class TraderPosition(PositionBase):
             oreq = OrderRequest(symbol=self._symbol, type=OrderType.STATUS, current_price=current_price, current_ts=current_ts)
             oreq.order_id = self._stop_loss_order.id
 
-            # TODO: replace with order pipeline
             #result = self._execute.execute_order(oreq)
             self._exec_pipe.process_order_request(order_request=oreq)
             result = self._exec_pipe.wait_order_result(oreq.rid)
