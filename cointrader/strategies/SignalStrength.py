@@ -13,43 +13,43 @@ class SignalStrength(Strategy):
         if weights is not None:
             self._signal_weights = weights
         else:
-            self._signal_weights = {
-                'macd': 1.5,
-                'sama': 1.0,
-                'zlema': 1.2,
-                'rsi': 1.3,
-                'stochastic': 1.3,
-                'ema': 1.1,
-                'sma': 1.0,
-                'supertrend': 1.4,
-                'adx': 1.3,
-                'squeeze': 1.2,
-                'roc': 1.0,
-                'psar': 1.1,
-                'vwap': 1.2,
-                'ppo': 1.1,
-                'cmf': 1.3,
-                'cci': 1.3,
-                'ao': 0,
-                'uo': 0,
-                'dpo': 0,
-                'ichimoku': 0,
-                'vo': 0,
-                'kvo': 1.2,
-                'eom': 0,
-                'kst': 1.8,
-                # minor signal weights
-                'macd_change': 0.5,
-                'rsi_change': 0.5,
-                'stoch_change': 0.5,
-                'adx_change': 0.3,
-                'roc_change': 0.5,
-                'vwap_change': 0.5,
-                'vo_change': 0,
-                #'kvo_change': 0.5,
-                #'uo_change': 0.3
-                #'kst_change': 0.2
-            }
+            # self._signal_weights = {
+            #     'macd': 1.5,
+            #     'sama': 1.0,
+            #     'zlema': 1.2,
+            #     'rsi': 1.3,
+            #     'stochastic': 1.3,
+            #     'ema': 1.1,
+            #     'sma': 1.0,
+            #     'supertrend': 1.4,
+            #     'adx': 1.3,
+            #     'squeeze': 1.2,
+            #     'roc': 1.0,
+            #     'psar': 1.1,
+            #     'vwap': 1.2,
+            #     'ppo': 1.1,
+            #     'cmf': 1.3,
+            #     'cci': 1.3,
+            #     'ao': 0,
+            #     'uo': 0,
+            #     'dpo': 0,
+            #     'ichimoku': 0,
+            #     'vo': 0,
+            #     'kvo': 1.2,
+            #     'eom': 0,
+            #     'kst': 1.8,
+            #     # minor signal weights
+            #     'macd_change': 0.5,
+            #     'rsi_change': 0.5,
+            #     'stoch_change': 0.5,
+            #     'adx_change': 0.3,
+            #     'roc_change': 0.5,
+            #     'vwap_change': 0.5,
+            #     'vo_change': 0,
+            #     #'kvo_change': 0.5,
+            #     #'uo_change': 0.3
+            #     #'kst_change': 0.2
+            # }
 
             self._signal_weights = {
                 'supertrend': 1.0,

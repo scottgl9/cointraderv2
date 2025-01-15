@@ -358,8 +358,9 @@ class Trader(object):
                 if not self._disabled and buy_signal:
                     if not self._size_strategy.ready():
                         continue
-                    size = self._size_strategy.get_base_trade_size(current_price, current_ts)
-                    if not size:
+                    size = self._size_strategy.get_base_trade_size(current_price=current_price, current_ts=current_ts)
+                    quote_size = self._size_strategy.get_quote_trade_size(current_price=current_price, current_ts=current_ts)
+                    if not quote_size:
                         continue
 
                     # check if we have sufficient balance to update the buy position
@@ -368,10 +369,10 @@ class Trader(object):
                     balance = self._config.global_current_balance_quote()
                     #print("balance", balance, self._config.quote_currency())
                     balance = self._account.round_quote(self._symbol, balance)
-                    if balance >= size:
+                    if balance >= quote_size:
                         position.update_buy_position(size=size, current_price=current_price, current_ts=current_ts)
                     elif self._config.log_level() >= LogLevel.WARNING.value:
-                        print(f"{self._symbol} {quote_name} Insufficient balance {balance} to update buy position at price {current_price}")
+                        print(f"{self._symbol} {quote_name} Insufficient balance {balance} (quote_size={quote_size}) to update buy position at price {current_price}")
 
                 # skip checking for sell signal if position has not been opened
                 if not position.opened():
