@@ -7,6 +7,7 @@ class ROC(Indicator):
     def __init__(self, name='roc', period=14, **kwargs):
         super().__init__(name, **kwargs)
         self.period = period
+        self._values = deque(maxlen=self.period)
         self.reset()
 
     def ready(self) -> bool:
@@ -14,7 +15,8 @@ class ROC(Indicator):
 
     def reset(self):
         self._last_value = None
-        self._values = deque(maxlen=self.period)
+        self._last_kline = None
+        self._values.clear()
 
     def update(self, kline: Kline) -> float:
         result = self.update_with_value(kline.close)
