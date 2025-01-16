@@ -9,6 +9,9 @@ import argparse
 sys.path.append('.')
 from cointrader.exchange.TraderSelectExchange import TraderSelectExchange
 from cointrader.indicators.RSI import RSI
+from cointrader.indicators.ZLEMA import ZLEMA
+from cointrader.indicators.EMA import EMA
+from cointrader.indicators.SuperSmoother import SuperSmoother
 from cointrader.common.Kline import Kline
 
 CLIENT_NAME = "cbadv"
@@ -65,6 +68,8 @@ if __name__ == '__main__':
 
     rsi = RSI(period=14)
     rsi_values = []
+    rsi_smooth = SuperSmoother(period=12) #ZLEMA(period=12)
+    rsi_smooth_values = []
 
     opens = []
     closes = []
@@ -78,8 +83,14 @@ if __name__ == '__main__':
         result = rsi.update(kline)
         if rsi.ready():
             rsi_values.append(result)
+            rsi_smooth.update_with_value(result)
+            if rsi_smooth.ready():
+                rsi_smooth_values.append(rsi_smooth.get_last_value())
+            else:
+                rsi_smooth_values.append(np.nan)
         else:
             rsi_values.append(np.nan)
+            rsi_smooth_values.append(np.nan)
         opens.append(kline.open)
         closes.append(kline.close)
         highs.append(kline.high)
@@ -100,6 +111,7 @@ if __name__ == '__main__':
     df.set_index('Date', inplace=True)
 
     rsi_plot = mpf.make_addplot(rsi_values, panel=1, color='purple', width=1.5, ylabel='RSI')
+    rsi_smooth_plot = mpf.make_addplot(rsi_smooth_values, panel=1, color='blue', width=1.5, ylabel='RSI Smooth')
 
     mpf.plot(
         df,
@@ -107,5 +119,5 @@ if __name__ == '__main__':
         style='charles',
         title=f'{ticker} {granularity_name} chart with RSI',
         ylabel='Price',
-        addplot=[rsi_plot],
+        addplot=[rsi_plot, rsi_smooth_plot],
     )

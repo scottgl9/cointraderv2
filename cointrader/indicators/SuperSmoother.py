@@ -1,4 +1,5 @@
 import math
+from collections import deque
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 
@@ -9,7 +10,7 @@ class SuperSmoother(Indicator):
         self.reset()
 
     def reset(self):
-        self.values = []
+        self.values = deque(maxlen=3)
         self._last_kline = None
         self._last_value = None
         self._last_price = None
@@ -24,14 +25,16 @@ class SuperSmoother(Indicator):
         self.c1 = 1 - self.c2 - self.c3
 
     def update(self, kline: Kline):
-        price = kline.close
+        result = self.update_with_value(kline.close)
+        self._last_kline = kline
+        return result
 
+    def update_with_value(self, price: float):
         # Initialization phase
         if self._last_price is None:
             # Just store the first price, no smoothing yet
             self.values.append(price)
             self._last_price = price
-            self._last_kline = kline
             self._last_value = price
             return self._last_value
         elif len(self.values) == 1:
@@ -49,7 +52,6 @@ class SuperSmoother(Indicator):
 
         # Update last price and kline
         self._last_price = price
-        self._last_kline = kline
         return self._last_value
 
     def get_last_value(self):
@@ -60,14 +62,14 @@ class SuperSmoother(Indicator):
 
     def ready(self):
         # We consider it ready once we have at least two smoothed values beyond initialization
-        return len(self.values) > 2
+        return len(self.values) >= 2
 
     def increasing(self) -> bool:
         if not self.ready():
             return False
-        return self.values[-1] > self.values[0]
+        return self.values[-1] > self.values[-2]
 
     def decreasing(self) -> bool:
         if not self.ready():
             return False
-        return self.values[-1] < self.values[0]
+        return self.values[-1] < self.values[-2]
