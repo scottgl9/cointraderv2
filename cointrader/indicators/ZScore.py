@@ -22,15 +22,12 @@ class ZScore(Indicator):
         self.age = 0
 
     def update(self, kline: Kline):
-        # Update SMA with the new kline
-        sma_result = self.sma.update(kline)
-        if sma_result is not None:
-            result = self.update_with_value(kline.close, sma_result)
-            self._last_kline = kline
-            return result
-        return None
+        result = self.update_with_value(kline.close)
+        self._last_kline = kline
+        return result
 
-    def update_with_value(self, value, sma_value):
+    def update_with_value(self, value: float):
+        sma_value = self.sma.update_with_value(value)
         # Add the new value to the rolling list of prices
         if len(self.prices) < self.period:
             self.prices.append(float(value))
