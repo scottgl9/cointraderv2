@@ -4,12 +4,12 @@ import math
 from cointrader.common.Indicator import Indicator
 from cointrader.common.Kline import Kline
 from cointrader.indicators.ATR import ATR
+from cointrader.indicators.SMA import SMA
 
 def sma(values):
     return sum(values) / len(values) if len(values) > 0 else None
 
-def stdev(values):
-    mean = sma(values)
+def stdev(values, mean):
     return math.sqrt(sum((v - mean)**2 for v in values) / len(values)) if len(values) > 1 else 0.0
 
 class SqueezeMomentum(Indicator):
@@ -28,6 +28,8 @@ class SqueezeMomentum(Indicator):
         # ATR indicator instance
         self.atr = ATR(period=length)
 
+        self.sma = SMA(name=f"{name}_sma", period=length)
+
         # For momentum calculation
         self.val_deque = deque(maxlen=length)
 
@@ -40,6 +42,7 @@ class SqueezeMomentum(Indicator):
         self.typical_prices.clear()
         self.atr.reset()
         self.val_deque.clear()
+        self.sma.reset()
         self._last_value = None
 
     def update(self, kline: Kline):
@@ -59,7 +62,7 @@ class SqueezeMomentum(Indicator):
 
         # Compute Bollinger Bands
         ma = sma(self.typical_prices)
-        sd = stdev(self.typical_prices)
+        sd = stdev(self.typical_prices, ma)
         upperBB = ma + self.multBB * sd
         lowerBB = ma - self.multBB * sd
 

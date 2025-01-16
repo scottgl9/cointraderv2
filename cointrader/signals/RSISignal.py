@@ -14,10 +14,12 @@ class RSISignal(Signal):
 
     def reset(self):
         self.rsi.reset()
-        self._values = deque(maxlen=self.period)
+        self._values = deque(maxlen=2)
 
     def update(self, kline):
         result = self.rsi.update(kline)
+        if not self.rsi.ready():
+            return
         self._values.append(result)
 
     def cross_up(self):
@@ -51,4 +53,4 @@ class RSISignal(Signal):
         return False
 
     def ready(self):
-        return self.rsi.ready()
+        return len(self._values) >= 2
