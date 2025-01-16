@@ -1,5 +1,5 @@
 from cointrader.exchange.cbadv.CBADVTraderExchange import CBADVTraderExchange
-from cointrader.exchange.ccxt.CCXTTraderExchange import CCXTTraderExchange
+#from cointrader.exchange.ccxt.CCXTTraderExchange import CCXTTraderExchange
 from cointrader.config import CBADV_KEY, CBADV_SECRET
 class TraderSelectExchange:
     def __init__(self, exchange_name):
@@ -11,7 +11,7 @@ class TraderSelectExchange:
     def select_exchange(self, exchange_name):
         exchanges = {
             "cbadv": (CBADVTraderExchange, CBADV_KEY, CBADV_SECRET),
-            "ccxt": (CCXTTraderExchange, CBADV_KEY, CBADV_SECRET),
+            #"ccxt": (CCXTTraderExchange, CBADV_KEY, CBADV_SECRET),
         }
         if exchange_name.lower() not in exchanges:
             raise ValueError(f"Unknown exchange: {exchange_name}")
