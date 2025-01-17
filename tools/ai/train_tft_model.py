@@ -10,6 +10,7 @@ from pytorch_forecasting.data import GroupNormalizer
 from pytorch_forecasting.metrics import QuantileLoss
 from pytorch_lightning import Trainer
 from sklearn.model_selection import train_test_split
+from pytorch_lightning import LightningModule
 import torch
 import argparse
 
@@ -129,23 +130,37 @@ def prepare_data(df: pd.DataFrame):
     return train_loader, validation, training
 
 # Step 4: Train the Model
+class TFTLightningModule(LightningModule):
+    def __init__(self, training):
+        super().__init__()
+        self.model = TemporalFusionTransformer.from_dataset(
+            training,
+            learning_rate=1e-3,
+            hidden_size=16,
+            attention_head_size=1,
+            dropout=0.1,
+            hidden_continuous_size=8,
+            output_size=7,  # Number of quantiles for probabilistic forecasting
+            loss=QuantileLoss(),
+            reduce_on_plateau_patience=4,
+            #logging_metrics=None
+        )
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self.model(x)
+        loss = self.model.loss(y_hat, y)
+        return loss
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=1e-3)
+
 def train_model(train_loader, validation, training):
     """
     Train a Temporal Fusion Transformer on the prepared data.
     """
     # Define the model
-    model = TemporalFusionTransformer.from_dataset(
-        training,
-        learning_rate=1e-3,
-        hidden_size=16,
-        attention_head_size=1,
-        dropout=0.1,
-        hidden_continuous_size=8,
-        output_size=7,  # Number of quantiles for probabilistic forecasting
-        loss=QuantileLoss(),
-        reduce_on_plateau_patience=4,
-        #logging_metrics=None
-    )
+    model = TFTLightningModule(training)
 
     # Create a PyTorch Lightning trainer
     trainer = Trainer(
