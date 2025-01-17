@@ -11,6 +11,8 @@ from pytorch_lightning import Trainer, LightningModule
 from sklearn.model_selection import train_test_split
 import torch
 import argparse
+from ta.momentum import UltimateOscillator, StochasticOscillator
+from ta.trend import CCIIndicator
 
 def load_candle_data(file_path) -> pd.DataFrame:
     df = pd.read_csv(file_path)
@@ -42,12 +44,26 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
         short_ma = group['Volume'].rolling(window=12).mean()
         long_ma = group['Volume'].rolling(window=26).mean()
         group['vo'] = ((short_ma - long_ma) / long_ma) * 100
+
+        uo = UltimateOscillator(high=group['High'], low=group['Low'], close=group['Close'], window1=7, window2=14, window3=28)
+        group['uo'] = uo.ultimate_oscillator()
+
+        stoch = StochasticOscillator(high=group['High'], low=group['Low'], close=group['Close'], window=14, smooth_window=3)
+        group['stoch_k'] = stoch.stoch()
+        group['stoch_d'] = stoch.stoch_signal()
+
+        cci = CCIIndicator(high=group['High'], low=group['Low'], close=group['Close'], window=20)
+        group['cci'] = cci.cci()
+
+        # percent price change in the last 50 candles
+        group["pct_change"] = (group["Close"].pct_change(50) * 100)
+
         group = group.fillna(0)
         result.append(group)
     return pd.concat(result).reset_index(drop=True)
 
 def prepare_data(df: pd.DataFrame):
-    # Predict the % price change over next 10 candles
+    # Predict the percent price change over next 10 candles
     df['price_strength'] = ((df['Close'].shift(-10) - df['Close']) / df['Close']) * 100
     df['time_idx'] = df.groupby("Symbol").cumcount()
     df['group'] = df['Symbol']
@@ -65,7 +81,7 @@ def prepare_data(df: pd.DataFrame):
         time_varying_known_reals=["time_idx"],
         time_varying_unknown_reals=[
             "rsi", "macd", "macd_signal", "natr", "cmf", "z_score",
-            "supertrend", "kst", "kst_signal", "vo", "price_strength"
+            "supertrend", "kst", "kst_signal", "vo", "uo", "stoch_k", "stoch_d", "cci", "pct_change"
         ],
         target_normalizer=GroupNormalizer(),
     )
@@ -86,11 +102,12 @@ class TFTLightningModule(LightningModule):
             output_size=1,
             loss=MAE(),
             reduce_on_plateau_patience=4,
-        )
+        ).to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 
     def training_step(self, batch, batch_idx):
         x, y = batch
-        y_hat = self.model(x)
+        output = self.model(x)
+        y_hat = output.prediction
         loss = self.model.loss(y_hat, y)
         return loss
 
